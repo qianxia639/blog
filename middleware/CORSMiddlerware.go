@@ -1,0 +1,23 @@
+package middleware
+
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+// 跨域 -- CORS
+func CORS() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ctx.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+		ctx.Writer.Header().Set("Access-Control-Max-Age", "86400")
+		ctx.Writer.Header().Set("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS")
+		ctx.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token,Authorization")
+		ctx.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		// ctx.Writer.Header().Set("Content-Type", "text/javascript")
+		if ctx.Request.Method == http.MethodOptions {
+			ctx.AbortWithStatus(http.StatusNoContent)
+		}
+		ctx.Next()
+	}
+}

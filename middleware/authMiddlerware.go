@@ -1,0 +1,47 @@
+package middleware
+
+import (
+	"net/http"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/qianxia/blog/command"
+	"github.com/qianxia/blog/model"
+	"github.com/qianxia/blog/utils"
+)
+
+func AuthorizationMiddlleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// 从请求头中获取Authorization头信息
+		tokenStr := ctx.GetHeader("Authorization")
+		if tokenStr == "" || !strings.HasPrefix(tokenStr, "Bearer ") {
+			command.Failed(ctx, http.StatusUnauthorized, 401, "token不存在或格式不正确")
+			ctx.Abort()
+			return
+		}
+
+		tokenStr = tokenStr[7:]
+
+		// 解析token
+		token, claims, err := utils.ParseJwt(tokenStr)
+		if err != nil || !token.Valid {
+			command.Failed(ctx, http.StatusUnauthorized, 401, "token解析失败")
+			ctx.Abort()
+			return
+		}
+
+		// 验证通过或获取claims中的userId
+		userId := claims.UserId
+		DB := utils.GetDB()
+		var user model.User
+		if err := DB.First(&user, userId).Error; err != nil {
+			command.Failed(ctx, http.StatusInternalServerError, 500, "用户名不存在")
+			ctx.Abort()
+			return
+		}
+
+		// 将用户信息写入上下文
+		ctx.Set("user", user)
+		ctx.Next()
+	}
+}
