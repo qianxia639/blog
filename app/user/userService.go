@@ -18,7 +18,7 @@ func (us *UserService) Register(user model.User) (model.User, error) {
 	Db := utils.GetDB()
 	// 判断用户名是否存在
 	if err = Db.Where("username = ?", user.Username).Find(&user).Error; err == nil {
-		// ctx.JSON(500, gin.H{"code": 500, "msg": "用户名已存在"})
+		//ctx.JSON(500, gin.H{"code": 500, "msg": "用户名已存在"})
 		// command.Failed(ctx, http.StatusInternalServerError, 500, "用户名已存在")
 		return user, errors.New("用户名已存在")
 	}

@@ -1,6 +1,8 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type User struct {
 	// 主键
@@ -14,7 +16,7 @@ type User struct {
 	// 头像
 	// Face string
 	// 注册时间
-	CreateTime time.Time `time_format:"2006-01-02" `
+	CreateTime time.Time `time_format:"2006-01-02"`
 	// 修改时间
-	EditTime time.Time `time_format:"2006-01-02" `
+	EditTime time.Time `time_format:"2006-01-02"`
 }

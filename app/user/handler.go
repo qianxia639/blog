@@ -17,11 +17,16 @@ func registerHandler(ctx *gin.Context) {
 	// 绑定表单数据
 	ctx.ShouldBind(&user)
 
+	// if err := user.Validate(); err != nil {
+	// 	command.Failed(ctx, http.StatusInternalServerError, "数据验证失败")
+	// 	return
+	// }
+
 	var userService UserService
 	_, err := userService.Register(user)
 
 	if err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, 500, err.Error())
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -88,14 +93,14 @@ func loginHandler(ctx *gin.Context) {
 	var userService UserService
 	user, err := userService.Login(form)
 	if err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, 500, err.Error())
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	// 校验密码
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(form.Password)); err != nil {
 		// ctx.JSON(401, gin.H{"code": 401, "msg": "密码错误"})
-		command.Failed(ctx, http.StatusUnauthorized, 401, "密码错误")
+		command.Failed(ctx, http.StatusUnauthorized, "密码错误")
 		return
 	}
 
@@ -109,5 +114,5 @@ func loginHandler(ctx *gin.Context) {
 func infoHandler(ctx *gin.Context) {
 	userInfo, _ := ctx.Get("user")
 	// ctx.JSON(http.StatusOK, gin.H{"user": userInfo})
-	command.Success(ctx, "登录成功", gin.H{"userInfo": dto.ToUserDto(userInfo.(model.User))})
+	command.Success(ctx, "登录成功", gin.H{"user": dto.ToUserDto(userInfo.(model.User))})
 }
