@@ -6,14 +6,16 @@ import (
 )
 
 func Routers(e *gin.Engine) *gin.Engine {
+	// userHandler := NewUserHandler()
+	var userHandler UserHandler
 	r := e.Group("/user")
 	{
 		// 注册
-		r.POST("/register", registerHandler)
+		r.POST("/register", userHandler.registerHandler)
 		// 登录
-		r.POST("/login", loginHandler)
+		r.POST("/login", userHandler.loginHandler)
 		// 用户信息
-		r.GET("/info", middleware.AuthorizationMiddlleware(), infoHandler)
+		r.GET("/info", middleware.AuthorizationMiddlleware(), userHandler.infoHandler)
 	}
 	return e
 }

@@ -13,6 +13,7 @@ type Config struct {
 		Username   string `yaml:"username"`
 		Password   string `yaml:"password"`
 		Charset    string `yaml:"charset"`
+		Loc        string `yaml:"loc"`
 	}
 	Redis struct {
 		Host string `yaml:"host"`
