@@ -21,7 +21,7 @@ func AuthorizationMiddlleware() gin.HandlerFunc {
 		}
 
 		tokenStr = tokenStr[7:]
-
+		// 常量
 		// 解析token
 		token, claims, err := utils.ParseJwt(tokenStr)
 		if err != nil || !token.Valid {
@@ -34,7 +34,7 @@ func AuthorizationMiddlleware() gin.HandlerFunc {
 		userId := claims.UserId
 		DB := utils.GetDB()
 		var user model.User
-		if err := DB.First(&user, userId).Error; err != nil {
+		if err := DB.Table(command.DBUser).First(&user, userId).Error; err != nil {
 			command.Failed(ctx, http.StatusInternalServerError, "用户名不存在")
 			ctx.Abort()
 			return

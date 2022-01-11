@@ -12,9 +12,9 @@ import (
 )
 
 type IUserHandler interface {
-	registerHandler(ctx *gin.Context)
-	loginHandler(ctx *gin.Context)
-	infoHandler(ctx *gin.Context)
+	Register(ctx *gin.Context)
+	Login(ctx *gin.Context)
+	Info(ctx *gin.Context)
 }
 
 type UserHandler struct {
@@ -28,12 +28,12 @@ func NewUserHandler() IUserHandler {
 }
 
 // 注册
-func (u UserHandler) registerHandler(ctx *gin.Context) {
+func (u UserHandler) Register(ctx *gin.Context) {
 	var user model.User
 	// 绑定表单数据
 	ctx.ShouldBindJSON(&user)
 
-	_, err := u.Register(user)
+	_, err := u.UserService.Register(user)
 
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
@@ -44,12 +44,12 @@ func (u UserHandler) registerHandler(ctx *gin.Context) {
 }
 
 // 登录
-func (u UserHandler) loginHandler(ctx *gin.Context) {
+func (u UserHandler) Login(ctx *gin.Context) {
 	// 绑定表单参数
 	var form model.User
 	ctx.ShouldBindJSON(&form)
 
-	user, err := u.Login(form)
+	user, err := u.UserService.Login(form)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -67,7 +67,7 @@ func (u UserHandler) loginHandler(ctx *gin.Context) {
 }
 
 // 获取用户信息
-func (u UserHandler) infoHandler(ctx *gin.Context) {
+func (u UserHandler) Info(ctx *gin.Context) {
 	userInfo, _ := ctx.Get("user")
 	command.Success(ctx, "信息获取成功", gin.H{"user": dto.ToUserDto(userInfo.(model.User))})
 }
