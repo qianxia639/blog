@@ -2,11 +2,11 @@ package model
 
 type Blog struct {
 	// 主键
-	Id int64 `binding:"required"`
+	Id int64 `json:"id" binding:"required"`
 	// 用户id，
-	UserId int64
+	UserId int64 `json:"user_id" `
 	// 分类id
-	TypeId int
+	TypeId int `json:"type_id" `
 	// 标题
 	Title string `json:"title" binding:"required"`
 	// 内容
@@ -23,10 +23,12 @@ type Blog struct {
 	ShareStatement bool `json:"share_statement"`
 	// 是否开启评论
 	Commentabled bool `json:"commentabled"`
-	// 是否发布
-	Published bool `json:"published"`
 	// 创建时间
 	CreateTime Time `json:"create_time"`
 	// 更新时间
 	UpdateTime Time `json:"update_time"`
+
+	Tags  []Tag
+	Users User
+	Types Type
 }

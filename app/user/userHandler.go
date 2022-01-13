@@ -18,13 +18,13 @@ type IUserHandler interface {
 }
 
 type UserHandler struct {
-	UserService
+	Service UserService
 }
 
 func NewUserHandler() IUserHandler {
-	var userService UserService
+	userService := NewUserService()
 
-	return UserHandler{UserService: userService}
+	return UserHandler{Service: userService}
 }
 
 // 注册
@@ -33,7 +33,7 @@ func (u UserHandler) Register(ctx *gin.Context) {
 	// 绑定表单数据
 	ctx.ShouldBindJSON(&user)
 
-	_, err := u.UserService.Register(user)
+	_, err := u.Service.Register(user)
 
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
@@ -49,7 +49,7 @@ func (u UserHandler) Login(ctx *gin.Context) {
 	var form model.User
 	ctx.ShouldBindJSON(&form)
 
-	user, err := u.UserService.Login(form)
+	user, err := u.Service.Login(form)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return

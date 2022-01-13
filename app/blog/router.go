@@ -3,10 +3,10 @@ package blog
 import "github.com/gin-gonic/gin"
 
 func Routers(e *gin.Engine) *gin.Engine {
-	typeHandler := NewTypeHandler()
-	r := e.Group("/type")
+	blogHandler := NewBlogHandler()
+	r := e.Group("/blog")
 	{
-		r.GET("/list", typeHandler.List)
+		r.POST("/save/:userId/:typeId", blogHandler.Save)
 	}
 
 	return e

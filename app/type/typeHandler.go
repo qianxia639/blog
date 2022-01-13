@@ -1,4 +1,4 @@
-package blog
+package types
 
 import (
 	"net/http"
@@ -12,19 +12,19 @@ type ITypeHandler interface {
 }
 
 type TypeHandler struct {
-	TypeService
+	Service TypeService
 }
 
 func NewTypeHandler() ITypeHandler {
-	var typeService TypeService
+	typeService := NewTypeService()
 
-	return TypeHandler{TypeService: typeService}
+	return TypeHandler{Service: typeService}
 }
 
 func (t TypeHandler) List(ctx *gin.Context) {
-	types, err := t.TypeService.List()
+	types, err := t.Service.List()
 	if err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 	command.Success(ctx, "查询成功", gin.H{"type": types})

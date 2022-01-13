@@ -3,13 +3,13 @@ package dto
 import "github.com/qianxia/blog/model"
 
 type UserDto struct {
+	Id       int64  `json:"id"`
 	Username string `json:"username"`
-	Password string `json:"password"`
 }
 
 func ToUserDto(user model.User) UserDto {
 	return UserDto{
+		Id:       user.Id,
 		Username: user.Username,
-		Password: user.Password,
 	}
 }

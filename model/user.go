@@ -2,7 +2,7 @@ package model
 
 type User struct {
 	// 主键
-	Id int64 `binding:"required"`
+	Id int64 `json:"id" binding:"required"`
 	// 用户名
 	Username string `form:"username" json:"username" binding:"required"`
 	// 密码
