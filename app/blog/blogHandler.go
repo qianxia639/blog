@@ -1,6 +1,7 @@
 package blog
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,6 +13,8 @@ import (
 
 type IBlogHandler interface {
 	Save(ctx *gin.Context)
+	List(ctx *gin.Context)
+	Delete(ctx *gin.Context)
 }
 
 type BlogHandler struct {
@@ -55,8 +58,34 @@ func (b BlogHandler) Save(ctx *gin.Context) {
 	typeId, _ := strconv.Atoi(ctx.Params.ByName("typeId"))
 	post.TypeId = typeId
 
-	count, err := b.Service.Save(post)
-	if count == 0 {
+	err := b.Service.Save(post)
+	if err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	command.Success(ctx, "操作成功", nil)
+}
+
+func (b BlogHandler) List(ctx *gin.Context) {
+	// 获取登录的用户信息
+	userInfo, _ := ctx.Get("user")
+	blogs, err := b.Service.List(userInfo.(model.User).Id)
+	if err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	command.Success(ctx, "查询成功", gin.H{"blog": blogs})
+}
+
+func (b BlogHandler) Delete(ctx *gin.Context) {
+
+	id, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
+
+	fmt.Println("id ====> ", id)
+
+	err := b.Service.Delete(id)
+	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/qianxia/blog/command"
+	"github.com/qianxia/blog/dto"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/utils"
 	"github.com/qianxia/blog/vo"
@@ -13,7 +14,7 @@ import (
 type BlogService struct {
 }
 
-func (bs BlogService) Save(post vo.Post) (uint, error) {
+func (bs BlogService) Save(post vo.Post) error {
 	Db := utils.GetDB()
 	var were, shareStatment, commentabled bool
 
@@ -32,7 +33,7 @@ func (bs BlogService) Save(post vo.Post) (uint, error) {
 	var tags []model.Tag
 	var tagIds []int
 	if err := Db.Raw("SELECT id FROM "+command.DBTag+" WHERE tag_name in (?) FOR UPDATE", post.Tags).Scan(&tags).Error; err != nil {
-		return 0, errors.New("数据查询失败")
+		return errors.New("数据查询失败")
 	}
 
 	for _, v := range tags {
@@ -58,7 +59,7 @@ func (bs BlogService) Save(post vo.Post) (uint, error) {
 	if err := tx.Exec("INSERT INTO "+command.DBBlog+"(id,user_id,type_id,title,content,flag,were,share_statement,commentabled,create_time,update_time) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
 		blog.Id, blog.UserId, blog.TypeId, blog.Title, blog.Content, blog.Flag, blog.Were, blog.ShareStatement, blog.Commentabled, blog.CreateTime, blog.UpdateTime).Error; err != nil {
 		tx.Rollback()
-		return 0, errors.New("数据插入失败")
+		return errors.New("数据插入失败")
 	}
 
 	//插入博客与标签关系表中的对应数据
@@ -66,12 +67,30 @@ func (bs BlogService) Save(post vo.Post) (uint, error) {
 		if err := Db.Exec("INSERT INTO "+command.DBBlogTag+"(id,blog_id,tag_id) VALUES(?,?,?)",
 			utils.NextId(), blog.Id, tagIds[i]).Error; err != nil {
 			tx.Rollback()
-			return 0, errors.New("数据插入失败")
+			return errors.New("数据插入失败")
 		}
 	}
 	tx.Commit()
 
 	// fmt.Println("blog ===> ", blog)
 
-	return 1, nil
+	return nil
+}
+
+func (bs BlogService) List(id int64) ([]dto.BlogDto, error) {
+	Db := utils.GetDB()
+	blogs := make([]dto.BlogDto, 10)
+	if err := Db.Raw("SELECT id,title,update_time FROM "+command.DBBlog+" WHERE user_id = ?", id).Scan(&blogs).Error; err != nil {
+		return nil, errors.New("查询失败")
+	}
+
+	return blogs, nil
+}
+
+func (bs BlogService) Delete(id int64) error {
+	Db := utils.GetDB()
+	if err := Db.Exec("DELETE FROM "+command.DBBlog+" WHERE id = ?", id).Error; err != nil {
+		return errors.New("操作失败")
+	}
+	return nil
 }

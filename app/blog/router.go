@@ -11,6 +11,8 @@ func Routers(e *gin.Engine) *gin.Engine {
 	r := e.Group("/blog")
 	{
 		r.POST("/save/:typeId", blogHandler.Save)
+		r.GET("/list", blogHandler.List)
+		r.DELETE("/:id", blogHandler.Delete)
 	}
 
 	return e
