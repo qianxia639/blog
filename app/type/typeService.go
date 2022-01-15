@@ -3,18 +3,12 @@ package types
 import (
 	"errors"
 
-	"github.com/jinzhu/gorm"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/utils"
 )
 
 type TypeService struct {
-	DB *gorm.DB
-}
-
-func NewTypeService() TypeService {
-	return TypeService{DB: utils.GetDB()}
 }
 
 func (ts TypeService) List() ([]model.Type, error) {

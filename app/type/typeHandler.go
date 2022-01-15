@@ -16,7 +16,7 @@ type TypeHandler struct {
 }
 
 func NewTypeHandler() ITypeHandler {
-	typeService := NewTypeService()
+	var typeService TypeService
 
 	return TypeHandler{Service: typeService}
 }

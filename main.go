@@ -17,9 +17,9 @@ func main() {
 	yaml.Unmarshal(dc, &y)
 
 	// 加载MySQL配置信息
-	DB := utils.InitDb(y)
+	db := utils.InitDb(y)
 	// 关闭MySQL连接信息
-	defer DB.Close()
+	defer db.Close()
 
 	// 加载Redis链接池配置信息
 	// Pool := utils.InitRedis(y)

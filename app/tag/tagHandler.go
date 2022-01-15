@@ -16,7 +16,7 @@ type TagHandler struct {
 }
 
 func NewTagHandler() ITagHandler {
-	tagService := NewTagService()
+	var tagService TagService
 
 	return TagHandler{Service: tagService}
 }

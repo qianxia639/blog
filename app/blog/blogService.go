@@ -1,36 +1,77 @@
 package blog
 
 import (
-	"github.com/jinzhu/gorm"
+	"errors"
+	"time"
+
+	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/utils"
+	"github.com/qianxia/blog/vo"
 )
 
 type BlogService struct {
-	DB *gorm.DB
 }
 
-func NewBlogService() BlogService {
-	return BlogService{DB: utils.GetDB()}
-}
+func (bs BlogService) Save(post vo.Post) (uint, error) {
+	Db := utils.GetDB()
+	var were, shareStatment, commentabled bool
 
-func (bs BlogService) Save(blog model.Blog) (uint, error) {
-	var err error
+	// 修改 点赞、转载声明、评论的值
+	for i := 0; i < len(post.Selected); i++ {
+		if post.Selected[i] == "点赞" {
+			were = true
+		} else if post.Selected[i] == "转载声明" {
+			shareStatment = true
+		} else if post.Selected[i] == "评论" {
+			commentabled = true
+		}
+	}
+	// 根据post.tags[]的值查询对应的id
+	// tags := make([]model.Tag, 4)
+	var tags []model.Tag
+	var tagIds []int
+	if err := Db.Raw("SELECT id FROM "+command.DBTag+" WHERE tag_name in (?) FOR UPDATE", post.Tags).Scan(&tags).Error; err != nil {
+		return 0, errors.New("数据查询失败")
+	}
+
+	for _, v := range tags {
+		tagIds = append(tagIds, v.Id)
+	}
 
 	// 构建数据
-	// newBlog := model.Blog{
-	// 	Id:             utils.NextId(),
-	// 	UserId:         1,
-	// 	TypeId:         1,
-	// 	Title:          blog.Title,
-	// 	Content:        blog.Content,
-	// 	Flag:           blog.Flag,
-	// 	Were:           blog.Were,
-	// 	ShareStatement: blog.ShareStatement,
-	// 	Commentabled:   blog.Commentabled,
-	// 	CreateTime:     model.Time(time.Now()),
-	// 	UpdateTime:     model.Time(time.Now()),
-	// }
+	blog := model.Blog{
+		Id:             utils.NextId(),
+		UserId:         post.UserId,
+		TypeId:         post.TypeId,
+		Title:          post.Title,
+		Content:        post.Content,
+		Flag:           post.Flag,
+		Were:           were,
+		ShareStatement: shareStatment,
+		Commentabled:   commentabled,
+		CreateTime:     model.Time(time.Now()),
+		UpdateTime:     model.Time(time.Now()),
+	}
+	tx := Db.Begin()
+	// 插入博客数据
+	if err := tx.Exec("INSERT INTO "+command.DBBlog+"(id,user_id,type_id,title,content,flag,were,share_statement,commentabled,create_time,update_time) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+		blog.Id, blog.UserId, blog.TypeId, blog.Title, blog.Content, blog.Flag, blog.Were, blog.ShareStatement, blog.Commentabled, blog.CreateTime, blog.UpdateTime).Error; err != nil {
+		tx.Rollback()
+		return 0, errors.New("数据插入失败")
+	}
 
-	return 0, err
+	//插入博客与标签关系表中的对应数据
+	for i := 0; i < len(tagIds); i++ {
+		if err := Db.Exec("INSERT INTO "+command.DBBlogTag+"(id,blog_id,tag_id) VALUES(?,?,?)",
+			utils.NextId(), blog.Id, tagIds[i]).Error; err != nil {
+			tx.Rollback()
+			return 0, errors.New("数据插入失败")
+		}
+	}
+	tx.Commit()
+
+	// fmt.Println("blog ===> ", blog)
+
+	return 1, nil
 }

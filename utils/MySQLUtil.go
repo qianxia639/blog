@@ -34,7 +34,7 @@ func InitDb(y *model.Config) *gorm.DB {
 
 	db.LogMode(true)
 	Db = db
-	return Db
+	return db
 }
 
 func GetDB() *gorm.DB {

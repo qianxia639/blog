@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/jinzhu/gorm"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/utils"
@@ -12,31 +11,22 @@ import (
 )
 
 type UserService struct {
-	DB *gorm.DB
-}
-
-func NewUserService() UserService {
-	return UserService{DB: utils.GetDB()}
 }
 
 // 注册
 func (us UserService) Register(user model.User) (*model.User, error) {
-	var err error
-	// Db := utils.GetDB()
+	Db := utils.GetDB()
 	// 判断用户名是否存在
-	if err = us.DB.Table(command.DBUser).Where("username = ?", user.Username).Find(&user).Error; err == nil {
+	if err := Db.Table(command.DBUser).Where("username = ?", user.Username).Find(&user).Error; err == nil {
 		return nil, errors.New("用户名已存在")
 	}
 
 	// 判断邮箱是否注册
-	if err = us.DB.Table(command.DBUser).Where("email = ?", user.Email).Find(&user).Error; err == nil {
+	if err := Db.Table(command.DBUser).Where("email = ?", user.Email).Find(&user).Error; err == nil {
 		return nil, errors.New("邮箱已注册")
 	}
 	// 对明文进行加密处理
-	newPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, errors.New("加密失败")
-	}
+	newPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	// 创建用户
 	newUser := model.User{
 		Id:         utils.NextId(),
@@ -53,20 +43,19 @@ func (us UserService) Register(user model.User) (*model.User, error) {
 	// if err = Db.Table("t_user").CreateTable(&newUser).Error; err != nil {
 	// 	return newUser, errors.New("数据创建失败")
 	// }
-	if err = us.DB.Exec("INSERT INTO "+command.DBUser+"(id,username,password,email,create_time,update_time) VALUES(?,?,?,?,?,?)",
+	if err := Db.Exec("INSERT INTO "+command.DBUser+"(id,username,password,email,create_time,update_time) VALUES(?,?,?,?,?,?)",
 		newUser.Id, newUser.Username, newUser.Password, newUser.Email, newUser.CreateTime, newUser.UpdateTime).Error; err != nil {
 		return nil, errors.New("用户注册失败")
 	}
-	return &newUser, err
+	return &newUser, nil
 }
 
 // 登录
 func (us UserService) Login(user model.User) (*model.User, error) {
-	var err error
-	// Db := utils.GetDB()
+	Db := utils.GetDB()
 	// 判断用户名是否存在
-	if err = us.DB.Table(command.DBUser).Where("username = ?", user.Username).Find(&user).Error; err != nil {
+	if err := Db.Table(command.DBUser).Where("username = ?", user.Username).Find(&user).Error; err != nil {
 		return nil, errors.New("账户不存在")
 	}
-	return &user, err
+	return &user, nil
 }

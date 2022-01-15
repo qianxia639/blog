@@ -22,7 +22,7 @@ type UserHandler struct {
 }
 
 func NewUserHandler() IUserHandler {
-	userService := NewUserService()
+	var userService UserService
 
 	return UserHandler{Service: userService}
 }

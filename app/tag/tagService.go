@@ -3,18 +3,12 @@ package tag
 import (
 	"errors"
 
-	"github.com/jinzhu/gorm"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/utils"
 )
 
 type TagService struct {
-	DB *gorm.DB
-}
-
-func NewTagService() TagService {
-	return TagService{DB: utils.GetDB()}
 }
 
 func (ts TagService) List() ([]string, error) {
