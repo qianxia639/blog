@@ -17,7 +17,7 @@ type Claims struct {
 
 // 生成token
 func CreateToken(id int64) string {
-	exp := time.Now().Add(30 * time.Minute)
+	exp := time.Now().Add(7 * 24 * time.Minute)
 	claims := &Claims{
 		UserId: id,
 		StandardClaims: jwt.StandardClaims{

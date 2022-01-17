@@ -1,6 +1,7 @@
-package blog
+package app
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -14,6 +15,7 @@ type IBlogHandler interface {
 	Save(ctx *gin.Context)
 	List(ctx *gin.Context)
 	Delete(ctx *gin.Context)
+	Index(ctx *gin.Context)
 }
 
 type BlogHandler struct {
@@ -31,7 +33,7 @@ func (b BlogHandler) Save(ctx *gin.Context) {
 	ctx.ShouldBindJSON(&post)
 	// 数据校验
 	if post.Title == "" || len(post.Title) < 6 || len(post.Title) > 20 {
-		command.Failed(ctx, http.StatusInternalServerError, "标题为空或标题长度不是6~20位")
+		command.Failed(ctx, http.StatusInternalServerError, "标题为空或标题长度少于6位")
 		return
 	}
 
@@ -87,4 +89,14 @@ func (b BlogHandler) Delete(ctx *gin.Context) {
 		return
 	}
 	command.Success(ctx, "操作成功", nil)
+}
+
+func (b BlogHandler) Index(ctx *gin.Context) {
+	// userInfo, _ := ctx.Get("user")
+	blogs := b.Service.Index()
+
+	fmt.Println(blogs)
+
+	command.Success(ctx, "", gin.H{"blog": blogs})
+	// return
 }

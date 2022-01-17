@@ -1,4 +1,4 @@
-package blog
+package app
 
 import (
 	"github.com/gin-gonic/gin"
@@ -12,6 +12,7 @@ func Routers(e *gin.Engine) *gin.Engine {
 	{
 		r.POST("/save/:typeId", blogHandler.Save)
 		r.GET("/list", blogHandler.List)
+		r.GET("/index", blogHandler.Index)
 		r.DELETE("/:id", blogHandler.Delete)
 	}
 

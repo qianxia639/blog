@@ -3,10 +3,10 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/qianxia/blog/app/blog"
-	"github.com/qianxia/blog/app/tag"
+	blog "github.com/qianxia/blog/app/blog"
+	tag "github.com/qianxia/blog/app/tag"
 	types "github.com/qianxia/blog/app/type"
-	"github.com/qianxia/blog/app/user"
+	user "github.com/qianxia/blog/app/user"
 	"github.com/qianxia/blog/middleware"
 )
 

@@ -1,5 +1,7 @@
 package model
 
+import "github.com/qianxia/blog/vo"
+
 type Blog struct {
 	// 主键
 	Id int64 `json:"id" binding:"required"`
@@ -27,4 +29,8 @@ type Blog struct {
 	CreateTime Time `json:"create_time"`
 	// 更新时间
 	UpdateTime Time `json:"update_time"`
+
+	User User
+	Type Type
+	Tags vo.Post
 }

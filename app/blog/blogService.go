@@ -1,4 +1,4 @@
-package blog
+package app
 
 import (
 	"errors"
@@ -86,6 +86,15 @@ func (bs BlogService) List(id int64) ([]dto.BlogDto, error) {
 	}
 
 	return blogs, nil
+}
+
+func (bs BlogService) Index() []model.Blog {
+	Db := utils.GetDB()
+
+	var blogs []model.Blog
+	Db.Raw("SELECT id,user_id,type_id,title,content,update_time FROM " + command.DBBlog).Scan(&blogs)
+
+	return blogs
 }
 
 func (bs BlogService) Delete(id int64) error {
