@@ -54,11 +54,12 @@ func (bs BlogService) Save(post vo.Post) error {
 		CreateTime:     model.Time(time.Now()),
 		UpdateTime:     model.Time(time.Now()),
 	}
+	// 开启事务
 	tx := Db.Begin()
 	// 插入博客数据
 	if err := tx.Exec("INSERT INTO "+command.DBBlog+"(id,user_id,type_id,title,content,flag,were,share_statement,commentabled,create_time,update_time) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
 		blog.Id, blog.UserId, blog.TypeId, blog.Title, blog.Content, blog.Flag, blog.Were, blog.ShareStatement, blog.Commentabled, blog.CreateTime, blog.UpdateTime).Error; err != nil {
-		tx.Rollback()
+		tx.Rollback() // 事务回滚
 		return errors.New("数据插入失败")
 	}
 
@@ -66,13 +67,12 @@ func (bs BlogService) Save(post vo.Post) error {
 	for i := 0; i < len(tagIds); i++ {
 		if err := Db.Exec("INSERT INTO "+command.DBBlogTag+"(id,blog_id,tag_id) VALUES(?,?,?)",
 			utils.NextId(), blog.Id, tagIds[i]).Error; err != nil {
-			tx.Rollback()
+			tx.Rollback() // 事务回滚
 			return errors.New("数据插入失败")
 		}
 	}
+	// 提交事务
 	tx.Commit()
-
-	// fmt.Println("blog ===> ", blog)
 
 	return nil
 }
@@ -80,6 +80,7 @@ func (bs BlogService) Save(post vo.Post) error {
 func (bs BlogService) List(id int64) ([]dto.BlogDto, error) {
 	Db := utils.GetDB()
 	blogs := make([]dto.BlogDto, 10)
+
 	if err := Db.Raw("SELECT id,title,update_time FROM "+command.DBBlog+" WHERE user_id = ?", id).Scan(&blogs).Error; err != nil {
 		return nil, errors.New("查询失败")
 	}
@@ -89,8 +90,33 @@ func (bs BlogService) List(id int64) ([]dto.BlogDto, error) {
 
 func (bs BlogService) Delete(id int64) error {
 	Db := utils.GetDB()
-	if err := Db.Exec("DELETE FROM "+command.DBBlog+" WHERE id = ?", id).Error; err != nil {
+
+	if err := Db.Raw("SELECT id FROM "+command.DBBlog+" WHERE id = ?", id).Scan(&model.Blog{}).Error; err != nil {
 		return errors.New("操作失败")
 	}
+
+	// 开启事务
+	tx := Db.Begin()
+
+	// 删除blog表中的数据
+	if err := tx.Exec("DELETE FROM "+command.DBBlog+" WHERE id = ?", id).Error; err != nil {
+		tx.Rollback() // 事务回滚
+		return errors.New("操作失败")
+	}
+
+	// if err := tx.Exec("DELETE FROM "+command.DBBlog+" WHERE id = ?", id).Error; err != nil {
+	// 	tx.Rollback() // 事务回滚
+	// 	return errors.New("操作失败")
+	// }
+
+	// 删除blog_tag中对应的数据
+	if err := tx.Exec("DELETE FROM "+command.DBBlogTag+" WHERE blog_id = ?", id).Error; err != nil {
+		tx.Rollback() // 事务回滚
+		return errors.New("操作失败")
+	}
+
+	// 提交事务
+	tx.Commit()
+
 	return nil
 }

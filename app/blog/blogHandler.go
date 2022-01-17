@@ -1,7 +1,6 @@
 package blog
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -81,8 +80,6 @@ func (b BlogHandler) List(ctx *gin.Context) {
 func (b BlogHandler) Delete(ctx *gin.Context) {
 
 	id, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
-
-	fmt.Println("id ====> ", id)
 
 	err := b.Service.Delete(id)
 	if err != nil {
