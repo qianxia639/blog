@@ -88,13 +88,44 @@ func (bs BlogService) List(id int64) ([]dto.BlogDto, error) {
 	return blogs, nil
 }
 
-func (bs BlogService) Index() []model.Blog {
+func (bs BlogService) Show() ([]dto.IndexDto, error) {
 	Db := utils.GetDB()
 
-	var blogs []model.Blog
-	Db.Raw("SELECT id,user_id,type_id,title,content,update_time FROM " + command.DBBlog).Scan(&blogs)
+	var blogs []dto.IndexDto
+	if err := Db.Raw(`SELECT b.id,b.title,b.content,b.update_time,t.type_name,u.avatar,u.username FROM t_blog b JOIN t_user u ON u.id = b.user_id JOIN t_type t ON b.type_id = t.id`).Scan(&blogs).Error; err != nil {
+		return nil, errors.New("查询失败")
+	}
+	// var tagName []string
+	// bs.TagService.Get()
+	// Db.Raw("SELECT DISTINCT(t.tag_name) FROM t_blog_tag bt JOIN t_blog b ON bt.blog_id = ? JOIN t_tag t on t.id = bt.tag_id", blogs[len(blogs)-1].Id).Scan(&tagName)
 
-	return blogs
+	// var tagNames []model.Tag
+	// Db.Raw("SELECT DISTINCT(t.tag_name) FROM t_blog_tag bt JOIN t_blog b ON bt.blog_id = ? JOIN t_tag t on t.id = bt.tag_id", id).Scan(&tagNames)
+	for k, v := range blogs {
+		// tagNames := bs.TagService.Get(v.Id)
+		// // fmt.Println("tagNames ===> ", tagNames)
+		// Db.Raw("SELECT t.id,t.tag_name FROM t_tag t JOIN t_blog_tag bt ON t.id = bt.tag_id JOIN t_blog b ON bt.blog_id = ?", v.Id).Scan(&blogs[len(blogs)-1].TagNames)
+		if err := Db.Raw(`select t.id,t.tag_name from t_tag t JOIN
+					(select DISTINCT(bt.tag_id) from t_blog_tag bt JOIN t_blog b ON bt.blog_id = ?) as tag
+					ON t.id = tag.tag_id`, v.Id).Scan(&blogs[k].TagNames).Error; err != nil {
+			return nil, errors.New("查询失败")
+		}
+		// // v.TagNames = tagNames
+		// for _, t := range tagNames {
+		// 	v.TagNames = append(v.TagNames, t.TagName)
+		// }
+		// fmt.Println("v.TagNames ===> ", v.TagNames)
+	}
+	return blogs, nil
+}
+
+func (bs BlogService) Latest() ([]model.Blog, error) {
+	Db := utils.GetDB()
+	var blogs []model.Blog
+	if err := Db.Raw("SELECT title FROM " + command.DBBlog + " ORDER BY update_time DESC LIMIT 4").Scan(&blogs).Error; err != nil {
+		return nil, errors.New("查询失败")
+	}
+	return blogs, nil
 }
 
 func (bs BlogService) Delete(id int64) error {
@@ -112,11 +143,6 @@ func (bs BlogService) Delete(id int64) error {
 		tx.Rollback() // 事务回滚
 		return errors.New("操作失败")
 	}
-
-	// if err := tx.Exec("DELETE FROM "+command.DBBlog+" WHERE id = ?", id).Error; err != nil {
-	// 	tx.Rollback() // 事务回滚
-	// 	return errors.New("操作失败")
-	// }
 
 	// 删除blog_tag中对应的数据
 	if err := tx.Exec("DELETE FROM "+command.DBBlogTag+" WHERE blog_id = ?", id).Error; err != nil {

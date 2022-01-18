@@ -5,7 +5,12 @@ import (
 )
 
 type IndexDto struct {
-	Title      string     `json:"title"`
-	Content    string     `json:"content"`
-	UpdateTime model.Time `json:"update_time"`
+	Id         string      `json:"blog_id"`
+	Title      string      `json:"title"`
+	Content    string      `json:"content"`
+	UpdateTime model.Time  `json:"update_time"`
+	TypeName   string      `json:"type_name"`
+	Avatar     string      `json:"avatar"`
+	Username   string      `json:"username"`
+	TagNames   []model.Tag `json:"tag_names"`
 }

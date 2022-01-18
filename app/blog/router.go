@@ -12,7 +12,8 @@ func Routers(e *gin.Engine) *gin.Engine {
 	{
 		r.POST("/save/:typeId", blogHandler.Save)
 		r.GET("/list", blogHandler.List)
-		r.GET("/index", blogHandler.Index)
+		r.GET("/show", blogHandler.Show)
+		r.GET("/latest", blogHandler.Latest)
 		r.DELETE("/:id", blogHandler.Delete)
 	}
 

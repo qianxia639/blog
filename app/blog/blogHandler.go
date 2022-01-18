@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -15,7 +14,8 @@ type IBlogHandler interface {
 	Save(ctx *gin.Context)
 	List(ctx *gin.Context)
 	Delete(ctx *gin.Context)
-	Index(ctx *gin.Context)
+	Show(ctx *gin.Context)
+	Latest(ctx *gin.Context)
 }
 
 type BlogHandler struct {
@@ -91,12 +91,22 @@ func (b BlogHandler) Delete(ctx *gin.Context) {
 	command.Success(ctx, "操作成功", nil)
 }
 
-func (b BlogHandler) Index(ctx *gin.Context) {
-	// userInfo, _ := ctx.Get("user")
-	blogs := b.Service.Index()
+func (b BlogHandler) Show(ctx *gin.Context) {
+	blogs, err := b.Service.Show()
 
-	fmt.Println(blogs)
+	if err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	command.Success(ctx, "", gin.H{"blog": blogs})
-	// return
+	command.Success(ctx, "查询成功", gin.H{"blog": blogs})
+}
+
+func (b BlogHandler) Latest(ctx *gin.Context) {
+	blogs, err := b.Service.Latest()
+	if err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	command.Success(ctx, "查询成功", gin.H{"blog": blogs})
 }

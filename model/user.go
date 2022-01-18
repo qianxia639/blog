@@ -15,6 +15,4 @@ type User struct {
 	CreateTime Time `json:"create_time" `
 	// 修改时间
 	UpdateTime Time `json:"update_time"`
-	// 一对多关系，User表作为关系维护方
-	Blogs []Blog
 }
