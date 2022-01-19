@@ -28,6 +28,7 @@ func NewBlogHandler() IBlogHandler {
 	return BlogHandler{Service: blogService}
 }
 
+// 新增博客
 func (b BlogHandler) Save(ctx *gin.Context) {
 	var post vo.Post
 	ctx.ShouldBindJSON(&post)
@@ -67,6 +68,7 @@ func (b BlogHandler) Save(ctx *gin.Context) {
 	command.Success(ctx, "操作成功", nil)
 }
 
+// 显示所有博客
 func (b BlogHandler) List(ctx *gin.Context) {
 	// 获取登录的用户信息
 	userInfo, _ := ctx.Get("user")
@@ -79,6 +81,7 @@ func (b BlogHandler) List(ctx *gin.Context) {
 	command.Success(ctx, "查询成功", gin.H{"blog": blogs})
 }
 
+// 个人博客删除
 func (b BlogHandler) Delete(ctx *gin.Context) {
 
 	id, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
@@ -102,6 +105,7 @@ func (b BlogHandler) Show(ctx *gin.Context) {
 	command.Success(ctx, "查询成功", gin.H{"blog": blogs})
 }
 
+// 最新推荐
 func (b BlogHandler) Latest(ctx *gin.Context) {
 	blogs, err := b.Service.Latest()
 	if err != nil {

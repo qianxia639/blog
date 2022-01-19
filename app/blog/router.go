@@ -7,11 +7,11 @@ import (
 
 func Routers(e *gin.Engine) *gin.Engine {
 	blogHandler := NewBlogHandler()
-	e.Use(middleware.AuthorizationMiddlleware())
+	// e.Use(middleware.AuthorizationMiddlleware())
 	r := e.Group("/blog")
 	{
-		r.POST("/save/:typeId", blogHandler.Save)
-		r.GET("/list", blogHandler.List)
+		r.POST("/save/:typeId", middleware.AuthorizationMiddlleware(), blogHandler.Save)
+		r.GET("/list", middleware.AuthorizationMiddlleware(), blogHandler.List)
 		r.GET("/show", blogHandler.Show)
 		r.GET("/latest", blogHandler.Latest)
 		r.DELETE("/:id", blogHandler.Delete)

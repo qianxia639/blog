@@ -14,6 +14,11 @@ import (
 type BlogService struct {
 }
 
+/**
+新增博客
+根据前端所选的额外选项进行相应的变化，
+进行博客新增的数据插入时，不仅要在博客表中新增数据，还要在博客标签表中进行数据的插入
+*/
 func (bs BlogService) Save(post vo.Post) error {
 	Db := utils.GetDB()
 	var were, shareStatment, commentabled bool
@@ -71,12 +76,20 @@ func (bs BlogService) Save(post vo.Post) error {
 			return errors.New("数据插入失败")
 		}
 	}
+
+	// 分类表中对应的条数要+1
+	if err := tx.Exec("UPDATE "+command.DBType+" SET amount = amount + 1 WHERE id = ?", blog.TypeId).Error; err != nil {
+		tx.Rollback() // 事务回滚
+		return errors.New("数据更新失败")
+	}
+
 	// 提交事务
 	tx.Commit()
 
 	return nil
 }
 
+// 个人博客列表展示
 func (bs BlogService) List(id int64) ([]dto.BlogDto, error) {
 	Db := utils.GetDB()
 	blogs := make([]dto.BlogDto, 10)
@@ -88,37 +101,26 @@ func (bs BlogService) List(id int64) ([]dto.BlogDto, error) {
 	return blogs, nil
 }
 
+// 首页博客展示
 func (bs BlogService) Show() ([]dto.IndexDto, error) {
 	Db := utils.GetDB()
 
 	var blogs []dto.IndexDto
-	if err := Db.Raw(`SELECT b.id,b.title,b.content,b.update_time,t.type_name,u.avatar,u.username FROM t_blog b JOIN t_user u ON u.id = b.user_id JOIN t_type t ON b.type_id = t.id`).Scan(&blogs).Error; err != nil {
+	if err := Db.Raw(`SELECT b.id,b.title,b.content,b.update_time,t.type_name,u.avatar,u.username 
+						FROM t_blog b JOIN t_user u ON u.id = b.user_id JOIN t_type t ON b.type_id = t.id`).Scan(&blogs).Error; err != nil {
 		return nil, errors.New("查询失败")
 	}
-	// var tagName []string
-	// bs.TagService.Get()
-	// Db.Raw("SELECT DISTINCT(t.tag_name) FROM t_blog_tag bt JOIN t_blog b ON bt.blog_id = ? JOIN t_tag t on t.id = bt.tag_id", blogs[len(blogs)-1].Id).Scan(&tagName)
-
-	// var tagNames []model.Tag
-	// Db.Raw("SELECT DISTINCT(t.tag_name) FROM t_blog_tag bt JOIN t_blog b ON bt.blog_id = ? JOIN t_tag t on t.id = bt.tag_id", id).Scan(&tagNames)
 	for k, v := range blogs {
-		// tagNames := bs.TagService.Get(v.Id)
-		// // fmt.Println("tagNames ===> ", tagNames)
-		// Db.Raw("SELECT t.id,t.tag_name FROM t_tag t JOIN t_blog_tag bt ON t.id = bt.tag_id JOIN t_blog b ON bt.blog_id = ?", v.Id).Scan(&blogs[len(blogs)-1].TagNames)
 		if err := Db.Raw(`select t.id,t.tag_name from t_tag t JOIN
 					(select DISTINCT(bt.tag_id) from t_blog_tag bt JOIN t_blog b ON bt.blog_id = ?) as tag
 					ON t.id = tag.tag_id`, v.Id).Scan(&blogs[k].TagNames).Error; err != nil {
 			return nil, errors.New("查询失败")
 		}
-		// // v.TagNames = tagNames
-		// for _, t := range tagNames {
-		// 	v.TagNames = append(v.TagNames, t.TagName)
-		// }
-		// fmt.Println("v.TagNames ===> ", v.TagNames)
 	}
 	return blogs, nil
 }
 
+// 最新推荐
 func (bs BlogService) Latest() ([]model.Blog, error) {
 	Db := utils.GetDB()
 	var blogs []model.Blog
@@ -128,10 +130,16 @@ func (bs BlogService) Latest() ([]model.Blog, error) {
 	return blogs, nil
 }
 
+/**
+博客删除
+删除时除了要删除博客表中的数据以外，还要删除博客标签表中对应的数据
+*/
 func (bs BlogService) Delete(id int64) error {
 	Db := utils.GetDB()
 
-	if err := Db.Raw("SELECT id FROM "+command.DBBlog+" WHERE id = ?", id).Scan(&model.Blog{}).Error; err != nil {
+	blog := new(model.Blog)
+
+	if err := Db.Raw("SELECT id,type_id FROM "+command.DBBlog+" WHERE id = ?", id).Scan(&blog).Error; err != nil {
 		return errors.New("操作失败")
 	}
 
@@ -148,6 +156,12 @@ func (bs BlogService) Delete(id int64) error {
 	if err := tx.Exec("DELETE FROM "+command.DBBlogTag+" WHERE blog_id = ?", id).Error; err != nil {
 		tx.Rollback() // 事务回滚
 		return errors.New("操作失败")
+	}
+
+	// 分类表中对应的条数要-1
+	if err := tx.Exec("UPDATE "+command.DBType+" SET amount = amount - 1 WHERE id = ?", blog.TypeId).Error; err != nil {
+		tx.Rollback() // 事务回滚
+		return errors.New("数据更新失败")
 	}
 
 	// 提交事务
