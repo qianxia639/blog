@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -14,8 +15,7 @@ type IBlogHandler interface {
 	Save(ctx *gin.Context)
 	List(ctx *gin.Context)
 	Delete(ctx *gin.Context)
-	Show(ctx *gin.Context)
-	Latest(ctx *gin.Context)
+	PageList(ctx *gin.Context)
 }
 
 type BlogHandler struct {
@@ -94,23 +94,26 @@ func (b BlogHandler) Delete(ctx *gin.Context) {
 	command.Success(ctx, "操作成功", nil)
 }
 
-func (b BlogHandler) Show(ctx *gin.Context) {
-	blogs, err := b.Service.Show()
+func (b BlogHandler) PageList(ctx *gin.Context) {
+
+	// var vo vo.PageListVO
+	// ctx.ShouldBindJSON(&vo)
+
+	pageNo, _ := strconv.Atoi(ctx.Param("pageNo"))
+	pageSize, _ := strconv.Atoi(ctx.Param("pageSize"))
+
+	fmt.Printf("pageNo: %d,pageSize: %d\n", pageNo, pageSize)
+
+	skipCount := (pageNo - 1) * pageSize
+	m := make(map[string]interface{}, 5)
+	m["skipCount"] = skipCount
+	m["pageSize"] = pageSize
+	pageListVO, err := b.Service.PageList(m)
 
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	command.Success(ctx, "查询成功", gin.H{"blog": blogs})
-}
-
-// 最新推荐
-func (b BlogHandler) Latest(ctx *gin.Context) {
-	blogs, err := b.Service.Latest()
-	if err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-	command.Success(ctx, "查询成功", gin.H{"blog": blogs})
+	command.Success(ctx, "查询成功", gin.H{"dataList": pageListVO})
 }

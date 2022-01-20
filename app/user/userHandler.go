@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
-	"github.com/qianxia/blog/dto"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/utils"
 	"golang.org/x/crypto/bcrypt"
@@ -69,5 +68,8 @@ func (u UserHandler) Login(ctx *gin.Context) {
 // 获取用户信息
 func (u UserHandler) Info(ctx *gin.Context) {
 	userInfo, _ := ctx.Get("user")
-	command.Success(ctx, "信息获取成功", gin.H{"user": dto.ToUserDto(userInfo.(model.User))})
+	userMap := make(map[string]interface{}, 1)
+	userMap["id"] = userInfo.(model.User).Id
+	userMap["username"] = userInfo.(model.User).Username
+	command.Success(ctx, "信息获取成功", gin.H{"user": userMap})
 }

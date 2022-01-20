@@ -7,6 +7,7 @@ func Routers(e *gin.Engine) *gin.Engine {
 	r := e.Group("/type")
 	{
 		r.GET("/list", typeHandler.List)
+		r.GET("/:id", typeHandler.typeList)
 	}
 
 	return e

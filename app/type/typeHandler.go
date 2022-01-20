@@ -2,6 +2,7 @@ package app
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
@@ -9,6 +10,7 @@ import (
 
 type ITypeHandler interface {
 	List(ctx *gin.Context)
+	typeList(ctx *gin.Context)
 }
 
 type TypeHandler struct {
@@ -28,4 +30,16 @@ func (t TypeHandler) List(ctx *gin.Context) {
 		return
 	}
 	command.Success(ctx, "查询成功", gin.H{"type": types})
+}
+
+func (t TypeHandler) typeList(ctx *gin.Context) {
+
+	id, _ := strconv.Atoi(ctx.Params.ByName("id"))
+
+	typeList, err := t.Service.typeList(id)
+	if err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	command.Success(ctx, "操作成功", gin.H{"typeList": typeList})
 }
