@@ -4,9 +4,9 @@ import (
 	"errors"
 
 	"github.com/qianxia/blog/command"
-	"github.com/qianxia/blog/dto"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/utils"
+	"github.com/qianxia/blog/vo"
 )
 
 type TypeService struct {
@@ -22,11 +22,11 @@ func (ts TypeService) List() ([]model.Type, error) {
 	return types, nil
 }
 
-func (ts TypeService) typeList(id int) ([]dto.IndexDto, error) {
+func (ts TypeService) typeList(id int) ([]vo.IndexVO, error) {
 
 	Db := utils.GetDB()
 
-	var blogs []dto.IndexDto
+	var blogs []vo.IndexVO
 	if err := Db.Raw(`SELECT b.id,b.title,b.content,b.update_time,t.type_name,u.avatar,u.username 
 						FROM t_blog b JOIN t_user u ON u.id = b.user_id JOIN t_type t ON b.type_id = t.id AND b.type_id = ?`, id).Scan(&blogs).Error; err != nil {
 		return nil, errors.New("查询失败")

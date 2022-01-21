@@ -1,6 +1,6 @@
-package vo
+package dto
 
-type Post struct {
+type PostDTO struct {
 	UserId   int64  `json:"user_id" binding:"required"`
 	TypeId   int    `json:"type_id" binding:"required"`
 	Title    string `json:"title" binding:"required"`

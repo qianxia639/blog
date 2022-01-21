@@ -19,7 +19,7 @@ type BlogService struct {
 根据前端所选的额外选项进行相应的变化，
 进行博客新增的数据插入时，不仅要在博客表中新增数据，还要在博客标签表中进行数据的插入
 */
-func (bs BlogService) Save(post vo.Post) error {
+func (bs BlogService) Save(post dto.PostDTO) error {
 	Db := utils.GetDB()
 	var were, shareStatment, commentabled bool
 
@@ -102,7 +102,7 @@ func (bs BlogService) List(id int64) ([]dto.BlogDto, error) {
 }
 
 // 首页博客展示及分页
-func (bs BlogService) PageList(m map[string]interface{}) (*vo.PageListVO, error) {
+func (bs BlogService) PageList(pageMap map[string]int) (*vo.PageListVO, error) {
 	Db := utils.GetDB()
 
 	// 获取total
@@ -111,9 +111,9 @@ func (bs BlogService) PageList(m map[string]interface{}) (*vo.PageListVO, error)
 		return nil, errors.New("操作失败")
 	}
 	// 获取dataList
-	var blogs []dto.IndexDto
+	var blogs []vo.IndexVO
 	if err := Db.Raw(`SELECT b.id,b.title,b.content,b.update_time,t.type_name,u.avatar,u.username
-						FROM t_blog b JOIN t_user u ON u.id = b.user_id JOIN t_type t ON b.type_id = t.id LIMIT ?,?`, m["skipCount"], m["pageSize"]).Scan(&blogs).Error; err != nil {
+						FROM t_blog b JOIN t_user u ON u.id = b.user_id JOIN t_type t ON b.type_id = t.id LIMIT ?,?`, pageMap["skipCount"], pageMap["pageSize"]).Scan(&blogs).Error; err != nil {
 		return nil, errors.New("查询失败")
 	}
 	for k, v := range blogs {

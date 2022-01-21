@@ -12,7 +12,7 @@ func Routers(e *gin.Engine) *gin.Engine {
 	{
 		r.POST("/save/:typeId", middleware.AuthorizationMiddlleware(), blogHandler.Save)
 		r.GET("/list", middleware.AuthorizationMiddlleware(), blogHandler.List)
-		r.GET("/pageList/:pageNo/:pageSize", blogHandler.PageList)
+		r.POST("/pageList", blogHandler.PageList)
 		r.DELETE("/:id", blogHandler.Delete)
 	}
 

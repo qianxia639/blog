@@ -1,14 +1,13 @@
 package app
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
+	"github.com/qianxia/blog/dto"
 	"github.com/qianxia/blog/model"
-	"github.com/qianxia/blog/vo"
 )
 
 type IBlogHandler interface {
@@ -30,7 +29,7 @@ func NewBlogHandler() IBlogHandler {
 
 // 新增博客
 func (b BlogHandler) Save(ctx *gin.Context) {
-	var post vo.Post
+	var post dto.PostDTO
 	ctx.ShouldBindJSON(&post)
 	// 数据校验
 	if post.Title == "" || len(post.Title) < 6 || len(post.Title) > 20 {
@@ -77,7 +76,6 @@ func (b BlogHandler) List(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-
 	command.Success(ctx, "查询成功", gin.H{"blog": blogs})
 }
 
@@ -94,21 +92,16 @@ func (b BlogHandler) Delete(ctx *gin.Context) {
 	command.Success(ctx, "操作成功", nil)
 }
 
+// 查询博客显示在首页并分页
 func (b BlogHandler) PageList(ctx *gin.Context) {
 
-	// var vo vo.PageListVO
-	// ctx.ShouldBindJSON(&vo)
+	pageMap := make(map[string]int)
+	ctx.ShouldBindJSON(&pageMap)
 
-	pageNo, _ := strconv.Atoi(ctx.Param("pageNo"))
-	pageSize, _ := strconv.Atoi(ctx.Param("pageSize"))
+	skipCount := (pageMap["pageNo"] - 1) * pageMap["pageSize"]
+	pageMap["skipCount"] = skipCount
 
-	fmt.Printf("pageNo: %d,pageSize: %d\n", pageNo, pageSize)
-
-	skipCount := (pageNo - 1) * pageSize
-	m := make(map[string]interface{}, 5)
-	m["skipCount"] = skipCount
-	m["pageSize"] = pageSize
-	pageListVO, err := b.Service.PageList(m)
+	pageListVO, err := b.Service.PageList(pageMap)
 
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())

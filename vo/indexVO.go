@@ -1,10 +1,10 @@
-package dto
+package vo
 
 import (
 	"github.com/qianxia/blog/model"
 )
 
-type IndexDto struct {
+type IndexVO struct {
 	Id         string      `json:"blog_id"`
 	Title      string      `json:"title"`
 	Content    string      `json:"content"`
