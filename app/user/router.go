@@ -15,7 +15,8 @@ func Routers(e *gin.Engine) *gin.Engine {
 		// 登录
 		r.POST("/login", userHandler.Login)
 		// 用户信息
-		r.GET("/info", middleware.AuthorizationMiddlleware(), userHandler.Info)
+		r.GET("/info", middleware.Auth(), userHandler.Info)
+		r.GET("/logout", userHandler.Logout)
 	}
 	return e
 }

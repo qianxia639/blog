@@ -1,26 +1,21 @@
 package app
 
 import (
-	"net/http"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
-	"github.com/qianxia/blog/command"
-	"github.com/qianxia/blog/dto"
-	"github.com/qianxia/blog/model"
 )
 
 type IBlogHandler interface {
 	Save(ctx *gin.Context)
 	List(ctx *gin.Context)
 	Delete(ctx *gin.Context)
-	PageList(ctx *gin.Context)
+	//PageList(ctx *gin.Context)
 }
 
 type BlogHandler struct {
 	Service BlogService
 }
 
+/*
 func NewBlogHandler() IBlogHandler {
 	var blogService BlogService
 
@@ -91,7 +86,8 @@ func (b BlogHandler) Delete(ctx *gin.Context) {
 	}
 	command.Success(ctx, "操作成功", nil)
 }
-
+*/
+/*
 // 查询博客显示在首页并分页
 func (b BlogHandler) PageList(ctx *gin.Context) {
 
@@ -110,3 +106,4 @@ func (b BlogHandler) PageList(ctx *gin.Context) {
 
 	command.Success(ctx, "查询成功", gin.H{"dataList": pageListVO})
 }
+*/

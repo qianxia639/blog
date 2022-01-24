@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type Blog struct {
 	// 主键
 	Id int64 `json:"id" binding:"required"`
@@ -24,7 +26,8 @@ type Blog struct {
 	// 浏览次数
 	Views int `json:"views"`
 	// 创建时间
-	CreateTime Time `json:"create_time"`
+	CreateTime time.Time `gorm:"type:timestamp" json:"create_time"`
 	// 更新时间
-	UpdateTime Time `json:"update_time"`
+	UpdateTime time.Time `gorm:"type:timestamp" json:"update_time"`
+	Tags       []*Tag    `gorm:"many2many:ry_blog_tag;"`
 }

@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	"github.com/qianxia/blog/global"
+	"github.com/qianxia/blog/initialize"
 	"github.com/qianxia/blog/routers"
 	"github.com/qianxia/blog/utils"
 	"gopkg.in/yaml.v2"
@@ -17,10 +19,14 @@ func main() {
 	yaml.Unmarshal(dc, &y)
 
 	// 加载MySQL配置信息
-	db := utils.InitDb(y)
-	// 关闭MySQL连接信息
-	defer db.Close()
-
+	global.RY_DB = utils.InitDb(y)
+	if global.RY_DB != nil {
+		// 初始化表
+		initialize.RegisterTables(global.RY_DB)
+		db, _ := global.RY_DB.DB()
+		// 关闭mysql连接
+		defer db.Close()
+	}
 	// 加载Redis链接池配置信息
 	// Pool := utils.InitRedis(y)
 	// // 关闭redis链接池信息

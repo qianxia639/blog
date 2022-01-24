@@ -1,18 +1,18 @@
 package model
 
+import "time"
+
 type User struct {
-	// 主键
-	Id int64 `json:"id" binding:"required"`
+	Id int64 `gorm:"primarykey"` // 主键
 	// 用户名
-	Username string `form:"username" json:"username" binding:"required"`
+	Username string `gorm:"type:varchar(20)" form:"username" json:"username" binding:"required"`
 	// 密码
-	Password string `form:"password" json:"password" binding:"required"`
+	Password string `gorm:"type:varchar(80)" form:"password" json:"password" binding:"required"`
 	// 邮箱
-	Email string `form:"email" json:"email" binding:"required"`
+	Email string `gorm:"type:varchar(20)" form:"email" json:"email" binding:"required"`
 	// 头像
-	Avatar string `json:"avatar"`
-	// 注册时间
-	CreateTime Time `json:"create_time" `
-	// 修改时间
-	UpdateTime Time `json:"update_time"`
+	Avatar    string    `json:"avatar"`
+	CreatedAt time.Time // 创建时间
+	UpdatedAt time.Time // 更新时间
+	Blogs     []Blog
 }

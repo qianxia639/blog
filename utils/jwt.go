@@ -4,10 +4,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-)
-
-const (
-	jwt_key = "l_qian_xia_y_y"
+	"github.com/qianxia/blog/global"
 )
 
 type Claims struct {
@@ -28,7 +25,7 @@ func CreateToken(id int64) string {
 		},
 	}
 	tokenStr := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token, err := tokenStr.SignedString([]byte(jwt_key))
+	token, err := tokenStr.SignedString(global.RY_JWT_Key)
 	if err != nil {
 		panic(err)
 	}
@@ -39,7 +36,7 @@ func CreateToken(id int64) string {
 func ParseJwt(tokenStr string) (*jwt.Token, *Claims, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
-		return []byte(jwt_key), nil
+		return global.RY_JWT_Key, nil
 	})
 	return token, claims, err
 }

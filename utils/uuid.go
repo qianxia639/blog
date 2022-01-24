@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"strings"
-
 	"github.com/google/uuid"
 )
 
@@ -11,5 +9,5 @@ func CreateUUID() string {
 	if err != nil {
 		panic(err)
 	}
-	return strings.ReplaceAll(u.String(), "-", "")
+	return u.String()
 }

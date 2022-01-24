@@ -1,16 +1,9 @@
 package app
 
-import (
-	"errors"
-
-	"github.com/qianxia/blog/command"
-	"github.com/qianxia/blog/model"
-	"github.com/qianxia/blog/utils"
-)
-
 type TagService struct {
 }
 
+/*
 func (ts TagService) List() ([]string, error) {
 	var err error
 	Db := utils.GetDB()
@@ -27,3 +20,4 @@ func (ts TagService) List() ([]string, error) {
 
 	return tagNames, err
 }
+*/

@@ -1,16 +1,5 @@
 package app
 
-import (
-	"errors"
-	"time"
-
-	"github.com/qianxia/blog/command"
-	"github.com/qianxia/blog/dto"
-	"github.com/qianxia/blog/model"
-	"github.com/qianxia/blog/utils"
-	"github.com/qianxia/blog/vo"
-)
-
 type BlogService struct {
 }
 
@@ -19,6 +8,7 @@ type BlogService struct {
 根据前端所选的额外选项进行相应的变化，
 进行博客新增的数据插入时，不仅要在博客表中新增数据，还要在博客标签表中进行数据的插入
 */
+/*
 func (bs BlogService) Save(post dto.PostDTO) error {
 	Db := utils.GetDB()
 	var were, shareStatment, commentabled bool
@@ -56,8 +46,8 @@ func (bs BlogService) Save(post dto.PostDTO) error {
 		Were:           were,
 		ShareStatement: shareStatment,
 		Commentabled:   commentabled,
-		CreateTime:     model.Time(time.Now()),
-		UpdateTime:     model.Time(time.Now()),
+		CreateTime:     time.Now(),
+		UpdateTime:     time.Now(),
 	}
 	// 开启事务
 	tx := Db.Begin()
@@ -88,19 +78,27 @@ func (bs BlogService) Save(post dto.PostDTO) error {
 
 	return nil
 }
-
+*/
 // 个人博客列表展示
+/*
 func (bs BlogService) List(id int64) ([]dto.BlogDto, error) {
 	Db := utils.GetDB()
 	blogs := make([]dto.BlogDto, 10)
-
+	// type Blog struct {
+	// 	Id         string
+	// 	Title      string
+	// 	UpdateTime model.Time
+	// }
+	// blogs := make([]Blog, 10)
+	// blogMap := make(map[string]interface{})
 	if err := Db.Raw("SELECT id,title,update_time FROM "+command.DBBlog+" WHERE user_id = ?", id).Scan(&blogs).Error; err != nil {
 		return nil, errors.New("查询失败")
 	}
-
+	// blogMap["blog"] = blogs
 	return blogs, nil
 }
-
+*/
+/*
 // 首页博客展示及分页
 func (bs BlogService) PageList(pageMap map[string]int) (*vo.PageListVO, error) {
 	Db := utils.GetDB()
@@ -130,11 +128,12 @@ func (bs BlogService) PageList(pageMap map[string]int) (*vo.PageListVO, error) {
 	// 返回vo
 	return &vo, nil
 }
-
+*/
 /**
 博客删除
 删除时除了要删除博客表中的数据以外，还要删除博客标签表中对应的数据
 */
+/*
 func (bs BlogService) Delete(id int64) error {
 	Db := utils.GetDB()
 
@@ -170,3 +169,4 @@ func (bs BlogService) Delete(id int64) error {
 
 	return nil
 }
+*/
