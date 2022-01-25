@@ -7,14 +7,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/model"
+	"github.com/qianxia/blog/response"
 	"github.com/qianxia/blog/utils"
 )
 
 type IUserHandler interface {
-	Register(ctx *gin.Context)
-	Login(ctx *gin.Context)
-	Info(ctx *gin.Context)
-	Logout(ctx *gin.Context)
+	register(ctx *gin.Context)
+	login(ctx *gin.Context)
+	info(ctx *gin.Context)
+	logout(ctx *gin.Context)
 }
 
 type UserHandler struct {
@@ -28,7 +29,7 @@ func NewUserHandler() IUserHandler {
 }
 
 // 注册
-func (u UserHandler) Register(ctx *gin.Context) {
+func (u UserHandler) register(ctx *gin.Context) {
 	var user model.User
 	// 绑定表单数据
 	ctx.ShouldBindJSON(&user)
@@ -44,7 +45,7 @@ func (u UserHandler) Register(ctx *gin.Context) {
 }
 
 // 登录
-func (u UserHandler) Login(ctx *gin.Context) {
+func (u UserHandler) login(ctx *gin.Context) {
 	// 绑定表单参数
 	var form model.User
 	ctx.ShouldBindJSON(&form)
@@ -54,7 +55,7 @@ func (u UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 	gob.Register(model.User{})
-	if err := utils.SaveSession(ctx, "user", user); err != nil {
+	if err := utils.SetSession(ctx, "user", user); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -64,22 +65,26 @@ func (u UserHandler) Login(ctx *gin.Context) {
 }
 
 // 获取用户信息
-func (u UserHandler) Info(ctx *gin.Context) {
-	// userInfo, _ := ctx.Get("user")
-	userInfo, _ := utils.GetSession(ctx, "user")
-	// userMap := make(map[interface{}]interface{})
+func (u UserHandler) info(ctx *gin.Context) {
+	userInfo, err := utils.GetSession(ctx, "user")
+	if err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	// userMap := make(map[string]interface{})
 	// userMap["id"] = userInfo.(model.User).Id
 	// userMap["username"] = userInfo.(model.User).Username
-	// fmt.Println(userInfo.(model.User))
-	command.Success(ctx, "信息获取成功", gin.H{
-		"id":       userInfo.(model.User).Id,
-		"username": userInfo.(model.User).Username,
-	})
+	// userMap["email"] = userInfo.(model.User).Email
+	// userMap["avatar"] = userInfo.(model.User).Avatar
+	// userMap["user"] = userInfo.(model.User)
+	command.Success(ctx, "信息获取成功", gin.H{"user": response.ToUser(userInfo.(model.User))})
 }
 
-func (u UserHandler) Logout(ctx *gin.Context) {
+// 登出
+func (u UserHandler) logout(ctx *gin.Context) {
 	if err := utils.RemoveSession(ctx); err != nil {
 		command.Failed(ctx, 500, err.Error())
+		return
 	}
-	command.Success(ctx, "成功", nil)
+	command.Success(ctx, "登出成功", nil)
 }

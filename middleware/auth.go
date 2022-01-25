@@ -52,7 +52,7 @@ func Auth() gin.HandlerFunc {
 		// }
 
 		// 将用户信息写入上下文
-		// ctx.Set("user", user)
+		ctx.Set("user", user)
 		ctx.Next()
 	}
 }

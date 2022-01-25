@@ -11,12 +11,13 @@ func Routers(e *gin.Engine) *gin.Engine {
 	r := e.Group("/user")
 	{
 		// 注册
-		r.POST("/register", userHandler.Register)
+		r.POST("/register", userHandler.register)
 		// 登录
-		r.POST("/login", userHandler.Login)
+		r.POST("/login", userHandler.login)
 		// 用户信息
-		r.GET("/info", middleware.Auth(), userHandler.Info)
-		r.GET("/logout", userHandler.Logout)
+		r.GET("/info", middleware.Auth(), userHandler.info)
+		// 登出
+		r.GET("/logout", middleware.Auth(), userHandler.logout)
 	}
 	return e
 }

@@ -14,12 +14,12 @@ var (
 )
 
 // 设置session
-func SaveSession(ctx *gin.Context, key, value interface{}) error {
+func SetSession(ctx *gin.Context, key, value interface{}) error {
 	session, err := get(ctx)
 	if err != nil {
 		return err
 	}
-	session.Values[key] = value
+	session.Values[key.(string)] = value
 	// 30分钟后cookie将会被删除
 	// session.Options.MaxAge = 30 * 60
 	return session.Save(ctx.Request, ctx.Writer)
