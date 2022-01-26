@@ -1,7 +1,10 @@
 package app
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+	"github.com/qianxia/blog/command"
 )
 
 type ITagHandler interface {
@@ -12,7 +15,6 @@ type TagHandler struct {
 	Service TagService
 }
 
-/*
 func NewTagHandler() ITagHandler {
 	var tagService TagService
 
@@ -27,4 +29,3 @@ func (t TagHandler) List(ctx *gin.Context) {
 	}
 	command.Success(ctx, "查询成功", gin.H{"tag": tags})
 }
-*/

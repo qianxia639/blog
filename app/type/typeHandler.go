@@ -1,7 +1,11 @@
 package app
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
+	"github.com/qianxia/blog/command"
 )
 
 type ITypeHandler interface {
@@ -13,7 +17,6 @@ type TypeHandler struct {
 	Service TypeService
 }
 
-/*
 func NewTypeHandler() ITypeHandler {
 	var typeService TypeService
 
@@ -40,4 +43,3 @@ func (t TypeHandler) typeList(ctx *gin.Context) {
 	}
 	command.Success(ctx, "操作成功", gin.H{"typeList": typeList})
 }
-*/

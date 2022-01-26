@@ -1,33 +1,31 @@
 package model
 
-import "time"
-
 type Blog struct {
 	// 主键
 	Id int64 `json:"id" binding:"required"`
 	// 用户id，
-	UserId int64 `json:"user_id" `
+	UserId int64 `json:"userId" binding:"required" gorm:"NOT NULL"`
 	// 分类id
-	TypeId int `json:"type_id" `
+	TypeId int `json:"typeId" binding:"required" gorm:"NOT NULL"`
 	// 标题
-	Title string `json:"title" binding:"required"`
+	Title string `json:"title" binding:"required" gorm:"size:20;NOT NULL"`
 	// 内容
-	Content string `json:"content" binding:"required"`
+	Content string `json:"content" binding:"required" gorm:"size:255;NOT NULL"`
 	// 标记
-	Flag string `json:"flag"`
+	Flag string `json:"flag" gorm:"type:varchar(10);comment:标记"`
 	// 是否开启点赞
-	Were bool `json:"were"`
+	Were bool `json:"were" gorm:"comment:是否开启点赞"`
 	// 是否显示转载声明
-	ShareStatement bool `json:"share_statement"`
+	ShareStatement bool `json:"shareStatement" gorm:"comment:是否显示转载声明"`
 	// 是否开启评论
-	Commentabled bool `json:"commentabled"`
+	EnableComment bool `json:"enableComment" gorm:"comment:是否开启评论"`
 	// 点赞数
-	Likes int `json:"likes"`
+	Likes int `json:"likes" gorm:"comment:点赞数"`
 	// 浏览次数
-	Views int `json:"views"`
+	Views int `json:"views" gorm:"comment:浏览次数" `
 	// 创建时间
-	CreateTime time.Time `gorm:"type:timestamp" json:"create_time"`
+	CreatedAt Time `json:"createdAt" gorm:"type:timestamp;comment:创建时间"`
 	// 更新时间
-	UpdateTime time.Time `gorm:"type:timestamp" json:"update_time"`
-	Tags       []*Tag    `gorm:"many2many:ry_blog_tag;"`
+	UpdatedAt Time   `json:"updatedAt" gorm:"type:timestamp;comment:更新时间"`
+	Tags      []*Tag `gorm:"many2many:blog_tag;"`
 }

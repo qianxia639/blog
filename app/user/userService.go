@@ -55,7 +55,7 @@ func (us UserService) Register(user model.User) (*model.User, error) {
 	// 	newUser.Id, newUser.Username, newUser.Password, newUser.Email, newUser.CreateTime, newUser.UpdateTime).Error; err != nil {
 	// 	return nil, errors.New("用户注册失败")
 	// }
-	if err := global.RY_DB.Debug().Create(&newUser).Error; err != nil {
+	if err := global.RY_DB.Create(&newUser).Error; err != nil {
 		return nil, errors.New("用户注册失败")
 	}
 	return &newUser, nil
