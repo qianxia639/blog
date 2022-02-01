@@ -34,13 +34,13 @@ func Auth() gin.HandlerFunc {
 		// 验证通过或获取claims中的userId
 		// userId := claims.UserId
 		// DB := utils.GetDB()
-		var user model.User
+		// var user model.User
 		// if err := DB.Raw("SELECT id,username,email,avatar FROM "+command.DBUser+" WHERE id = ?", userId).Scan(&user).Error; err != nil {
 		// 	command.Failed(ctx, http.StatusInternalServerError, "用户名不存在")
 		// 	ctx.Abort()
 		// 	return
 		// }
-		if err := global.RY_DB.Debug().Select("id,username,email,avatar").Where("id = ?", claims.UserId).Find(&user).Error; err != nil {
+		if err := global.RY_DB.Debug().Select("id,username,email,avatar").Where("id = ?", claims.UserId).Find(&model.User{}).Error; err != nil {
 			command.Failed(ctx, http.StatusInternalServerError, "用户名不存在")
 			ctx.Abort()
 			return
@@ -52,7 +52,7 @@ func Auth() gin.HandlerFunc {
 		// }
 
 		// 将用户信息写入上下文
-		ctx.Set("user", user)
+		// ctx.Set("user", user)
 		ctx.Next()
 	}
 }

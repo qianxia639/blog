@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/model"
-	"github.com/qianxia/blog/response"
 	"github.com/qianxia/blog/utils"
 )
 
@@ -33,7 +32,6 @@ func (u UserHandler) register(ctx *gin.Context) {
 	var user model.User
 	// 绑定表单数据
 	ctx.ShouldBindJSON(&user)
-
 	uh, err := u.Service.Register(user)
 
 	if err != nil {
@@ -77,7 +75,10 @@ func (u UserHandler) info(ctx *gin.Context) {
 	// userMap["email"] = userInfo.(model.User).Email
 	// userMap["avatar"] = userInfo.(model.User).Avatar
 	// userMap["user"] = userInfo.(model.User)
-	command.Success(ctx, "信息获取成功", gin.H{"user": response.ToUser(userInfo.(model.User))})
+
+	// fmt.Println("userInfo.(model.User) == > ", userInfo.(model.User))
+	// command.Success(ctx, "信息获取成功", gin.H{"user": response.ToUser(userInfo.(model.User))})
+	command.Success(ctx, "信息获取成功", gin.H{"user": userInfo})
 }
 
 // 登出

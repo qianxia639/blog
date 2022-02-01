@@ -36,5 +36,7 @@ func main() {
 		panic(r.Run(fmt.Sprintf("%s:%d", y.Server.Host, y.Server.Port)))
 	}
 
-	panic(r.Run())
+	go func() {
+		panic(r.Run())
+	}()
 }

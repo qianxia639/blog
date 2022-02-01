@@ -36,7 +36,7 @@ func (us UserService) Register(user model.User) (*model.User, error) {
 	}
 	// 对明文进行加密处理
 	// newPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	newPassword, _ := utils.Encrypt(user.Password)
+	newPassword, _ := utils.Enbcrypt(user.Password)
 	// 创建用户
 	newUser := model.User{
 		Id:       utils.NextId(),
@@ -55,7 +55,7 @@ func (us UserService) Register(user model.User) (*model.User, error) {
 	// 	newUser.Id, newUser.Username, newUser.Password, newUser.Email, newUser.CreateTime, newUser.UpdateTime).Error; err != nil {
 	// 	return nil, errors.New("用户注册失败")
 	// }
-	if err := global.RY_DB.Create(&newUser).Error; err != nil {
+	if err := global.RY_DB.Debug().Create(&newUser).Error; err != nil {
 		return nil, errors.New("用户注册失败")
 	}
 	return &newUser, nil
@@ -71,7 +71,7 @@ func (us UserService) Login(user model.User) (*model.User, error) {
 	}
 
 	// 校验密码
-	if err := utils.Decrypt(u.Password, user.Password); err != nil {
+	if err := utils.Debcrypt(u.Password, user.Password); err != nil {
 		return nil, errors.New("密码错误")
 	}
 	// if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(user.Password)); err != nil {

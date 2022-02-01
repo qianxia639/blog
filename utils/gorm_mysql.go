@@ -13,7 +13,7 @@ import (
 )
 
 func InitDb(y *model.Config) *gorm.DB {
-	args := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=%s",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=%s",
 		y.MySQL.Username,
 		y.MySQL.Password,
 		y.MySQL.Host,
@@ -24,7 +24,7 @@ func InitDb(y *model.Config) *gorm.DB {
 	)
 
 	db, _ := gorm.Open(mysql.New(mysql.Config{
-		DSN:               args,
+		DSN:               dsn,
 		DefaultStringSize: 150,
 	}), &gorm.Config{
 		Logger: logger.Default,

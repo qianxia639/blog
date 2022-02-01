@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type User struct {
 	Id int64 `binding:"required" gorm:"primaryKey;comment:主键"` // 主键
 	// 用户名
@@ -11,8 +13,14 @@ type User struct {
 	// 头像
 	Avatar string `json:"avatar" gorm:"default:https://picsum.photos/30/30/?image=41"`
 	// 创建时间
-	CreatedAt Time `json:"createdAt" gorm:"type:timestamp;comment:创建时间"`
+	// CreatedAt time.Time `json:"createdAt" gorm:"type:timestamp;comment:创建时间"`
+	// CreatedAt Time `json:"createdAt" gorm:"type:timestamp;comment:创建时间"`
+	CreatedAt time.Time `json:"createdAt" gorm:"comment:创建时间"`
+	// CreatedAt int64 `json:"createdAt" gorm:"comment:创建时间"`
 	// 更新时间
-	UpdatedAt Time `json:"updatedAt" gorm:"type:timestamp;comment:更新时间"`
-	Blogs     []Blog
+	// UpdatedAt time.Time `json:"updatedAt" gorm:"type:timestamp;comment:更新时间"`
+	// UpdatedAt Time `json:"updatedAt" gorm:"type:timestamp;comment:更新时间"`
+	UpdatedAt time.Time `json:"updatedAt" gorm:"comment:更新时间"`
+	// UpdatedAt int64 `json:"updatedAt" gorm:"comment:更新时间"`
+	Blogs []Blog
 }

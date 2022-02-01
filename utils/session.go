@@ -22,6 +22,7 @@ func SetSession(ctx *gin.Context, key, value interface{}) error {
 	session.Values[key.(string)] = value
 	// 30分钟后cookie将会被删除
 	// session.Options.MaxAge = 30 * 60
+	// return session.Store().Save(ctx.Request,ctx.Writer,session)
 	return session.Save(ctx.Request, ctx.Writer)
 }
 
@@ -31,7 +32,6 @@ func GetSession(ctx *gin.Context, key interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return session.Values[key], nil
 }
 
