@@ -11,8 +11,6 @@ type TagService struct {
 }
 
 func (ts TagService) List() ([]string, error) {
-	var err error
-	// Db := utils.GetDB()
 	tags := make([]model.Tag, 20)
 	var tagNames []string
 
@@ -20,7 +18,7 @@ func (ts TagService) List() ([]string, error) {
 	// 	return nil, errors.New("查询失败")
 	// }
 
-	if err := global.RY_DB.Select("id,tag_name").Find(&tags); err != nil {
+	if err := global.RY_DB.Debug().Select("id,tag_name").Find(&tags).Error; err != nil {
 		return nil, errors.New("查询失败")
 	}
 
@@ -28,5 +26,5 @@ func (ts TagService) List() ([]string, error) {
 		tagNames = append(tagNames, v.TagName)
 	}
 
-	return tagNames, err
+	return tagNames, nil
 }

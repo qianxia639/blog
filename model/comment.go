@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type Comment struct {
 	// 主键
 	Id int64 `json:"id" binding:"required"`
@@ -14,6 +16,5 @@ type Comment struct {
 	// 评论内容
 	Comment string `json:"comment" binding:"required" gorm:"NOT NULL"`
 	// 评论时间
-	// CreatedAt Time `json:"createdAt" gorm:"type:timestamp"`
-	CreatedAt Time `json:"createdAt"`
+	CreatedAt time.Time `json:"createdAt" gorm:"type:timestamp"`
 }

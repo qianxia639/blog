@@ -32,7 +32,6 @@ func InitDb(y *model.Config) *gorm.DB {
 			TablePrefix:   "ry_",
 			SingularTable: true,
 		},
-		SkipDefaultTransaction:                   false,
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 

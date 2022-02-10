@@ -10,10 +10,10 @@ import (
 func RegisterTables(db *gorm.DB) {
 	if err := db.AutoMigrate(
 		&model.User{},
-		// &model.Type{},
-		// &model.Tag{},
-		// &model.Blog{},
-		// &model.Comment{},
+		&model.Type{},
+		&model.Tag{},
+		&model.Blog{},
+		&model.Comment{},
 	); err != nil {
 		os.Exit(0)
 	}

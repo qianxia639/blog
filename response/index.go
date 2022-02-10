@@ -1,16 +1,18 @@
 package response
 
 import (
+	"time"
+
 	"github.com/qianxia/blog/model"
 )
 
 type Index struct {
-	Id        string      `json:"blog_id"`
+	Id        string      `json:"blogId"`
 	Title     string      `json:"title"`
 	Content   string      `json:"content"`
-	UpdatedAt model.Time  `json:"updated_at"`
-	TypeName  string      `json:"type_name"`
+	UpdatedAt time.Time   `json:"updatedAt"`
+	TypeName  string      `json:"typeName"`
 	Avatar    string      `json:"avatar"`
 	Username  string      `json:"username"`
-	TagNames  []model.Tag `json:"tag_names"`
+	TagNames  []model.Tag `json:"tagNames"`
 }

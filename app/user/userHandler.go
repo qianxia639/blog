@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/gob"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,7 +32,10 @@ func NewUserHandler() IUserHandler {
 func (u UserHandler) register(ctx *gin.Context) {
 	var user model.User
 	// 绑定表单数据
-	ctx.ShouldBindJSON(&user)
+	if err := ctx.ShouldBindJSON(&user); err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
 	uh, err := u.Service.Register(user)
 
 	if err != nil {
@@ -64,11 +68,12 @@ func (u UserHandler) login(ctx *gin.Context) {
 
 // 获取用户信息
 func (u UserHandler) info(ctx *gin.Context) {
-	userInfo, err := utils.GetSession(ctx, "user")
+	userInfo, err := utils.GetSession(ctx, "userInfo")
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
+	fmt.Println("userInfo", userInfo)
 	// userMap := make(map[string]interface{})
 	// userMap["id"] = userInfo.(model.User).Id
 	// userMap["username"] = userInfo.(model.User).Username

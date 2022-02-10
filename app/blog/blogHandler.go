@@ -1,7 +1,15 @@
 package app
 
 import (
+	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
+	"github.com/qianxia/blog/command"
+	"github.com/qianxia/blog/model"
+	"github.com/qianxia/blog/request"
+	"github.com/qianxia/blog/utils"
 )
 
 type IBlogHandler interface {
@@ -15,7 +23,6 @@ type BlogHandler struct {
 	Service BlogService
 }
 
-/*
 func NewBlogHandler() IBlogHandler {
 	var blogService BlogService
 
@@ -24,7 +31,7 @@ func NewBlogHandler() IBlogHandler {
 
 // 新增博客
 func (b BlogHandler) Save(ctx *gin.Context) {
-	var post dto.PostDTO
+	var post request.Post
 	ctx.ShouldBindJSON(&post)
 	// 数据校验
 	if post.Title == "" || len(post.Title) < 6 || len(post.Title) > 20 {
@@ -48,11 +55,10 @@ func (b BlogHandler) Save(ctx *gin.Context) {
 	}
 
 	// 获取登录的用户信息
-	userInfo, _ := ctx.Get("user")
+	userInfo, _ := utils.GetSession(ctx, "userInfo")
 	post.UserId = userInfo.(model.User).Id
-	// 获取URL中的参数
-	typeId, _ := strconv.Atoi(ctx.Params.ByName("typeId"))
-	post.TypeId = typeId
+
+	fmt.Println("post ===> ", post)
 
 	err := b.Service.Save(post)
 	if err != nil {
@@ -65,7 +71,7 @@ func (b BlogHandler) Save(ctx *gin.Context) {
 // 显示所有博客
 func (b BlogHandler) List(ctx *gin.Context) {
 	// 获取登录的用户信息
-	userInfo, _ := ctx.Get("user")
+	userInfo, _ := utils.GetSession(ctx, "userInfo")
 	blogs, err := b.Service.List(userInfo.(model.User).Id)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
@@ -86,7 +92,7 @@ func (b BlogHandler) Delete(ctx *gin.Context) {
 	}
 	command.Success(ctx, "操作成功", nil)
 }
-*/
+
 /*
 // 查询博客显示在首页并分页
 func (b BlogHandler) PageList(ctx *gin.Context) {

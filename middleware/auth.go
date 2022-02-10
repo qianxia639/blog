@@ -33,26 +33,15 @@ func Auth() gin.HandlerFunc {
 
 		// 验证通过或获取claims中的userId
 		// userId := claims.UserId
-		// DB := utils.GetDB()
-		// var user model.User
-		// if err := DB.Raw("SELECT id,username,email,avatar FROM "+command.DBUser+" WHERE id = ?", userId).Scan(&user).Error; err != nil {
-		// 	command.Failed(ctx, http.StatusInternalServerError, "用户名不存在")
-		// 	ctx.Abort()
-		// 	return
-		// }
-		if err := global.RY_DB.Debug().Select("id,username,email,avatar").Where("id = ?", claims.UserId).Find(&model.User{}).Error; err != nil {
+		var user model.User
+		if err := global.RY_DB.Debug().Select("id,username,email,avatar").Where("id = ?", claims.UserId).Find(&user).Error; err != nil {
 			command.Failed(ctx, http.StatusInternalServerError, "用户名不存在")
 			ctx.Abort()
 			return
 		}
-		// if err := DB.Table(command.DBUser).First(&user, userId).Error; err != nil {
-		// 	command.Failed(ctx, http.StatusInternalServerError, "用户名不存在")
-		// 	ctx.Abort()
-		// 	return
-		// }
 
-		// 将用户信息写入上下文
-		// ctx.Set("user", user)
+		// 将用户信息写入session中
+		utils.SetSession(ctx, "userInfo", user)
 		ctx.Next()
 	}
 }

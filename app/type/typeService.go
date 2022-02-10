@@ -11,13 +11,10 @@ import (
 type TypeService struct {
 }
 
+// 查詢type列表，按amount降序排列
 func (ts TypeService) List() ([]model.Type, error) {
-	// Db := utils.GetDB()
 	var types []model.Type
-	// if err := Db.Raw("SELECT id,type_name,amount FROM " + command.DBType + " ORDER BY amount DESC").Scan(&types).Error; err != nil {
-	// 	return nil, errors.New("查询失败")
-	// }
-	if err := global.RY_DB.Select("id,type_name,amount").Order("amount DESC").Error; err != nil {
+	if err := global.RY_DB.Debug().Select("id,type_name,amount").Order("amount DESC").Find(&types).Error; err != nil {
 		return nil, errors.New("查询失败")
 	}
 
@@ -25,9 +22,6 @@ func (ts TypeService) List() ([]model.Type, error) {
 }
 
 func (ts TypeService) typeList(id int) ([]response.Index, error) {
-
-	// Db := utils.GetDB()
-
 	var blogs []response.Index
 	if err := global.RY_DB.Raw(`SELECT b.id,b.title,b.content,b.update_time,t.type_name,u.avatar,u.username
 						FROM t_blog b JOIN t_user u ON u.id = b.user_id JOIN t_type t ON b.type_id = t.id AND b.type_id = ?`, id).Scan(&blogs).Error; err != nil {

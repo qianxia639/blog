@@ -15,7 +15,7 @@ type UserService struct {
 func (us UserService) Register(user model.User) (*model.User, error) {
 	// Db := utils.GetDB()
 	// 判断用户名是否存在
-	// if err := Db.Table(command.DBUser).Where("username = ?", user.Username).Find(&user).Error; err == nil {
+	// if err := global.RY_DB.Debug().Table(command.DBUser).Where("username = ?", user.Username).Find(&user).Error; err == nil {
 	// 	return nil, errors.New("用户名已存在")
 	// }
 	var u model.User
@@ -25,11 +25,18 @@ func (us UserService) Register(user model.User) (*model.User, error) {
 		return nil, errors.New("用户名已存在")
 	}
 
+	// if err := global.RY_DB.Debug().Select("username").Where("username = ?", user.Username).Find(&model.User{}).Error; err == nil {
+	// 	return nil, errors.New("用户名已存在")
+	// }
+
 	// 判断邮箱是否注册
-	// if err := Db.Table(command.DBUser).Where("email = ?", user.Email).Find(&user).Error; err == nil {
+	// if err := global.RY_DB.Debug().Table(command.DBUser).Where("email = ?", user.Email).Find(&user).Error; err == nil {
 	// 	return nil, errors.New("邮箱已注册")
 	// }
 	global.RY_DB.Debug().Select("email").Where("email = ?", user.Email).Find(&u)
+	// if err := global.RY_DB.Debug().Select("email").Where("email = ?", user.Email).Find(&model.User{}).Error; err == nil {
+	// 	return nil, errors.New("邮箱已注册")
+	// }
 
 	if u.Email == user.Email {
 		return nil, errors.New("邮箱已注册")
