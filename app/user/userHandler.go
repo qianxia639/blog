@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/model"
+	"github.com/qianxia/blog/response"
 	"github.com/qianxia/blog/utils"
 )
 
@@ -73,7 +74,7 @@ func (u UserHandler) info(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-	fmt.Println("userInfo", userInfo)
+	fmt.Println("userInfo ", userInfo)
 	// userMap := make(map[string]interface{})
 	// userMap["id"] = userInfo.(model.User).Id
 	// userMap["username"] = userInfo.(model.User).Username
@@ -82,14 +83,13 @@ func (u UserHandler) info(ctx *gin.Context) {
 	// userMap["user"] = userInfo.(model.User)
 
 	// fmt.Println("userInfo.(model.User) == > ", userInfo.(model.User))
-	// command.Success(ctx, "信息获取成功", gin.H{"user": response.ToUser(userInfo.(model.User))})
-	command.Success(ctx, "信息获取成功", gin.H{"user": userInfo})
+	command.Success(ctx, "信息获取成功", gin.H{"user": response.ToUser(userInfo.(model.User))})
 }
 
 // 登出
 func (u UserHandler) logout(ctx *gin.Context) {
 	if err := utils.RemoveSession(ctx); err != nil {
-		command.Failed(ctx, 500, err.Error())
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 	command.Success(ctx, "登出成功", nil)

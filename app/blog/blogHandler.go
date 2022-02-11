@@ -16,7 +16,7 @@ type IBlogHandler interface {
 	Save(ctx *gin.Context)
 	List(ctx *gin.Context)
 	Delete(ctx *gin.Context)
-	//PageList(ctx *gin.Context)
+	pageList(ctx *gin.Context)
 }
 
 type BlogHandler struct {
@@ -93,9 +93,8 @@ func (b BlogHandler) Delete(ctx *gin.Context) {
 	command.Success(ctx, "操作成功", nil)
 }
 
-/*
 // 查询博客显示在首页并分页
-func (b BlogHandler) PageList(ctx *gin.Context) {
+func (b BlogHandler) pageList(ctx *gin.Context) {
 
 	pageMap := make(map[string]int)
 	ctx.ShouldBindJSON(&pageMap)
@@ -112,4 +111,3 @@ func (b BlogHandler) PageList(ctx *gin.Context) {
 
 	command.Success(ctx, "查询成功", gin.H{"dataList": pageListVO})
 }
-*/
