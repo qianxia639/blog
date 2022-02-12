@@ -8,7 +8,7 @@ import (
 )
 
 type ITagHandler interface {
-	List(ctx *gin.Context)
+	tagList(ctx *gin.Context)
 }
 
 type TagHandler struct {
@@ -21,7 +21,7 @@ func NewTagHandler() ITagHandler {
 	return TagHandler{Service: tagService}
 }
 
-func (t TagHandler) List(ctx *gin.Context) {
+func (t TagHandler) tagList(ctx *gin.Context) {
 	tags, err := t.Service.List()
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())

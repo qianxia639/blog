@@ -11,12 +11,8 @@ type TagService struct {
 }
 
 func (ts TagService) List() ([]string, error) {
-	tags := make([]model.Tag, 20)
+	tags := make([]model.Tag, 10)
 	var tagNames []string
-
-	// if err = Db.Raw("SELECT id,tag_name FROM " + command.DBTag).Scan(&tags).Error; err != nil {
-	// 	return nil, errors.New("查询失败")
-	// }
 
 	if err := global.RY_DB.Debug().Select("id,tag_name").Find(&tags).Error; err != nil {
 		return nil, errors.New("查询失败")

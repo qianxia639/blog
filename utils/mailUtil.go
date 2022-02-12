@@ -25,10 +25,10 @@ func SendMail(captcha string, to ...string) {
 	// 设置主题
 	e.Subject = "欢迎注册!!"
 	// 设置邮件主体
-	e.HTML = []byte(`您的本次验证码为【` + captcha + `】,请及时进行激活操作，非本人操作请无视`)
+	e.HTML = []byte(`您的本次验证码为【` + captcha + `】,请及时进行激活操作,非本人操作请无视`)
 	// 发送邮件
 	if err := e.Send(args, smtp.PlainAuth("", y.QQMail.Username, y.QQMail.Password, y.QQMail.Host)); err != nil {
-		log.Printf("邮箱【：%s 】不存在", to[0])
+		log.Printf("邮箱【:%s 】不存在", to[0])
 		return
 	}
 }

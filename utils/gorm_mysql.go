@@ -5,14 +5,14 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/qianxia/blog/model"
+	"github.com/qianxia/blog/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
-func InitDb(y *model.Config) *gorm.DB {
+func InitDb(y *config.Config) *gorm.DB {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=%s",
 		y.MySQL.Username,
 		y.MySQL.Password,

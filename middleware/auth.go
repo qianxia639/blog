@@ -40,8 +40,8 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 
-		// 将用户信息写入session中
-		utils.SetSession(ctx, "userInfo", user)
+		// 将用户信息写入上下文中
+		ctx.Set("user", user)
 		ctx.Next()
 	}
 }

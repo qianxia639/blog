@@ -6,7 +6,7 @@ type Blog struct {
 	// 用户id，
 	UserId int64 `json:"userId" binding:"required" gorm:"NOT NULL"`
 	// 分类id
-	TypeId uint32 `json:"typeId" binding:"required" gorm:"NOT NULL"`
+	TypeId uint8 `json:"typeId" binding:"required" gorm:"NOT NULL"`
 	// 标题
 	Title string `json:"title" binding:"required" gorm:"size:20;NOT NULL"`
 	// 描述

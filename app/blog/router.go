@@ -7,13 +7,16 @@ import (
 
 func Routers(e *gin.Engine) *gin.Engine {
 	blogHandler := NewBlogHandler()
-	// e.Use(middleware.AuthorizationMiddlleware())
 	r := e.Group("/blog")
 	{
-		r.POST("/save", middleware.Auth(), blogHandler.Save)
-		r.GET("/list", middleware.Auth(), blogHandler.List)
-		r.POST("/pageList", blogHandler.pageList)
-		r.DELETE("/:id", blogHandler.Delete)
+		// 新增博客
+		r.POST("/save", middleware.Auth(), blogHandler.createBlog)
+		//
+		r.GET("/list", middleware.Auth(), blogHandler.blogList)
+		// 博客分页列表
+		r.POST("/pageList", blogHandler.blogPageList)
+		// 根据id删除博客
+		r.DELETE("/:id", blogHandler.deleteBlog)
 	}
 
 	return e

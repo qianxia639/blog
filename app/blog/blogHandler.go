@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -9,14 +8,13 @@ import (
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/request"
-	"github.com/qianxia/blog/utils"
 )
 
 type IBlogHandler interface {
-	Save(ctx *gin.Context)
-	List(ctx *gin.Context)
-	Delete(ctx *gin.Context)
-	pageList(ctx *gin.Context)
+	createBlog(ctx *gin.Context)
+	blogList(ctx *gin.Context)
+	deleteBlog(ctx *gin.Context)
+	blogPageList(ctx *gin.Context)
 }
 
 type BlogHandler struct {
@@ -30,35 +28,13 @@ func NewBlogHandler() IBlogHandler {
 }
 
 // 新增博客
-func (b BlogHandler) Save(ctx *gin.Context) {
+func (b BlogHandler) createBlog(ctx *gin.Context) {
 	var post request.Post
 	ctx.ShouldBindJSON(&post)
-	// 数据校验
-	if post.Title == "" || len(post.Title) < 6 || len(post.Title) > 20 {
-		command.Failed(ctx, http.StatusInternalServerError, "标题为空或标题长度少于6位")
-		return
-	}
-
-	if post.Content == "" || len(post.Content) < 6 {
-		command.Failed(ctx, http.StatusInternalServerError, "博客内容不能小于6位")
-		return
-	}
-
-	if post.Flag == "" {
-		command.Failed(ctx, http.StatusInternalServerError, "博客来源还未选择")
-		return
-	}
-
-	if len(post.Tags) < 1 {
-		command.Failed(ctx, http.StatusInternalServerError, "博客标签未选择")
-		return
-	}
 
 	// 获取登录的用户信息
-	userInfo, _ := utils.GetSession(ctx, "userInfo")
+	userInfo := ctx.MustGet("user")
 	post.UserId = userInfo.(model.User).Id
-
-	fmt.Println("post ===> ", post)
 
 	err := b.Service.Save(post)
 	if err != nil {
@@ -69,9 +45,9 @@ func (b BlogHandler) Save(ctx *gin.Context) {
 }
 
 // 显示所有博客
-func (b BlogHandler) List(ctx *gin.Context) {
+func (b BlogHandler) blogList(ctx *gin.Context) {
 	// 获取登录的用户信息
-	userInfo, _ := utils.GetSession(ctx, "userInfo")
+	userInfo := ctx.MustGet("user")
 	blogs, err := b.Service.List(userInfo.(model.User).Id)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
@@ -81,7 +57,7 @@ func (b BlogHandler) List(ctx *gin.Context) {
 }
 
 // 个人博客删除
-func (b BlogHandler) Delete(ctx *gin.Context) {
+func (b BlogHandler) deleteBlog(ctx *gin.Context) {
 
 	id, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
 
@@ -94,10 +70,17 @@ func (b BlogHandler) Delete(ctx *gin.Context) {
 }
 
 // 查询博客显示在首页并分页
-func (b BlogHandler) pageList(ctx *gin.Context) {
+func (b BlogHandler) blogPageList(ctx *gin.Context) {
 
 	pageMap := make(map[string]int)
 	ctx.ShouldBindJSON(&pageMap)
+
+	switch {
+	case pageMap["pageSize"] == 0:
+		pageMap["pageSize"] = -1
+	case pageMap["pageNo"] == 0:
+		pageMap["pageNo"] = 1
+	}
 
 	skipCount := (pageMap["pageNo"] - 1) * pageMap["pageSize"]
 	pageMap["skipCount"] = skipCount

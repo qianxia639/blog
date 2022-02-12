@@ -12,12 +12,20 @@ type TypeService struct {
 }
 
 // 查詢type列表，按amount降序排列
-func (ts TypeService) List() ([]model.Type, error) {
+func (ts TypeService) ListOrderByAmountDesc() ([]model.Type, error) {
 	var types []model.Type
 	if err := global.RY_DB.Debug().Select("id,type_name,amount").Order("amount DESC").Find(&types).Error; err != nil {
 		return nil, errors.New("查询失败")
 	}
+	return types, nil
+}
 
+// 只显示分类列表不排序
+func (ts TypeService) List() ([]model.Type, error) {
+	var types []model.Type
+	if err := global.RY_DB.Debug().Select("id,type_name,amount").Find(&types).Error; err != nil {
+		return nil, errors.New("查询失败")
+	}
 	return types, nil
 }
 

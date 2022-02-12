@@ -1,4 +1,4 @@
-package model
+package config
 
 type Config struct {
 	Server struct {
@@ -6,9 +6,9 @@ type Config struct {
 		Host string `yaml:"host"`
 	}
 	MySQL struct {
-		DriverName string `yaml:"driver_name"`
-		Host       string `yaml:"host"`
 		Port       int    `yaml:"port"`
+		Host       string `yaml:"host"`
+		DriverName string `yaml:"driver_name"`
 		DbName     string `yaml:"dbname"`
 		Username   string `yaml:"username"`
 		Password   string `yaml:"password"`
@@ -16,13 +16,13 @@ type Config struct {
 		Loc        string `yaml:"loc"`
 	}
 	Redis struct {
-		Host string `yaml:"host"`
 		Port int    `yaml:"port"`
+		Host string `yaml:"host"`
 	}
 	QQMail struct {
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
 		Port     int    `yaml:"port"`
 		Host     string `yaml:"host"`
+		Username string `yaml:"username"`
+		Password string `yaml:"password"`
 	}
 }

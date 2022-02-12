@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 
-	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/request"
@@ -84,32 +83,31 @@ func (bs BlogService) List(id int64) ([]response.Blog, error) {
 }
 
 // 首页博客展示及分页
-func (bs BlogService) PageList(pageMap map[string]int) (*response.PageList, error) {
-	// 获取total
-	var total int64
-	if err := global.RY_DB.Table(command.DBBlog).Count(&total).Error; err != nil {
-		return nil, errors.New("操作失败")
-	}
-	// 获取dataList
-	var blogs []response.Index
-	var b []model.Blog
-	if err := global.RY_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Find(&b).Error; err != nil {
+func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) {
+	var (
+		// 获取total
+		total int64
+		b     []model.Blog
+		// 获取dataList
+		blogs []response.Index
+	)
+	if err := global.RY_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Limit(page["pageSize"]).Offset(page["skipCount"]).Find(&b).Count(&total).Error; err != nil {
 		return nil, errors.New("查询失败")
 	}
 
 	for _, v := range b {
 		var users model.User
 		if err := global.RY_DB.Debug().Select("username,avatar").Where("id = ?", v.UserId).Find(&users).Error; err != nil {
-			return nil, errors.New("user查询失败")
+			return nil, errors.New("查询失败")
 		}
 		var types model.Type
 		if err := global.RY_DB.Debug().Select("type_name").Where("id = ?", v.TypeId).Find(&types).Error; err != nil {
-			return nil, errors.New("type查询失败")
+			return nil, errors.New("查询失败")
 		}
 		index := response.Index{
 			Title:       v.Title,
 			Description: v.Description,
-			UpdatedAt:   v.UpdatedAt,
+			UpdatedAt:   utils.TomestampToTime(v.UpdatedAt),
 			TypeName:    types.TypeName,
 			Avatar:      users.Avatar,
 			Username:    users.Username,

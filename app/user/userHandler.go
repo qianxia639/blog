@@ -1,8 +1,6 @@
 package app
 
 import (
-	"encoding/gob"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -57,11 +55,6 @@ func (u UserHandler) login(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-	gob.Register(model.User{})
-	if err := utils.SetSession(ctx, "user", user); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
 	// 生成token
 	token := utils.CreateToken(user.Id)
 	command.Success(ctx, "登录成功", gin.H{"token": token})
@@ -69,28 +62,12 @@ func (u UserHandler) login(ctx *gin.Context) {
 
 // 获取用户信息
 func (u UserHandler) info(ctx *gin.Context) {
-	userInfo, err := utils.GetSession(ctx, "userInfo")
-	if err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-	fmt.Println("userInfo ", userInfo)
-	// userMap := make(map[string]interface{})
-	// userMap["id"] = userInfo.(model.User).Id
-	// userMap["username"] = userInfo.(model.User).Username
-	// userMap["email"] = userInfo.(model.User).Email
-	// userMap["avatar"] = userInfo.(model.User).Avatar
-	// userMap["user"] = userInfo.(model.User)
-
-	// fmt.Println("userInfo.(model.User) == > ", userInfo.(model.User))
+	userInfo := ctx.MustGet("user")
 	command.Success(ctx, "信息获取成功", gin.H{"user": response.ToUser(userInfo.(model.User))})
 }
 
 // 登出
 func (u UserHandler) logout(ctx *gin.Context) {
-	if err := utils.RemoveSession(ctx); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
+
 	command.Success(ctx, "登出成功", nil)
 }

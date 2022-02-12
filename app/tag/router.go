@@ -7,7 +7,8 @@ func Routers(e *gin.Engine) *gin.Engine {
 
 	r := e.Group("/tag")
 	{
-		r.GET("/list", tagHandler.List)
+		// 标签列表(不分页)
+		r.GET("/list", tagHandler.tagList)
 	}
 
 	return e

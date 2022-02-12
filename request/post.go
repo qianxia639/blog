@@ -1,12 +1,12 @@
 package request
 
 type Post struct {
-	UserId      int64  `json:"userId" binding:"required"`
-	TypeId      uint32 `json:"typeId" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	Title       string `json:"title" binding:"required"`
-	Content     string `json:"content" binding:"required"`
-	Flag        string `json:"flag" binding:"required"`
+	TypeId      uint8  `json:"typeId"`
+	UserId      int64  `json:"userId"`
+	Description string `json:"description"`
+	Title       string `json:"title"`
+	Content     string `json:"content"`
+	Flag        string `json:"flag"`
 	Tags        []string
 	Selected    []string
 }

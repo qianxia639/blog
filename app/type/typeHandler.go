@@ -9,7 +9,8 @@ import (
 )
 
 type ITypeHandler interface {
-	List(ctx *gin.Context)
+	listOrder(ctx *gin.Context)
+	list(ctx *gin.Context)
 	typeList(ctx *gin.Context)
 }
 
@@ -23,7 +24,18 @@ func NewTypeHandler() ITypeHandler {
 	return TypeHandler{Service: typeService}
 }
 
-func (t TypeHandler) List(ctx *gin.Context) {
+// 按amount降序排列
+func (t TypeHandler) listOrder(ctx *gin.Context) {
+	types, err := t.Service.ListOrderByAmountDesc()
+	if err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	command.Success(ctx, "查询成功", gin.H{"type": types})
+}
+
+// 不排序只显示列表
+func (t TypeHandler) list(ctx *gin.Context) {
 	types, err := t.Service.List()
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
@@ -32,6 +44,7 @@ func (t TypeHandler) List(ctx *gin.Context) {
 	command.Success(ctx, "查询成功", gin.H{"type": types})
 }
 
+//
 func (t TypeHandler) typeList(ctx *gin.Context) {
 
 	id, _ := strconv.Atoi(ctx.Params.ByName("id"))

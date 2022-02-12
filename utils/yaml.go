@@ -3,13 +3,11 @@ package utils
 import (
 	"io/ioutil"
 
-	"github.com/qianxia/blog/model"
+	"github.com/qianxia/blog/config"
 )
 
-func DeCode() ([]byte, *model.Config) {
+func DeCode() ([]byte, *config.Config) {
 	fileName := "./config/application.yaml"
-	y := new(model.Config)
 	yamlFile, _ := ioutil.ReadFile(fileName)
-
-	return yamlFile, y
+	return yamlFile, &config.Config{}
 }
