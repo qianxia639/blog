@@ -2,17 +2,17 @@ package model
 
 type Blog struct {
 	// 主键
-	Id int64 `json:"id" binding:"required"`
+	Id int64 `json:"id"`
 	// 用户id，
-	UserId int64 `json:"userId" binding:"required" gorm:"NOT NULL"`
+	UserId int64 `json:"userId" gorm:"NOT NULL"`
 	// 分类id
-	TypeId uint8 `json:"typeId" binding:"required" gorm:"NOT NULL"`
+	TypeId uint8 `json:"typeId" gorm:"NOT NULL"`
 	// 标题
-	Title string `json:"title" binding:"required" gorm:"size:20;NOT NULL"`
+	Title string `json:"title" gorm:"size:20;NOT NULL"`
 	// 描述
-	Description string `json:"description" binding:"required" gorm:"NOT NULL"`
+	Description string `json:"description" gorm:"NOT NULL"`
 	// 内容
-	Content string `json:"content" binding:"required" gorm:"type:text;NOT NULL"`
+	Content string `json:"content" gorm:"type:text;NOT NULL"`
 	// 标记
 	Flag string `json:"flag" gorm:"type:varchar(10);comment:标记"`
 	// 是否开启点赞

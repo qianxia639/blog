@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
@@ -82,6 +83,15 @@ func (bs BlogService) List(id int64) ([]response.Blog, error) {
 	return blogs, nil
 }
 
+// 最新推荐展示
+func (bs BlogService) LatestList() ([]model.Blog, error) {
+	list := make([]model.Blog, 4)
+	if err := global.RY_DB.Debug().Select("id,title").Order("updated_at DESC").Limit(4).Offset(-1).Find(&list).Error; err != nil {
+		return nil, errors.New("查询失败")
+	}
+	return list, nil
+}
+
 // 首页博客展示及分页
 func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) {
 	var (
@@ -105,6 +115,7 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 			return nil, errors.New("查询失败")
 		}
 		index := response.Index{
+			Id:          fmt.Sprintf("%v", v.Id),
 			Title:       v.Title,
 			Description: v.Description,
 			UpdatedAt:   utils.TomestampToTime(v.UpdatedAt),

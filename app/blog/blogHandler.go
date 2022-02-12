@@ -15,6 +15,7 @@ type IBlogHandler interface {
 	blogList(ctx *gin.Context)
 	deleteBlog(ctx *gin.Context)
 	blogPageList(ctx *gin.Context)
+	latestList(ctx *gin.Context)
 }
 
 type BlogHandler struct {
@@ -28,7 +29,7 @@ func NewBlogHandler() IBlogHandler {
 }
 
 // 新增博客
-func (b BlogHandler) createBlog(ctx *gin.Context) {
+func (bh BlogHandler) createBlog(ctx *gin.Context) {
 	var post request.Post
 	ctx.ShouldBindJSON(&post)
 
@@ -36,7 +37,7 @@ func (b BlogHandler) createBlog(ctx *gin.Context) {
 	userInfo := ctx.MustGet("user")
 	post.UserId = userInfo.(model.User).Id
 
-	err := b.Service.Save(post)
+	err := bh.Service.Save(post)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -45,10 +46,10 @@ func (b BlogHandler) createBlog(ctx *gin.Context) {
 }
 
 // 显示所有博客
-func (b BlogHandler) blogList(ctx *gin.Context) {
+func (bh BlogHandler) blogList(ctx *gin.Context) {
 	// 获取登录的用户信息
 	userInfo := ctx.MustGet("user")
-	blogs, err := b.Service.List(userInfo.(model.User).Id)
+	blogs, err := bh.Service.List(userInfo.(model.User).Id)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -57,11 +58,11 @@ func (b BlogHandler) blogList(ctx *gin.Context) {
 }
 
 // 个人博客删除
-func (b BlogHandler) deleteBlog(ctx *gin.Context) {
+func (bh BlogHandler) deleteBlog(ctx *gin.Context) {
 
 	id, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
 
-	err := b.Service.Delete(id)
+	err := bh.Service.Delete(id)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -70,7 +71,7 @@ func (b BlogHandler) deleteBlog(ctx *gin.Context) {
 }
 
 // 查询博客显示在首页并分页
-func (b BlogHandler) blogPageList(ctx *gin.Context) {
+func (bh BlogHandler) blogPageList(ctx *gin.Context) {
 
 	pageMap := make(map[string]int)
 	ctx.ShouldBindJSON(&pageMap)
@@ -85,7 +86,7 @@ func (b BlogHandler) blogPageList(ctx *gin.Context) {
 	skipCount := (pageMap["pageNo"] - 1) * pageMap["pageSize"]
 	pageMap["skipCount"] = skipCount
 
-	pageListVO, err := b.Service.PageList(pageMap)
+	pageListVO, err := bh.Service.PageList(pageMap)
 
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
@@ -93,4 +94,14 @@ func (b BlogHandler) blogPageList(ctx *gin.Context) {
 	}
 
 	command.Success(ctx, "查询成功", gin.H{"dataList": pageListVO})
+}
+
+// 最新推荐
+func (bh BlogHandler) latestList(ctx *gin.Context) {
+	list, err := bh.Service.LatestList()
+	if err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	command.Success(ctx, "查询成功", gin.H{"latestList": list})
 }

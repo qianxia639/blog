@@ -2,10 +2,12 @@ package app
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/response"
+	"github.com/qianxia/blog/utils"
 )
 
 type TypeService struct {
@@ -30,19 +32,43 @@ func (ts TypeService) List() ([]model.Type, error) {
 }
 
 func (ts TypeService) typeList(id int) ([]response.Index, error) {
-	var blogs []response.Index
-	// if err := global.RY_DB.Raw(`SELECT b.id,b.title,b.content,b.update_time,t.type_name,u.avatar,u.username
-	// 					FROM t_blog b JOIN t_user u ON u.id = b.user_id JOIN t_type t ON b.type_id = t.id AND b.type_id = ?`, id).Scan(&blogs).Error; err != nil {
-	// 	return nil, errors.New("查询失败")
-	// }
+	var (
+		// 获取total
+		total int64
+		b     []model.Blog
+		// 获取dataList
+		blogs []response.Index
+	)
+	if err := global.RY_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Where("type_id = ?", id).Find(&b).Count(&total).Error; err != nil {
+		return nil, errors.New("查询失败")
+	}
 
-	// for k, v := range blogs {
-	// 	if err := global.RY_DB.Raw(`select t.id,t.tag_name from t_tag t JOIN
-	// 				(select DISTINCT(bt.tag_id) from t_blog_tag bt JOIN t_blog b ON bt.blog_id = ?) as tag
-	// 				ON t.id = tag.tag_id`, v.Id).Scan(&blogs[k].Tags).Error; err != nil {
-	// 		return nil, errors.New("查询失败")
-	// 	}
-	// }
+	for _, v := range b {
+		var users model.User
+		if err := global.RY_DB.Debug().Select("username,avatar").Where("id = ?", v.UserId).Find(&users).Error; err != nil {
+			return nil, errors.New("查询失败")
+		}
+		var types model.Type
+		if err := global.RY_DB.Debug().Select("type_name").Where("id = ?", v.TypeId).Find(&types).Error; err != nil {
+			return nil, errors.New("查询失败")
+		}
+		index := response.Index{
+			Id:          fmt.Sprintf("%v", v.Id),
+			Title:       v.Title,
+			Description: v.Description,
+			UpdatedAt:   utils.TomestampToTime(v.UpdatedAt),
+			TypeName:    types.TypeName,
+			Avatar:      users.Avatar,
+			Username:    users.Username,
+			Tags:        v.Tags,
+		}
+		blogs = append(blogs, index)
+	}
+
+	// 将total和dataList封装到pageList中
+	var pageList response.PageList
+	pageList.Total = total
+	pageList.DataList = blogs
 
 	return blogs, nil
 }
