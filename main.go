@@ -27,10 +27,6 @@ func main() {
 		// 关闭mysql连接
 		defer db.Close()
 	}
-	// 加载Redis链接池配置信息
-	// Pool := utils.InitRedis(y)
-	// // 关闭redis链接池信息
-	// defer Pool.Close()
 
 	if y.Server.Port != -1 {
 		panic(r.Run(fmt.Sprintf("%s:%d", y.Server.Host, y.Server.Port)))

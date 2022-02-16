@@ -114,11 +114,12 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 		if err := global.RY_DB.Debug().Select("type_name").Where("id = ?", v.TypeId).Find(&types).Error; err != nil {
 			return nil, errors.New("查询失败")
 		}
+
 		index := response.Index{
 			Id:          fmt.Sprintf("%v", v.Id),
 			Title:       v.Title,
 			Description: v.Description,
-			UpdatedAt:   utils.TomestampToTime(v.UpdatedAt),
+			UpdatedAt:   utils.TimestampToTime(v.UpdatedAt),
 			TypeName:    types.TypeName,
 			Avatar:      users.Avatar,
 			Username:    users.Username,

@@ -10,26 +10,16 @@ import (
 	"github.com/qianxia/blog/request"
 )
 
-type IBlogHandler interface {
-	createBlog(ctx *gin.Context)
-	blogList(ctx *gin.Context)
-	deleteBlog(ctx *gin.Context)
-	blogPageList(ctx *gin.Context)
-	latestList(ctx *gin.Context)
-}
-
 type BlogHandler struct {
 	Service BlogService
 }
 
-func NewBlogHandler() IBlogHandler {
-	var blogService BlogService
-
-	return BlogHandler{Service: blogService}
-}
+// func NewBlogHandler() *BlogHandler {
+// 	return &BlogHandler{BlogService{}}
+// }
 
 // 新增博客
-func (bh BlogHandler) createBlog(ctx *gin.Context) {
+func (bh *BlogHandler) createBlog(ctx *gin.Context) {
 	var post request.Post
 	ctx.ShouldBindJSON(&post)
 

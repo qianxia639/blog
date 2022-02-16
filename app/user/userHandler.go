@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/model"
-	"github.com/qianxia/blog/response"
 	"github.com/qianxia/blog/utils"
 )
 
@@ -63,7 +62,12 @@ func (u UserHandler) login(ctx *gin.Context) {
 // 获取用户信息
 func (u UserHandler) info(ctx *gin.Context) {
 	userInfo := ctx.MustGet("user")
-	command.Success(ctx, "信息获取成功", gin.H{"user": response.ToUser(userInfo.(model.User))})
+	userMap := make(map[string]interface{}, 1)
+	userMap["id"] = userInfo.(model.User).Id
+	userMap["username"] = userInfo.(model.User).Username
+	userMap["email"] = userInfo.(model.User).Email
+	userMap["avatar"] = userInfo.(model.User).Avatar
+	command.Success(ctx, "信息获取成功", gin.H{"user": userMap})
 }
 
 // 登出

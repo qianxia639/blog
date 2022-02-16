@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -21,7 +22,6 @@ func CreateToken(id int64) string {
 			ExpiresAt: exp.Unix(), // 过期时间
 			IssuedAt:  time.Now().Unix(),
 			Issuer:    "qianxia",
-			Subject:   "user token",
 		},
 	}
 	tokenStr := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -33,10 +33,26 @@ func CreateToken(id int64) string {
 }
 
 // 解析token
-func ParseJwt(tokenStr string) (*jwt.Token, *Claims, error) {
+func ParseJwt(tokenStr string) (*Claims, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
 		return global.RY_JWT_Key, nil
 	})
-	return token, claims, err
+	if err != nil {
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+				return nil, errors.New("token格式不正确")
+			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
+				return nil, errors.New("token已过期")
+			} else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
+				return nil, errors.New("无效的token")
+			}
+		}
+	}
+	if token != nil {
+		if token.Valid {
+			return claims, nil
+		}
+	}
+	return nil, errors.New("无效的token")
 }

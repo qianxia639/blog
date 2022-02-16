@@ -14,25 +14,28 @@ import (
 func Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 从请求头中获取Authorization头信息
-		tokenStr := ctx.GetHeader("Authorization")
-		if tokenStr == "" || !strings.HasPrefix(tokenStr, "Bearer ") {
-			command.Failed(ctx, http.StatusUnauthorized, "token不存在或格式不正确")
+		token := ctx.GetHeader("Authorization")
+		if token == "" {
+			command.Failed(ctx, http.StatusUnauthorized, "未登录或非法访问")
 			ctx.Abort()
 			return
 		}
+		if !strings.HasPrefix(token, "Bearer ") {
+			command.Failed(ctx, http.StatusUnauthorized, "token格式有误")
+			ctx.Abort()
+			return
+		}
+		token = token[7:]
 
-		tokenStr = tokenStr[7:]
-		// 常量
 		// 解析token
-		token, claims, err := utils.ParseJwt(tokenStr)
-		if err != nil || !token.Valid {
-			command.Failed(ctx, http.StatusUnauthorized, "token解析失败")
+		claims, err := utils.ParseJwt(token)
+		if err != nil {
+			command.Failed(ctx, http.StatusUnauthorized, err.Error())
 			ctx.Abort()
 			return
 		}
 
 		// 验证通过或获取claims中的userId
-		// userId := claims.UserId
 		var user model.User
 		if err := global.RY_DB.Debug().Select("id,username,email,avatar").Where("id = ?", claims.UserId).Find(&user).Error; err != nil {
 			command.Failed(ctx, http.StatusInternalServerError, "用户名不存在")
