@@ -1,4 +1,4 @@
-package app
+package example
 
 import (
 	"errors"
@@ -13,8 +13,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-type BlogService struct {
-}
+type BlogService struct{}
 
 /**
 新增博客
@@ -35,7 +34,7 @@ func (bs BlogService) Save(post request.Post) error {
 		}
 	}
 	// 根据post.tags[]的值查询对应的id
-	tags := make([]model.Tag, 4)
+	tags := make([]model.Tag, 0, 4)
 
 	if err := global.RY_DB.Debug().Select("id").Where("tag_name in (?)", post.Tags).Find(&tags).Error; err != nil {
 		return errors.New("数据查询失败")
@@ -75,7 +74,7 @@ func (bs BlogService) Save(post request.Post) error {
 
 // 个人博客列表展示
 func (bs BlogService) List(id int64) ([]response.Blog, error) {
-	blogs := make([]response.Blog, 10)
+	blogs := make([]response.Blog, 0, 10)
 	if err := global.RY_DB.Debug().Select("id,title,updated_at").Where("user_id = ?", id).Find(&blogs).Error; err != nil {
 		return nil, errors.New("查询失败")
 	}
@@ -85,7 +84,7 @@ func (bs BlogService) List(id int64) ([]response.Blog, error) {
 
 // 最新推荐展示
 func (bs BlogService) LatestList() ([]model.Blog, error) {
-	list := make([]model.Blog, 4)
+	list := make([]model.Blog, 0, 4)
 	if err := global.RY_DB.Debug().Select("id,title").Order("updated_at DESC").Limit(4).Offset(-1).Find(&list).Error; err != nil {
 		return nil, errors.New("查询失败")
 	}

@@ -1,4 +1,4 @@
-package app
+package example
 
 import (
 	"net/http"
@@ -6,27 +6,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
+	"github.com/qianxia/blog/service/example"
 )
 
-type ITypeHandler interface {
-	listOrder(ctx *gin.Context)
-	list(ctx *gin.Context)
-	typeList(ctx *gin.Context)
-}
-
 type TypeHandler struct {
-	Service TypeService
-}
-
-func NewTypeHandler() ITypeHandler {
-	var typeService TypeService
-
-	return TypeHandler{Service: typeService}
+	typeService example.TypeService
 }
 
 // 按amount降序排列
-func (t TypeHandler) listOrder(ctx *gin.Context) {
-	types, err := t.Service.ListOrderByAmountDesc()
+func (th *TypeHandler) ListOrder(ctx *gin.Context) {
+	types, err := th.typeService.ListOrderByAmountDesc()
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -35,8 +24,8 @@ func (t TypeHandler) listOrder(ctx *gin.Context) {
 }
 
 // 不排序只显示列表
-func (t TypeHandler) list(ctx *gin.Context) {
-	types, err := t.Service.List()
+func (th *TypeHandler) List(ctx *gin.Context) {
+	types, err := th.typeService.List()
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -45,11 +34,11 @@ func (t TypeHandler) list(ctx *gin.Context) {
 }
 
 //
-func (t TypeHandler) typeList(ctx *gin.Context) {
+func (th *TypeHandler) TypeList(ctx *gin.Context) {
 
 	id, _ := strconv.Atoi(ctx.Params.ByName("id"))
 
-	typeList, err := t.Service.typeList(id)
+	typeList, err := th.typeService.TypeList(id)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return

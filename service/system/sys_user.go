@@ -1,4 +1,4 @@
-﻿package app
+package system
 
 import (
 	"errors"
@@ -8,11 +8,10 @@ import (
 	"github.com/qianxia/blog/utils"
 )
 
-type UserService struct {
-}
+type UserService struct{}
 
 // 注册
-func (us UserService) Register(user model.User) (*model.User, error) {
+func (*UserService) Register(user model.User) (*model.User, error) {
 	var u model.User
 	if err := global.RY_DB.Debug().Select("username").Where("username = ?", user.Username).Find(&u).Error; err == nil {
 		if u.Username == user.Username {
@@ -43,7 +42,7 @@ func (us UserService) Register(user model.User) (*model.User, error) {
 }
 
 // 登录
-func (us UserService) Login(user model.User) (*model.User, error) {
+func (*UserService) Login(user model.User) (*model.User, error) {
 	var u model.User
 	// 判断用户名是否存在
 	if err := global.RY_DB.Debug().Select("id,username,password,email,avatar").Where("username = ?", user.Username).Find(&u).Error; err != nil {

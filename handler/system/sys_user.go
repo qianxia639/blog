@@ -1,4 +1,4 @@
-package app
+package system
 
 import (
 	"net/http"
@@ -6,50 +6,38 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/model"
+	"github.com/qianxia/blog/service/system"
 	"github.com/qianxia/blog/utils"
 )
 
-type IUserHandler interface {
-	register(ctx *gin.Context)
-	login(ctx *gin.Context)
-	info(ctx *gin.Context)
-	logout(ctx *gin.Context)
-}
-
 type UserHandler struct {
-	Service UserService
-}
-
-func NewUserHandler() IUserHandler {
-	var userService UserService
-
-	return UserHandler{Service: userService}
+	userService system.UserService
 }
 
 // 注册
-func (u UserHandler) register(ctx *gin.Context) {
+func (uh *UserHandler) Register(ctx *gin.Context) {
 	var user model.User
 	// 绑定表单数据
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-	uh, err := u.Service.Register(user)
+	_, err := uh.userService.Register(user)
 
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	command.Success(ctx, "注册成功", &uh)
+	command.Success(ctx, "注册成功", nil)
 }
 
 // 登录
-func (u UserHandler) login(ctx *gin.Context) {
+func (uh *UserHandler) Login(ctx *gin.Context) {
 	// 绑定表单参数
 	var form model.User
 	ctx.ShouldBindJSON(&form)
-	user, err := u.Service.Login(form)
+	user, err := uh.userService.Login(form)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -60,7 +48,7 @@ func (u UserHandler) login(ctx *gin.Context) {
 }
 
 // 获取用户信息
-func (u UserHandler) info(ctx *gin.Context) {
+func (uh *UserHandler) Info(ctx *gin.Context) {
 	userInfo := ctx.MustGet("user")
 	userMap := make(map[string]interface{}, 1)
 	userMap["id"] = userInfo.(model.User).Id
@@ -68,10 +56,4 @@ func (u UserHandler) info(ctx *gin.Context) {
 	userMap["email"] = userInfo.(model.User).Email
 	userMap["avatar"] = userInfo.(model.User).Avatar
 	command.Success(ctx, "信息获取成功", gin.H{"user": userMap})
-}
-
-// 登出
-func (u UserHandler) logout(ctx *gin.Context) {
-
-	command.Success(ctx, "登出成功", nil)
 }

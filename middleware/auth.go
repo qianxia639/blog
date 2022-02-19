@@ -13,8 +13,8 @@ import (
 
 func Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// 从请求头中获取Authorization头信息
-		token := ctx.GetHeader("Authorization")
+		// 从请求头中获取X-Token头信息
+		token := ctx.GetHeader("X-Token")
 		if token == "" {
 			command.Failed(ctx, http.StatusUnauthorized, "未登录或非法访问")
 			ctx.Abort()

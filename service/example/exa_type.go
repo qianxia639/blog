@@ -1,4 +1,4 @@
-package app
+package example
 
 import (
 	"errors"
@@ -10,12 +10,11 @@ import (
 	"github.com/qianxia/blog/utils"
 )
 
-type TypeService struct {
-}
+type TypeService struct{}
 
 // 查詢type列表，按amount降序排列
-func (ts TypeService) ListOrderByAmountDesc() ([]model.Type, error) {
-	var types []model.Type
+func (ts *TypeService) ListOrderByAmountDesc() ([]model.Type, error) {
+	types := make([]model.Type, 0, 4)
 	if err := global.RY_DB.Debug().Select("id,type_name,amount").Order("amount DESC").Find(&types).Error; err != nil {
 		return nil, errors.New("查询失败")
 	}
@@ -23,15 +22,15 @@ func (ts TypeService) ListOrderByAmountDesc() ([]model.Type, error) {
 }
 
 // 只显示分类列表不排序
-func (ts TypeService) List() ([]model.Type, error) {
-	var types []model.Type
+func (ts *TypeService) List() ([]model.Type, error) {
+	types := make([]model.Type, 0, 10)
 	if err := global.RY_DB.Debug().Select("id,type_name,amount").Find(&types).Error; err != nil {
 		return nil, errors.New("查询失败")
 	}
 	return types, nil
 }
 
-func (ts TypeService) typeList(id int) ([]response.Index, error) {
+func (ts *TypeService) TypeList(id int) ([]response.Index, error) {
 	var (
 		// 获取total
 		total int64

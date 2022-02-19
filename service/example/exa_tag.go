@@ -1,4 +1,4 @@
-package app
+package example
 
 import (
 	"errors"
@@ -7,11 +7,10 @@ import (
 	"github.com/qianxia/blog/model"
 )
 
-type TagService struct {
-}
+type TagService struct{}
 
-func (ts TagService) List() ([]string, error) {
-	tags := make([]model.Tag, 10)
+func (ts *TagService) List() ([]string, error) {
+	tags := make([]model.Tag, 0, 10)
 	var tagNames []string
 
 	if err := global.RY_DB.Debug().Select("id,tag_name").Find(&tags).Error; err != nil {

@@ -1,4 +1,4 @@
-package app
+package example
 
 import (
 	"net/http"
@@ -8,18 +8,15 @@ import (
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/request"
+	"github.com/qianxia/blog/service/example"
 )
 
 type BlogHandler struct {
-	Service BlogService
+	blogService example.BlogService
 }
 
-// func NewBlogHandler() *BlogHandler {
-// 	return &BlogHandler{BlogService{}}
-// }
-
 // 新增博客
-func (bh *BlogHandler) createBlog(ctx *gin.Context) {
+func (bh *BlogHandler) CreateBlog(ctx *gin.Context) {
 	var post request.Post
 	ctx.ShouldBindJSON(&post)
 
@@ -27,7 +24,7 @@ func (bh *BlogHandler) createBlog(ctx *gin.Context) {
 	userInfo := ctx.MustGet("user")
 	post.UserId = userInfo.(model.User).Id
 
-	err := bh.Service.Save(post)
+	err := bh.blogService.Save(post)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -36,10 +33,10 @@ func (bh *BlogHandler) createBlog(ctx *gin.Context) {
 }
 
 // 显示所有博客
-func (bh BlogHandler) blogList(ctx *gin.Context) {
+func (bh *BlogHandler) BlogList(ctx *gin.Context) {
 	// 获取登录的用户信息
 	userInfo := ctx.MustGet("user")
-	blogs, err := bh.Service.List(userInfo.(model.User).Id)
+	blogs, err := bh.blogService.List(userInfo.(model.User).Id)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -48,11 +45,11 @@ func (bh BlogHandler) blogList(ctx *gin.Context) {
 }
 
 // 个人博客删除
-func (bh BlogHandler) deleteBlog(ctx *gin.Context) {
+func (bh *BlogHandler) DeleteBlog(ctx *gin.Context) {
 
 	id, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
 
-	err := bh.Service.Delete(id)
+	err := bh.blogService.Delete(id)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -61,14 +58,14 @@ func (bh BlogHandler) deleteBlog(ctx *gin.Context) {
 }
 
 // 查询博客显示在首页并分页
-func (bh BlogHandler) blogPageList(ctx *gin.Context) {
+func (bh *BlogHandler) BlogPageList(ctx *gin.Context) {
 
-	pageMap := make(map[string]int)
+	pageMap := make(map[string]int, 5)
 	ctx.ShouldBindJSON(&pageMap)
 
 	switch {
 	case pageMap["pageSize"] == 0:
-		pageMap["pageSize"] = -1
+		pageMap["pageSize"] = 6
 	case pageMap["pageNo"] == 0:
 		pageMap["pageNo"] = 1
 	}
@@ -76,19 +73,19 @@ func (bh BlogHandler) blogPageList(ctx *gin.Context) {
 	skipCount := (pageMap["pageNo"] - 1) * pageMap["pageSize"]
 	pageMap["skipCount"] = skipCount
 
-	pageListVO, err := bh.Service.PageList(pageMap)
+	pageList, err := bh.blogService.PageList(pageMap)
 
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	command.Success(ctx, "查询成功", gin.H{"dataList": pageListVO})
+	command.Success(ctx, "查询成功", gin.H{"dataList": pageList})
 }
 
 // 最新推荐
-func (bh BlogHandler) latestList(ctx *gin.Context) {
-	list, err := bh.Service.LatestList()
+func (bh *BlogHandler) LatestList(ctx *gin.Context) {
+	list, err := bh.blogService.LatestList()
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
