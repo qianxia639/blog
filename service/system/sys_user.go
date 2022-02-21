@@ -45,8 +45,10 @@ func (*UserService) Register(user model.User) (*model.User, error) {
 func (*UserService) Login(user model.User) (*model.User, error) {
 	var u model.User
 	// 判断用户名是否存在
-	if err := global.RY_DB.Debug().Select("id,username,password,email,avatar").Where("username = ?", user.Username).Find(&u).Error; err != nil {
-		return nil, errors.New("账户不存在")
+	if err := global.RY_DB.Debug().Select("id,username,password,email,avatar").Where("username = ?", user.Username).Find(&u).Error; err == nil {
+		if u.Username != user.Username {
+			return nil, errors.New("账户不存在")
+		}
 	}
 
 	// 校验密码

@@ -7,12 +7,16 @@ import (
 	"github.com/qianxia/blog/initialize"
 	"github.com/qianxia/blog/routers"
 	"github.com/qianxia/blog/utils"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
 func main() {
 	// 初始化路由
 	r := routers.Init()
+	// 加载log日志
+	global.RY_LOG = utils.InitLogger(global.RY_INFO_PATH, global.RY_WARN_PATH, zap.InfoLevel)
+	defer global.RY_LOG.Sync()
 
 	// 读取yaml配置文件
 	dc, y := utils.DeCode()
