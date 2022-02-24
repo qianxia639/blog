@@ -19,7 +19,7 @@ type Config struct {
 		Port int    `yaml:"port"`
 		Host string `yaml:"host"`
 	}
-	QQMail struct {
+	Mail struct {
 		Port     int    `yaml:"port"`
 		Host     string `yaml:"host"`
 		Username string `yaml:"username"`

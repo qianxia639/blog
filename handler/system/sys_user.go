@@ -19,16 +19,20 @@ type UserHandler struct {
 func (uh UserHandler) Register(ctx *gin.Context) {
 	var user model.User
 	// 绑定表单数据
+	// command.ShouldBindJSON(ctx, &user)
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		global.RY_LOG.Warnf("%s-{%v}", "数据绑定失败", err)
 		return
 	}
-	_, err := uh.userService.Register(user)
+	u, err := uh.userService.Register(user)
 
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		global.RY_LOG.Warn(err)
 		return
 	}
+	global.RY_LOG.Infof("%s,{%v}", "用户注册成功", u)
 	command.Success(ctx, "注册成功", nil)
 }
 
@@ -36,7 +40,11 @@ func (uh UserHandler) Register(ctx *gin.Context) {
 func (uh UserHandler) Login(ctx *gin.Context) {
 	// 绑定表单参数
 	var form model.User
-	ctx.ShouldBindJSON(&form)
+	if err := ctx.ShouldBindJSON(&form); err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		global.RY_LOG.Warnf("%s-{%v}", "数据绑定失败", err)
+		return
+	}
 	user, err := uh.userService.Login(form)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
@@ -56,5 +64,45 @@ func (uh UserHandler) Info(ctx *gin.Context) {
 	userMap["username"] = userInfo.(model.User).Username
 	userMap["email"] = userInfo.(model.User).Email
 	userMap["avatar"] = userInfo.(model.User).Avatar
+	global.RY_LOG.Infof("%s,{%v}", "用户信息获取成功", userMap)
 	command.Success(ctx, "信息获取成功", gin.H{"user": userMap})
+}
+
+// 修改名字
+func (uh UserHandler) UpdateUsername(ctx *gin.Context) {
+	var user model.User
+	if err := ctx.ShouldBindJSON(&user); err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		global.RY_LOG.Warnf("%s-{%v}", "数据绑定失败", err)
+		return
+	}
+	if err := uh.userService.UpdateUsername(user); err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		global.RY_LOG.Warnf("%v", err)
+		return
+	}
+	command.Success(ctx, "修改成功", nil)
+}
+
+// 更改头像
+
+// 找回密码
+
+// 修改密码
+func (uh UserHandler) UpdatePassword(ctx *gin.Context) {
+	var m map[string]string
+	userInfo := ctx.MustGet("user")
+
+	if err := ctx.ShouldBindJSON(&m); err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		global.RY_LOG.Warnf("%s-{%v}", "数据绑定失败", err)
+		return
+	}
+
+	if err := uh.userService.UpdatePassword(m, userInfo.(model.User)); err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		global.RY_LOG.Warnf("%v", err)
+		return
+	}
+	command.Success(ctx, "修改成功", nil)
 }

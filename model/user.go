@@ -7,7 +7,7 @@ type User struct {
 	Username string `json:"username" gorm:"size:20;NOT NULL"`
 	// 密码
 	Password string `json:"password" gorm:"size:80;NOT NULL"`
-	// 邮箱
+	// 邮箱 (做登录账户)
 	Email string `json:"email" gorm:"size:20;NOT NULL"`
 	// 头像
 	Avatar string `json:"avatar" gorm:"default:https://picsum.photos/30/30/?image=41"`

@@ -4,10 +4,17 @@ import (
 	"io/ioutil"
 
 	"github.com/qianxia/blog/config"
+	"github.com/qianxia/blog/global"
+	"gopkg.in/yaml.v2"
 )
 
-func DeCode() ([]byte, *config.Config) {
+func DeCode() (config *config.Config) {
 	fileName := "./config/application.yaml"
 	yamlFile, _ := ioutil.ReadFile(fileName)
-	return yamlFile, &config.Config{}
+	err := yaml.Unmarshal(yamlFile, &config)
+	if err != nil {
+		global.RY_LOG.Errorf("%v", err)
+		return nil
+	}
+	return
 }

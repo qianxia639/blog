@@ -9,7 +9,7 @@ import (
 type Index struct {
 	Id        string      `json:"blogId"`
 	Title     string      `json:"title"`
-	Content   string      `json:"description"`
+	Content   string      `json:"content"`
 	UpdatedAt time.Time   `json:"updatedAt"`
 	TypeName  string      `json:"typeName"`
 	Avatar    string      `json:"avatar"`

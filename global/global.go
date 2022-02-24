@@ -3,14 +3,16 @@ package global
 import (
 	"time"
 
+	"github.com/qianxia/blog/config"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 var (
-	RY_DB      *gorm.DB
-	RY_JWT_Key = []byte("l_ruo_yu_y_y")
-	RY_LOG     *zap.SugaredLogger
+	RY_DB          *gorm.DB
+	RY_JWT_Key     = []byte("l_ruo_yu_y_y")
+	RY_LOG         *zap.SugaredLogger
+	RY_YAML_CONFIG *config.Config
 )
 
 // ============== log path ==============

@@ -13,3 +13,8 @@ mysql:
 redis:
   host: localhost
   port: 6379
+mail:
+  host: smtp.qq.com
+  port: 465
+  username: 2274000859@qq.com
+  password: mlgtpvckxvpaebje

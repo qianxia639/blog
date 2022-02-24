@@ -37,7 +37,7 @@ func Auth() gin.HandlerFunc {
 
 		// 验证通过或获取claims中的userId
 		var user model.User
-		if err := global.RY_DB.Debug().Select("id,username,email,avatar").Where("id = ?", claims.UserId).Find(&user).Error; err != nil {
+		if err := global.RY_DB.Debug().Select("id,username,password,email,avatar").Where("id = ?", claims.UserId).Find(&user).Error; err != nil {
 			command.Failed(ctx, http.StatusInternalServerError, "用户名不存在")
 			ctx.Abort()
 			return

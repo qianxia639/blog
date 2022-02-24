@@ -1,0 +1,1 @@
+{"level":"INFO","time":"2022-02-21 16:53:22","file":"D:/project/blog/handler/system/sys_user.go:62","message":"用户信息获取成功,{map[string]interface {}{\"avatar\":\"https://picsum.photos/30/30/?image=41\", \"email\":\"qw@qq.com\", \"id\":498137653598752768, \"username\":\"1\"}}"}

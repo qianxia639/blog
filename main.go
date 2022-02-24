@@ -1,42 +1,48 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
 
 	"github.com/qianxia/blog/global"
-	"github.com/qianxia/blog/initialize"
 	"github.com/qianxia/blog/routers"
-	"github.com/qianxia/blog/utils"
-	"go.uber.org/zap"
-	"gopkg.in/yaml.v2"
 )
 
 func main() {
 	// 初始化路由
-	r := routers.Init()
-	// 加载log日志
-	global.RY_LOG = utils.InitLogger(global.RY_INFO_PATH, global.RY_WARN_PATH, zap.InfoLevel)
+	router := routers.Init()
+	// 加载配置信息
+	db := routers.Load()
 	defer global.RY_LOG.Sync()
+	defer db.Close()
 
-	// 读取yaml配置文件
-	dc, y := utils.DeCode()
-	yaml.Unmarshal(dc, &y)
-
-	// 加载MySQL配置信息
-	global.RY_DB = utils.InitDb(y)
-	if global.RY_DB != nil {
-		// 初始化表
-		initialize.RegisterTables(global.RY_DB)
-		db, _ := global.RY_DB.DB()
-		// 关闭mysql连接
-		defer db.Close()
-	}
-
-	if y.Server.Port != -1 {
-		panic(r.Run(fmt.Sprintf("%s:%d", y.Server.Host, y.Server.Port)))
+	srv := &http.Server{
+		Addr:           fmt.Sprintf("%s:%d", global.RY_YAML_CONFIG.Server.Host, global.RY_YAML_CONFIG.Server.Port),
+		Handler:        router,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
 	}
 
 	go func() {
-		panic(r.Run())
+		// 服务连接
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			global.RY_LOG.Fatalf("listen: %s\n", err)
+		}
 	}()
+
+	// 等待中断信号关闭服务器(设置5秒超时时间)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		global.RY_LOG.Fatal("Server Shutdown: ", err)
+	}
 }
