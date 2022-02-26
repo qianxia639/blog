@@ -1,5 +1,7 @@
 package example
 
+import "sync"
+
 type ExampleRouterGroup struct {
 	BlogHandler
 	TypeHandler
@@ -7,11 +9,14 @@ type ExampleRouterGroup struct {
 	ArchiveHandler
 }
 
-var exampleRouterGroups *ExampleRouterGroup
+var exampleRouterGroups = new(ExampleRouterGroup)
+var once sync.Once
 
 func GetInstance() *ExampleRouterGroup {
-	if exampleRouterGroups == nil {
-		exampleRouterGroups = &ExampleRouterGroup{}
-	}
+	once.Do(func() {
+		if exampleRouterGroups == nil {
+			exampleRouterGroups = &ExampleRouterGroup{}
+		}
+	})
 	return exampleRouterGroups
 }

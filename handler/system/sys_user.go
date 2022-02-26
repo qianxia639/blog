@@ -87,22 +87,26 @@ func (uh UserHandler) UpdateUsername(ctx *gin.Context) {
 // 更改头像
 
 // 找回密码
+// func (uh UserHandler) RetrievePassword(ctx *gin.Context) {
+// 	email := ctx.Param("email")
+// 	uh.userService.RetrievePassword(email, "")
+// }
 
 // 修改密码
-func (uh UserHandler) UpdatePassword(ctx *gin.Context) {
-	var m map[string]string
-	userInfo := ctx.MustGet("user")
+// func (uh UserHandler) UpdatePassword(ctx *gin.Context) {
+// 	var m map[string]string
+// 	userInfo := ctx.MustGet("user")
 
-	if err := ctx.ShouldBindJSON(&m); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warnf("%s-{%v}", "数据绑定失败", err)
-		return
-	}
+// 	if err := ctx.ShouldBindJSON(&m); err != nil {
+// 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+// 		global.RY_LOG.Warnf("%s-{%v}", "数据绑定失败", err)
+// 		return
+// 	}
 
-	if err := uh.userService.UpdatePassword(m, userInfo.(model.User)); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warnf("%v", err)
-		return
-	}
-	command.Success(ctx, "修改成功", nil)
-}
+// 	if err := uh.userService.UpdatePassword(m, userInfo.(model.User)); err != nil {
+// 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+// 		global.RY_LOG.Warnf("%v", err)
+// 		return
+// 	}
+// 	command.Success(ctx, "修改成功", nil)
+// }

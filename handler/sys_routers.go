@@ -19,7 +19,7 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		// 修改名称
 		userGroup.PUT("/updateName", system.GetInstance().UpdateUsername)
 		// 修改密码
-		userGroup.PUT("/updatePwd", system.GetInstance().UpdatePassword)
+		// userGroup.PUT("/updatePwd", system.GetInstance().UpdatePassword)
 	}
 	//  ========== search router group ==========
 

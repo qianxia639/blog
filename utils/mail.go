@@ -19,7 +19,6 @@ func SendMail(content string, to ...string) {
 		global.RY_YAML_CONFIG.Mail.Password)
 	if err := d.DialAndSend(msg); err != nil {
 		global.RY_LOG.Errorf("%s", err.Error())
-		return
 	}
 	msg.Reset()
 }

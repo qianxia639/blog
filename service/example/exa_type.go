@@ -55,7 +55,7 @@ func (ts *TypeService) TypeList(id int) ([]response.Index, error) {
 			Id:        fmt.Sprintf("%v", v.Id),
 			Title:     v.Title,
 			Content:   utils.De([]byte(v.Content)),
-			UpdatedAt: utils.TimestampToTime(v.UpdatedAt),
+			UpdatedAt: utils.TimestampToString(v.UpdatedAt),
 			TypeName:  types.TypeName,
 			Avatar:    users.Avatar,
 			Username:  users.Username,

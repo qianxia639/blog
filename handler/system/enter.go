@@ -1,16 +1,21 @@
 package system
 
+import "sync"
+
 type SystemRouterGroup struct {
 	UserHandler
 	SearchHandler
 }
 
-var systemRouterGroups *SystemRouterGroup
+var systemRouterGroups = new(SystemRouterGroup)
+var once sync.Once
 
 // 单例对象(懒加载)
 func GetInstance() *SystemRouterGroup {
-	if systemRouterGroups == nil {
-		systemRouterGroups = &SystemRouterGroup{}
-	}
+	once.Do(func() {
+		if systemRouterGroups == nil {
+			systemRouterGroups = &SystemRouterGroup{}
+		}
+	})
 	return systemRouterGroups
 }

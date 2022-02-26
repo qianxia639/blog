@@ -8,7 +8,7 @@ mysql:
   dbname: blog
   username: root
   password: qianxia
-  charset: utf8
+  charset: utf8mb4
   loc: Asia/Shanghai
 redis:
   host: localhost

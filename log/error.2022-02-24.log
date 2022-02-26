@@ -1,0 +1,1 @@
+{"level":"FATAL","time":"2022-02-24 10:49:30","file":"D:/project/blog/initialize/gorm.go:21","message":"表自动迁移失败,err: Error 1075: Incorrect table definition; there can be only one auto column and it must be defined as a key"}

@@ -101,3 +101,15 @@ func (bh BlogHandler) LatestList(ctx *gin.Context) {
 	}
 	command.Success(ctx, "查询成功", gin.H{"latestList": list})
 }
+
+// 根据id获取博客信息
+func (bh BlogHandler) GetBlog(ctx *gin.Context) {
+	blogId, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
+	if blogs, err := bh.blogService.GetBlog(blogId); err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		global.RY_LOG.Error(err)
+		return
+	} else {
+		command.Success(ctx, "查询成功", gin.H{"blogs": blogs})
+	}
+}

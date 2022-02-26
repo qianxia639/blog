@@ -118,7 +118,7 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 			Id:        fmt.Sprintf("%v", v.Id),
 			Title:     v.Title,
 			Content:   utils.De([]byte(v.Content)),
-			UpdatedAt: utils.TimestampToTime(v.UpdatedAt),
+			UpdatedAt: utils.TimestampToString(v.UpdatedAt),
 			TypeName:  types.TypeName,
 			Avatar:    users.Avatar,
 			Username:  users.Username,
@@ -163,4 +163,38 @@ func (bs BlogService) Delete(id int64) error {
 	tx.Commit()
 
 	return nil
+}
+
+// 获取博客信息
+func (bs BlogService) GetBlog(id int64) (map[string]interface{}, error) {
+
+	var b model.Blog
+	if err := global.RY_DB.Debug().Select("id,user_id,type_id,title,content,flag,were,share_statement,enable_comment,views,updated_at").Preload("Tags").Where("id = ?", id).Find(&b).Error; err != nil {
+		return nil, errors.New("查询失败")
+	}
+
+	var users model.User
+	if err := global.RY_DB.Debug().Select("username,avatar").Where("id = ?", b.UserId).Find(&users).Error; err != nil {
+		return nil, errors.New("查询失败")
+	}
+	var types model.Type
+	if err := global.RY_DB.Debug().Select("type_name").Where("id = ?", b.TypeId).Find(&types).Error; err != nil {
+		return nil, errors.New("查询失败")
+	}
+
+	m := make(map[string]interface{}, 11)
+	m["title"] = b.Title
+	m["content"] = b.Content
+	m["flag"] = b.Flag
+	m["were"] = b.Were
+	m["shareStatement"] = b.ShareStatement
+	m["enableComment"] = b.EnableComment
+	m["views"] = b.Views
+	m["updatedAt"] = utils.TimestampToString(b.UpdatedAt)
+	m["username"] = users.Username
+	m["avatar"] = users.Avatar
+	m["typeName"] = types.TypeName
+
+	// 返回
+	return m, nil
 }
