@@ -22,17 +22,15 @@ func (uh UserHandler) Register(ctx *gin.Context) {
 	// command.ShouldBindJSON(ctx, &user)
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warnf("%s-{%v}", "数据绑定失败", err)
+		global.RY_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
 		return
 	}
-	u, err := uh.userService.Register(user)
+	_, err := uh.userService.Register(user)
 
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warn(err)
 		return
 	}
-	global.RY_LOG.Infof("%s,{%v}", "用户注册成功", u)
 	command.Success(ctx, "注册成功", nil)
 }
 
@@ -42,13 +40,12 @@ func (uh UserHandler) Login(ctx *gin.Context) {
 	var form model.User
 	if err := ctx.ShouldBindJSON(&form); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warnf("%s-{%v}", "数据绑定失败", err)
+		global.RY_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
 		return
 	}
 	user, err := uh.userService.Login(form)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warn(err)
 		return
 	}
 	// 生成token
@@ -64,7 +61,6 @@ func (uh UserHandler) Info(ctx *gin.Context) {
 	userMap["username"] = userInfo.(model.User).Username
 	userMap["email"] = userInfo.(model.User).Email
 	userMap["avatar"] = userInfo.(model.User).Avatar
-	global.RY_LOG.Infof("%s,{%v}", "用户信息获取成功", userMap)
 	command.Success(ctx, "信息获取成功", gin.H{"user": userMap})
 }
 
@@ -73,12 +69,11 @@ func (uh UserHandler) UpdateUsername(ctx *gin.Context) {
 	var user model.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warnf("%s-{%v}", "数据绑定失败", err)
+		global.RY_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
 		return
 	}
 	if err := uh.userService.UpdateUsername(user); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warnf("%v", err)
 		return
 	}
 	command.Success(ctx, "修改成功", nil)

@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
-	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/service/example"
 )
 
@@ -19,7 +18,6 @@ func (th TypeHandler) ListOrder(ctx *gin.Context) {
 	types, err := th.typeService.ListOrderByAmountDesc()
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warn(err)
 		return
 	}
 	command.Success(ctx, "查询成功", gin.H{"type": types})
@@ -30,7 +28,6 @@ func (th TypeHandler) List(ctx *gin.Context) {
 	types, err := th.typeService.List()
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warn(err)
 		return
 	}
 	command.Success(ctx, "查询成功", gin.H{"type": types})
@@ -44,7 +41,6 @@ func (th TypeHandler) TypeList(ctx *gin.Context) {
 	typeList, err := th.typeService.TypeList(id)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warn(err)
 		return
 	}
 	command.Success(ctx, "操作成功", gin.H{"typeList": typeList})

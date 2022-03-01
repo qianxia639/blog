@@ -15,7 +15,7 @@ func (*UserService) Register(user model.User) (*model.User, error) {
 	var u model.User
 	if err := global.RY_DB.Debug().Select("email").Where("email = ?", user.Email).Find(&u).Error; err == nil {
 		if u.Email == user.Email {
-			global.RY_LOG.Warnf("%s", "重复的邮箱")
+			global.RY_LOG.Error("%s-{%v}", "重复的邮箱", err)
 			return nil, errors.New("邮箱已注册")
 		}
 	}
@@ -31,7 +31,7 @@ func (*UserService) Register(user model.User) (*model.User, error) {
 	}
 
 	if err := global.RY_DB.Debug().Create(&newUser).Error; err != nil {
-		global.RY_LOG.Errorf("%s, %v", "注册失败", err)
+		global.RY_LOG.Errorf("%s-{%v}", "注册失败", err)
 		return nil, errors.New("用户注册失败")
 	}
 	return &newUser, nil
@@ -43,7 +43,7 @@ func (*UserService) Login(user model.User) (*model.User, error) {
 	// 判断用户名是否存在
 	if err := global.RY_DB.Debug().Select("id,username,password,email,avatar").Where("email = ?", user.Email).Find(&u).Error; err == nil {
 		if u.Email != user.Email {
-			global.RY_LOG.Warnf("%s", "不存在的账户")
+			global.RY_LOG.Error("%s-{%v}", "不存在的账户", err)
 			return nil, errors.New("账户不存在")
 		}
 	}
@@ -60,12 +60,12 @@ func (*UserService) UpdateUsername(user model.User) error {
 	var u model.User
 	if err := global.RY_DB.Debug().Select("id,username").Where("username = ?", user.Username).Find(&u).Error; err == nil {
 		if u.Username == user.Username {
-			global.RY_LOG.Warnf("%s", "上一次的用户名")
+			global.RY_LOG.Error("%s-{%v}", "上一次的用户名", err)
 			return errors.New("不能更改为当前用户名")
 		}
 	}
 	if err := global.RY_DB.Debug().Model(&u).Where("id = ?", user.Id).Update("username", user.Username).Error; err != nil {
-		global.RY_LOG.Warnf("%s", err)
+		global.RY_LOG.Error("%s", err)
 		return errors.New("用户名修改失败")
 	}
 	return nil

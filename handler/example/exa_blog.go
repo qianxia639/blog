@@ -21,7 +21,7 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	var post request.Post
 	if err := ctx.ShouldBindJSON(&post); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, "数据绑定失败")
-		global.RY_LOG.Warnf("%s-{%v}", "数据绑定失败", err)
+		global.RY_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
 		return
 	}
 	// 获取登录的用户信息
@@ -31,7 +31,6 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	err := bh.blogService.Save(post)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warn(err)
 		return
 	}
 	command.Success(ctx, "操作成功", nil)
@@ -41,13 +40,29 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 func (bh BlogHandler) BlogList(ctx *gin.Context) {
 	// 获取登录的用户信息
 	userInfo := ctx.MustGet("user")
-	blogs, err := bh.blogService.List(userInfo.(model.User).Id)
+
+	pageSize, _ := strconv.Atoi(ctx.Query("paginate"))
+	pageNo, _ := strconv.Atoi(ctx.Query("page"))
+	offset := (pageNo - 1) * pageSize
+
+	pageMap := make(map[string]int, 3)
+	pageMap["pageSize"] = pageSize
+	pageMap["pageNo"] = pageNo
+	pageMap["offset"] = offset
+
+	switch {
+	case pageMap["pageSize"] == 0:
+		pageMap["pageSize"] = 5
+	case pageMap["pageNo"] == 0:
+		pageMap["pageNo"] = 1
+	}
+
+	blogs, err := bh.blogService.List(userInfo.(model.User).Id, pageMap)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warn(err)
 		return
 	}
-	command.Success(ctx, "查询成功", gin.H{"blog": blogs})
+	command.Success(ctx, "查询成功", gin.H{"pageList": blogs})
 }
 
 // 个人博客删除
@@ -58,7 +73,6 @@ func (bh BlogHandler) DeleteBlog(ctx *gin.Context) {
 	err := bh.blogService.Delete(id)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warn(err)
 		return
 	}
 	command.Success(ctx, "操作成功", nil)
@@ -67,8 +81,14 @@ func (bh BlogHandler) DeleteBlog(ctx *gin.Context) {
 // 查询博客显示在首页并分页
 func (bh BlogHandler) BlogPageList(ctx *gin.Context) {
 
-	pageMap := make(map[string]int, 5)
-	ctx.ShouldBindJSON(&pageMap)
+	pageSize, _ := strconv.Atoi(ctx.Query("paginate"))
+	pageNo, _ := strconv.Atoi(ctx.Query("page"))
+	offset := (pageNo - 1) * pageSize
+
+	pageMap := make(map[string]int, 3)
+
+	pageMap["pageSize"] = pageSize
+	pageMap["pageNo"] = pageNo
 
 	switch {
 	case pageMap["pageSize"] == 0:
@@ -76,19 +96,16 @@ func (bh BlogHandler) BlogPageList(ctx *gin.Context) {
 	case pageMap["pageNo"] == 0:
 		pageMap["pageNo"] = 1
 	}
-
-	skipCount := (pageMap["pageNo"] - 1) * pageMap["pageSize"]
-	pageMap["skipCount"] = skipCount
+	pageMap["offset"] = offset
 
 	pageList, err := bh.blogService.PageList(pageMap)
 
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warn(err)
 		return
 	}
 
-	command.Success(ctx, "查询成功", gin.H{"dataList": pageList})
+	command.Success(ctx, "查询成功", gin.H{"pageList": pageList})
 }
 
 // 最新推荐
@@ -96,7 +113,6 @@ func (bh BlogHandler) LatestList(ctx *gin.Context) {
 	list, err := bh.blogService.LatestList()
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Warn(err)
 		return
 	}
 	command.Success(ctx, "查询成功", gin.H{"latestList": list})
@@ -107,9 +123,18 @@ func (bh BlogHandler) GetBlog(ctx *gin.Context) {
 	blogId, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
 	if blogs, err := bh.blogService.GetBlog(blogId); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Error(err)
 		return
 	} else {
 		command.Success(ctx, "查询成功", gin.H{"blogs": blogs})
 	}
+}
+
+func (bh BlogHandler) UpdateLikes(ctx *gin.Context) {
+
+	blogId, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
+	if err := bh.blogService.UpdateLikes(blogId); err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, "失败")
+		return
+	}
+	command.Success(ctx, "成功", nil)
 }

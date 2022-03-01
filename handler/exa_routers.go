@@ -20,8 +20,10 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 		blogGroup.DELETE("/:id", example.GetInstance().DeleteBlog)
 		// 最新推荐(按更新时间降序排列)
 		blogGroup.GET("/latestList", example.GetInstance().LatestList)
-		//
+		// 获取博客信息
 		blogGroup.GET("/:id", example.GetInstance().GetBlog)
+		// 更新点赞数
+		blogGroup.PUT("/:id", example.GetInstance().UpdateLikes)
 	}
 
 	//  ========== type router group ==========
