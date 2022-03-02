@@ -2,9 +2,9 @@ package model
 
 type Blog struct {
 	// 主键
-	Id int64 `json:"id"`
+	Id int64 `json:"id" gorm:"primaryKey"`
 	// 用户id，
-	UserId int64 `json:"userId" gorm:"NOT NULL"`
+	UserId uint64 `json:"userId" gorm:"NOT NULL"`
 	// 分类id
 	TypeId uint8 `json:"typeId" gorm:"NOT NULL"`
 	// 标题

@@ -2,7 +2,6 @@ server:
   port: 6754
   host: localhost
 mysql:
-  driver_name: mysql
   host: 127.0.0.1
   port: 3306
   dbname: blog
@@ -13,8 +12,3 @@ mysql:
 redis:
   host: localhost
   port: 6379
-mail:
-  host: smtp.qq.com
-  port: 465
-  username: 2274000859@qq.com
-  password: mlgtpvckxvpaebje

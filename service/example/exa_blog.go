@@ -76,7 +76,7 @@ func (bs BlogService) Save(post request.Post) error {
 }
 
 // 个人博客列表展示
-func (bs BlogService) List(id int64, page map[string]int) (*response.PageList, error) {
+func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
 	if err := global.RY_DB.Debug().Select("id,title,updated_at").Where("user_id = ?", id).Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Count(&total).Error; err != nil {
@@ -138,7 +138,7 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 		index := response.Index{
 			Id:        fmt.Sprintf("%v", v.Id),
 			Title:     v.Title,
-			Content:   utils.De([]byte(v.Content)),
+			Content:   v.Content,
 			UpdatedAt: utils.TimestampToString(v.UpdatedAt),
 			TypeName:  types.TypeName,
 			Avatar:    users.Avatar,

@@ -16,7 +16,7 @@ type UserHandler struct {
 }
 
 // 注册
-func (uh UserHandler) Register(ctx *gin.Context) {
+func (uh *UserHandler) Register(ctx *gin.Context) {
 	var user model.User
 	// 绑定表单数据
 	// command.ShouldBindJSON(ctx, &user)
@@ -35,7 +35,7 @@ func (uh UserHandler) Register(ctx *gin.Context) {
 }
 
 // 登录
-func (uh UserHandler) Login(ctx *gin.Context) {
+func (uh *UserHandler) Login(ctx *gin.Context) {
 	// 绑定表单参数
 	var form model.User
 	if err := ctx.ShouldBindJSON(&form); err != nil {
@@ -49,12 +49,12 @@ func (uh UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 	// 生成token
-	token := utils.CreateToken(user.Id)
+	token := utils.CreateToken(user.Email)
 	command.Success(ctx, "登录成功", gin.H{"token": token})
 }
 
 // 获取用户信息
-func (uh UserHandler) Info(ctx *gin.Context) {
+func (uh *UserHandler) Info(ctx *gin.Context) {
 	userInfo := ctx.MustGet("user")
 	userMap := make(map[string]interface{}, 1)
 	userMap["id"] = userInfo.(model.User).Id
@@ -65,7 +65,7 @@ func (uh UserHandler) Info(ctx *gin.Context) {
 }
 
 // 修改名字
-func (uh UserHandler) UpdateUsername(ctx *gin.Context) {
+func (uh *UserHandler) UpdateUsername(ctx *gin.Context) {
 	var user model.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())

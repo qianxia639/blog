@@ -2,7 +2,7 @@ package request
 
 type Post struct {
 	TypeId      uint8  `json:"typeId"`
-	UserId      int64  `json:"userId"`
+	UserId      uint64 `json:"userId"`
 	Description string `json:"description"`
 	Title       string `json:"title"`
 	Content     string `json:"content"`

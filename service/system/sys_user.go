@@ -13,25 +13,23 @@ type UserService struct{}
 // 注册
 func (*UserService) Register(user model.User) (*model.User, error) {
 	var u model.User
+
 	if err := global.RY_DB.Debug().Select("email").Where("email = ?", user.Email).Find(&u).Error; err == nil {
 		if u.Email == user.Email {
-			global.RY_LOG.Error("%s-{%v}", "重复的邮箱", err)
 			return nil, errors.New("邮箱已注册")
 		}
 	}
 
 	// 对明文进行加密处理
-	newPassword, _ := utils.Enbcrypt(user.Password)
+	newPassword := utils.Md5([]byte(user.Password))
 	// 创建用户
 	newUser := model.User{
-		Id:       utils.NextId(),
 		Username: user.Email,
 		Email:    user.Email,
-		Password: string(newPassword),
+		Password: newPassword,
 	}
 
 	if err := global.RY_DB.Debug().Create(&newUser).Error; err != nil {
-		global.RY_LOG.Errorf("%s-{%v}", "注册失败", err)
 		return nil, errors.New("用户注册失败")
 	}
 	return &newUser, nil
@@ -40,18 +38,24 @@ func (*UserService) Register(user model.User) (*model.User, error) {
 // 登录
 func (*UserService) Login(user model.User) (*model.User, error) {
 	var u model.User
+
 	// 判断用户名是否存在
-	if err := global.RY_DB.Debug().Select("id,username,password,email,avatar").Where("email = ?", user.Email).Find(&u).Error; err == nil {
+	if err := global.RY_DB.Debug().Select("email,password").Where("email = ?", user.Email).Find(&u).Error; err == nil {
 		if u.Email != user.Email {
-			global.RY_LOG.Error("%s-{%v}", "不存在的账户", err)
-			return nil, errors.New("账户不存在")
+			return nil, errors.New("用户名不存在")
 		}
 	}
-	// 校验密码
-	if err := utils.Debcrypt(u.Password, user.Password); err != nil {
-		global.RY_LOG.Error(err)
+
+	// 匹配密码
+	if u.Password != utils.Md5([]byte(user.Password)) {
 		return nil, errors.New("密码错误")
 	}
+
+	// 匹配用户名和密码
+	if err := global.RY_DB.Debug().Select("id,username,email,avatar").Where("email = ? AND password = ?", u.Email, u.Password).Find(&u).Error; err != nil {
+		return nil, errors.New("用户名或密码错误")
+	}
+
 	return &u, nil
 }
 

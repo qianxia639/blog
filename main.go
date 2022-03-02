@@ -15,6 +15,7 @@ import (
 func main() {
 	// 初始化路由
 	router := routers.Init()
+
 	// 加载配置信息
 	db := routers.Load()
 	defer global.RY_LOG.Sync()

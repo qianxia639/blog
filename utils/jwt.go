@@ -4,24 +4,23 @@ import (
 	"errors"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/qianxia/blog/global"
 )
 
-type Claims struct {
-	UserId int64
-	jwt.StandardClaims
+type CustomClaims struct {
+	Email string `json:"email"`
+	jwt.RegisteredClaims
 }
 
 // 生成token
-func CreateToken(id int64) string {
-	exp := time.Now().Add(7 * 24 * time.Hour)
-	claims := &Claims{
-		UserId: id,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: exp.Unix(), // 过期时间
-			IssuedAt:  time.Now().Unix(),
-			Issuer:    "qianxia",
+func CreateToken(email string) string {
+	claims := &CustomClaims{
+		Email: email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			NotBefore: jwt.NewNumericDate(time.Now()),                         // 生效时间
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)), // 过期时间
+			Issuer:    "qianxia",                                              // 签发人
 		},
 	}
 	tokenStr := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -33,26 +32,27 @@ func CreateToken(id int64) string {
 }
 
 // 解析token
-func ParseJwt(tokenStr string) (*Claims, error) {
-	claims := &Claims{}
-	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
+func ParseToken(tokenStr string) (*CustomClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &CustomClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return global.RY_JWT_Key, nil
 	})
 	if err != nil {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-				return nil, errors.New("token格式不正确")
+				return nil, jwt.ErrTokenMalformed
 			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				return nil, errors.New("token已过期")
+				return nil, jwt.ErrTokenExpired
 			} else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
-				return nil, errors.New("无效的token")
+				return nil, jwt.ErrTokenNotValidYet
 			}
 		}
 	}
 	if token != nil {
-		if token.Valid {
+		if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 			return claims, nil
 		}
+		return nil, errors.New("无法解析的token")
+	} else {
+		return nil, errors.New("无法解析的token")
 	}
-	return nil, errors.New("无效的token")
 }
