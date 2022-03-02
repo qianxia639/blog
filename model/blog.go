@@ -2,11 +2,11 @@ package model
 
 type Blog struct {
 	// 主键
-	Id int64 `json:"id" gorm:"primaryKey"`
+	Id uint64 `json:"id" gorm:"primaryKey"`
 	// 用户id，
 	UserId uint64 `json:"userId" gorm:"NOT NULL"`
 	// 分类id
-	TypeId uint8 `json:"typeId" gorm:"NOT NULL"`
+	TypeId uint16 `json:"typeId" gorm:"NOT NULL"`
 	// 标题
 	Title string `json:"title" gorm:"size:20;NOT NULL"`
 	// 描述
@@ -15,14 +15,6 @@ type Blog struct {
 	Content string `json:"content" gorm:"type:text;NOT NULL"`
 	// 标记
 	Flag string `json:"flag" gorm:"type:varchar(10);comment:标记"`
-	// 是否开启点赞
-	Were bool `json:"were" gorm:"comment:是否开启点赞"`
-	// 是否显示转载声明
-	ShareStatement bool `json:"shareStatement" gorm:"comment:是否显示转载声明"`
-	// 是否开启评论
-	EnableComment bool `json:"enableComment" gorm:"comment:是否开启评论"`
-	// 点赞数
-	Likes uint32 `json:"likes" gorm:"comment:点赞数"`
 	// 浏览次数
 	Views uint32 `json:"views" gorm:"comment:浏览次数"`
 	// 创建时间

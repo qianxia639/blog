@@ -21,18 +21,6 @@ type BlogService struct{}
 进行博客新增的数据插入时，不仅要在博客表中新增数据，还要在博客标签表中进行数据的插入
 */
 func (bs BlogService) Save(post request.Post) error {
-	var were, shareStatment, enableComment bool
-
-	// 修改 点赞、转载声明、评论的值
-	for i := 0; i < len(post.Selected); i++ {
-		if post.Selected[i] == "点赞" {
-			were = true
-		} else if post.Selected[i] == "转载声明" {
-			shareStatment = true
-		} else if post.Selected[i] == "评论" {
-			enableComment = true
-		}
-	}
 	// 根据post.tags[]的值查询对应的id
 	tags := make([]model.Tag, 0, 4)
 
@@ -43,17 +31,13 @@ func (bs BlogService) Save(post request.Post) error {
 
 	// 构建数据
 	blog := model.Blog{
-		Id:             utils.NextId(),
-		UserId:         post.UserId,
-		TypeId:         post.TypeId,
-		Title:          post.Title,
-		Description:    post.Description,
-		Content:        post.Content,
-		Flag:           post.Flag,
-		Were:           were,
-		ShareStatement: shareStatment,
-		EnableComment:  enableComment,
-		Tags:           tags,
+		UserId:      post.UserId,
+		TypeId:      post.TypeId,
+		Title:       post.Title,
+		Description: post.Description,
+		Content:     post.Content,
+		Flag:        post.Flag,
+		Tags:        tags,
 	}
 
 	// 开启事务
@@ -118,7 +102,7 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 		// 获取dataList
 		blogs []response.Index
 	)
-	if err := global.RY_DB.Debug().Select("id,user_id,type_id,title,content,updated_at").Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&b).Count(&total).Error; err != nil {
+	if err := global.RY_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&b).Count(&total).Error; err != nil {
 		global.RY_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}
@@ -136,14 +120,14 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 		}
 
 		index := response.Index{
-			Id:        fmt.Sprintf("%v", v.Id),
-			Title:     v.Title,
-			Content:   v.Content,
-			UpdatedAt: utils.TimestampToString(v.UpdatedAt),
-			TypeName:  types.TypeName,
-			Avatar:    users.Avatar,
-			Username:  users.Username,
-			Tags:      v.Tags,
+			Id:          fmt.Sprintf("%v", v.Id),
+			Title:       v.Title,
+			Description: v.Description,
+			UpdatedAt:   utils.TimestampToString(v.UpdatedAt),
+			TypeName:    types.TypeName,
+			Avatar:      users.Avatar,
+			Username:    users.Username,
+			Tags:        v.Tags,
 		}
 		blogs = append(blogs, index)
 	}
@@ -193,10 +177,10 @@ func (bs BlogService) Delete(id int64) error {
 }
 
 // 获取博客信息
-func (bs BlogService) GetBlog(id int64) (map[string]interface{}, error) {
+func (bs BlogService) GetBlog(id uint64) (map[string]interface{}, error) {
 
 	var b model.Blog
-	if err := global.RY_DB.Debug().Select("id,user_id,type_id,title,content,flag,were,share_statement,enable_comment,views,updated_at").Preload("Tags").Where("id = ?", id).Find(&b).Error; err != nil {
+	if err := global.RY_DB.Debug().Select("id,user_id,type_id,title,content,flag,views,updated_at").Preload("Tags").Where("id = ?", id).Find(&b).Error; err != nil {
 		global.RY_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}
@@ -225,9 +209,6 @@ func (bs BlogService) GetBlog(id int64) (map[string]interface{}, error) {
 	m["title"] = b.Title
 	m["content"] = b.Content
 	m["flag"] = b.Flag
-	m["were"] = b.Were
-	m["shareStatement"] = b.ShareStatement
-	m["enableComment"] = b.EnableComment
 	m["views"] = b.Views
 	m["updatedAt"] = utils.TimestampToString(b.UpdatedAt)
 	m["username"] = users.Username
@@ -236,12 +217,4 @@ func (bs BlogService) GetBlog(id int64) (map[string]interface{}, error) {
 
 	// 返回
 	return m, nil
-}
-
-func (bs BlogService) UpdateLikes(id int64) error {
-	if err := global.RY_DB.Debug().Model(&model.Blog{Id: id}).Update("likes", gorm.Expr("likes + ?", 1)).Error; err != nil {
-		global.RY_LOG.Error(err)
-		return err
-	}
-	return nil
 }

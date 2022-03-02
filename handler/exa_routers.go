@@ -22,8 +22,6 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 		blogGroup.GET("/latestList", example.GetInstance().LatestList)
 		// 获取博客信息
 		blogGroup.GET("/:id", example.GetInstance().GetBlog)
-		// 更新点赞数
-		blogGroup.PUT("/:id", example.GetInstance().UpdateLikes)
 	}
 
 	//  ========== type router group ==========

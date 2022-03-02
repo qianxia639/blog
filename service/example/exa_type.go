@@ -40,7 +40,7 @@ func (ts *TypeService) TypeList(id int) ([]response.Index, error) {
 		// 获取dataList
 		blogs []response.Index
 	)
-	if err := global.RY_DB.Debug().Select("id,user_id,type_id,title,content,updated_at").Preload("Tags").Where("type_id = ?", id).Find(&b).Count(&total).Error; err != nil {
+	if err := global.RY_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Where("type_id = ?", id).Find(&b).Count(&total).Error; err != nil {
 		global.RY_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}
@@ -57,14 +57,14 @@ func (ts *TypeService) TypeList(id int) ([]response.Index, error) {
 			return nil, errors.New("查询失败")
 		}
 		index := response.Index{
-			Id:        fmt.Sprintf("%v", v.Id),
-			Title:     v.Title,
-			Content:   v.Content,
-			UpdatedAt: utils.TimestampToString(v.UpdatedAt),
-			TypeName:  types.TypeName,
-			Avatar:    users.Avatar,
-			Username:  users.Username,
-			Tags:      v.Tags,
+			Id:          fmt.Sprintf("%v", v.Id),
+			Title:       v.Title,
+			Description: v.Description,
+			UpdatedAt:   utils.TimestampToString(v.UpdatedAt),
+			TypeName:    types.TypeName,
+			Avatar:      users.Avatar,
+			Username:    users.Username,
+			Tags:        v.Tags,
 		}
 		blogs = append(blogs, index)
 	}

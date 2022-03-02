@@ -121,20 +121,10 @@ func (bh BlogHandler) LatestList(ctx *gin.Context) {
 // 根据id获取博客信息
 func (bh BlogHandler) GetBlog(ctx *gin.Context) {
 	blogId, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
-	if blogs, err := bh.blogService.GetBlog(blogId); err != nil {
+	if blogs, err := bh.blogService.GetBlog(uint64(blogId)); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	} else {
 		command.Success(ctx, "查询成功", gin.H{"blogs": blogs})
 	}
-}
-
-func (bh BlogHandler) UpdateLikes(ctx *gin.Context) {
-
-	blogId, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
-	if err := bh.blogService.UpdateLikes(blogId); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, "失败")
-		return
-	}
-	command.Success(ctx, "成功", nil)
 }
