@@ -214,6 +214,7 @@ func (bs BlogService) GetBlog(id uint64) (map[string]interface{}, error) {
 	m["username"] = users.Username
 	m["avatar"] = users.Avatar
 	m["typeName"] = types.TypeName
+	m["tagNames"] = b.Tags
 
 	// 返回
 	return m, nil

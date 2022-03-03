@@ -15,7 +15,7 @@ type TypeService struct{}
 // 查詢type列表，按amount降序排列
 func (ts *TypeService) ListOrderByAmountDesc() ([]model.Type, error) {
 	types := make([]model.Type, 0, 4)
-	if err := global.RY_DB.Debug().Select("id,type_name,amount").Order("amount DESC").Find(&types).Error; err != nil {
+	if err := global.RY_DB.Debug().Select("id,type_name,amount").Preload("Blogs").Order("amount DESC").Find(&types).Error; err != nil {
 		global.RY_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}

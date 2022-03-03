@@ -5,26 +5,27 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/qianxia/blog/global"
 )
 
+var jwtKey = []byte("lyyBlog")
+
 type CustomClaims struct {
-	Email string `json:"email"`
+	Username string
 	jwt.RegisteredClaims
 }
 
 // 生成token
-func CreateToken(email string) string {
+func CreateToken(username string) string {
 	claims := &CustomClaims{
-		Email: email,
+		Username: username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			NotBefore: jwt.NewNumericDate(time.Now()),                         // 生效时间
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)), // 过期时间
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(2 * 24 * time.Hour)), // 过期时间
 			Issuer:    "qianxia",                                              // 签发人
 		},
 	}
 	tokenStr := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token, err := tokenStr.SignedString(global.RY_JWT_Key)
+	token, err := tokenStr.SignedString(jwtKey)
 	if err != nil {
 		panic(err)
 	}
@@ -34,7 +35,7 @@ func CreateToken(email string) string {
 // 解析token
 func ParseToken(tokenStr string) (*CustomClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &CustomClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return global.RY_JWT_Key, nil
+		return jwtKey, nil
 	})
 	if err != nil {
 		if ve, ok := err.(*jwt.ValidationError); ok {

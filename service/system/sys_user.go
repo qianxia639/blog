@@ -52,11 +52,12 @@ func (*UserService) Login(user model.User) (*model.User, error) {
 	}
 
 	// 匹配用户名和密码
-	if err := global.RY_DB.Debug().Select("id,username,email,avatar").Where("email = ? AND password = ?", u.Email, u.Password).Find(&u).Error; err != nil {
+	var u1 model.User
+	if err := global.RY_DB.Debug().Select("id,username,avatar").Where("email = ? AND password = ?", u.Email, u.Password).Find(&u1).Error; err != nil {
 		return nil, errors.New("用户名或密码错误")
 	}
 
-	return &u, nil
+	return &u1, nil
 }
 
 // 修改名称

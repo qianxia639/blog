@@ -10,7 +10,6 @@ import (
 
 var (
 	RY_DB          *gorm.DB
-	RY_JWT_Key     = []byte("l_ruo_yu_y_y")
 	RY_LOG         *zap.SugaredLogger
 	RY_YAML_CONFIG *config.Config
 )
