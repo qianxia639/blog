@@ -1,6 +1,7 @@
 server:
   port: 6754
   host: localhost
+
 mysql:
   host: 127.0.0.1
   port: 3306
@@ -9,6 +10,7 @@ mysql:
   password: qianxia
   charset: utf8mb4
   loc: Asia/Shanghai
+  
 redis:
-  host: localhost
+  host: 192.168.211.129
   port: 6379

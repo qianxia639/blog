@@ -18,10 +18,4 @@ type Config struct {
 		Port int    `yaml:"port"`
 		Host string `yaml:"host"`
 	}
-	Mail struct {
-		Port     int    `yaml:"port"`
-		Host     string `yaml:"host"`
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
-	}
 }

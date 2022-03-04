@@ -196,13 +196,10 @@ func (bs BlogService) GetBlog(id uint64) (map[string]interface{}, error) {
 		return nil, errors.New("查询失败")
 	}
 
-	tx := global.RY_DB.Begin()
-	if err := tx.Debug().Model(&model.Blog{Id: id}).Update("views", gorm.Expr("views + 1")).Error; err != nil {
+	if err := global.RY_DB.Debug().Model(&model.Blog{Id: id}).Update("views", gorm.Expr("views + 1")).Error; err != nil {
 		global.RY_LOG.Error(err)
-		tx.Rollback()
 		return nil, err
 	}
-	tx.Commit()
 
 	m := make(map[string]interface{}, 11)
 	m["id"] = fmt.Sprintf("%v", id)

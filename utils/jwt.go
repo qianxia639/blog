@@ -10,14 +10,20 @@ import (
 var jwtKey = []byte("lyyBlog")
 
 type CustomClaims struct {
-	Username string
+	BaseClaims
 	jwt.RegisteredClaims
 }
 
+type BaseClaims struct {
+	Id       uint64
+	Username string
+	Avatar   string
+}
+
 // 生成token
-func CreateToken(username string) string {
+func CreateToken(baseClaims BaseClaims) (string, error) {
 	claims := &CustomClaims{
-		Username: username,
+		BaseClaims: baseClaims,
 		RegisteredClaims: jwt.RegisteredClaims{
 			NotBefore: jwt.NewNumericDate(time.Now()),                         // 生效时间
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(2 * 24 * time.Hour)), // 过期时间
@@ -27,9 +33,9 @@ func CreateToken(username string) string {
 	tokenStr := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := tokenStr.SignedString(jwtKey)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return token
+	return token, nil
 }
 
 // 解析token

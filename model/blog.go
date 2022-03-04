@@ -12,7 +12,7 @@ type Blog struct {
 	// 描述
 	Description string `json:"description" gorm:"NOT NULL"`
 	// 内容
-	Content string `json:"content" gorm:"type:text;NOT NULL"`
+	Content string `json:"content" gorm:"type:longtext;NOT NULL"`
 	// 标记
 	Flag string `json:"flag" gorm:"type:varchar(10);comment:标记"`
 	// 浏览次数

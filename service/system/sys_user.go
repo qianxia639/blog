@@ -10,7 +10,9 @@ import (
 
 type UserService struct{}
 
-// 注册
+/**
+* 注册
+ */
 func (*UserService) Register(user model.User) (*model.User, error) {
 	var u model.User
 
@@ -35,7 +37,9 @@ func (*UserService) Register(user model.User) (*model.User, error) {
 	return &newUser, nil
 }
 
-// 登录
+/**
+* 登录
+ */
 func (*UserService) Login(user model.User) (*model.User, error) {
 	var u model.User
 
@@ -60,7 +64,20 @@ func (*UserService) Login(user model.User) (*model.User, error) {
 	return &u1, nil
 }
 
-// 修改名称
+/**
+* 获取用户信息
+ */
+func (*UserService) GetUserInfo(id uint64) (*model.User, error) {
+	var user model.User
+	if err := global.RY_DB.Debug().Select("id,username,avatar").Where("id = ?", id).Find(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+/**
+* 修改用户名
+ */
 func (*UserService) UpdateUsername(user model.User) error {
 	var u model.User
 	if err := global.RY_DB.Debug().Select("id,username").Where("username = ?", user.Username).Find(&u).Error; err == nil {
@@ -75,38 +92,3 @@ func (*UserService) UpdateUsername(user model.User) error {
 	}
 	return nil
 }
-
-// 修改密码
-// func (*UserService) UpdatePassword(m map[string]string, user model.User) error {
-// 	if err := utils.Debcrypt(user.Password, m["oldPwd"]); err != nil {
-// 		return errors.New("密码错误")
-// 	}
-
-// 	global.RY_DB.Debug().Model(&user).Where("id = ?", user.Id).Update("password", m["latestPwd"])
-// 	return nil
-// }
-
-// 找回密码
-// func (*UserService) RetrievePassword(email, password string) error {
-// 	var u model.User
-// 	if err := global.RY_DB.Debug().Select("id,password,enail").Where("email = ?", email).Find(&u); err == nil {
-// 		if u.Email != email {
-// 			return errors.New("邮箱不存在或填写错误")
-// 		}
-// 	}
-// 	// 发送邮件
-// 	go func() {
-// 		utils.SendMail("", u.Email)
-// 	}()
-
-// 	// 校验密码是否与已知密码一致
-// 	if err := utils.Debcrypt(u.Password, password); err == nil {
-// 		return errors.New("新密码不能与旧密码相同")
-// 	}
-// 	// 更改密码
-// 	newPassword, _ := utils.Enbcrypt(password)
-// 	if err := global.RY_DB.Debug().Model(&u).Where("id = ?", u.Id).Update("password", string(newPassword)).Error; err != nil {
-// 		return errors.New("密码修改失败")
-// 	}
-// 	return nil
-// }

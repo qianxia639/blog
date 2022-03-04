@@ -25,10 +25,11 @@ func (ts *TypeService) ListOrderByAmountDesc() ([]model.Type, error) {
 // 只显示分类列表不排序
 func (ts *TypeService) List() ([]model.Type, error) {
 	types := make([]model.Type, 0, 10)
-	if err := global.RY_DB.Debug().Select("id,type_name,amount").Find(&types).Error; err != nil {
+	if err := global.RY_DB.Debug().Select("id,type_name,amount").Preload("Blogs").Preload("Blogs.Tags").Find(&types).Error; err != nil {
 		global.RY_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}
+	global.RY_LOG.Info(types)
 	return types, nil
 }
 

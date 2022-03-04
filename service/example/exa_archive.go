@@ -10,29 +10,26 @@ import (
 
 type ArchiveService struct{}
 
-func (*ArchiveService) GetArchiveGroupByYear() (map[string][]response.Archive, int64, error) {
+func (*ArchiveService) GetArchiveGroupByYear() (m map[string][]response.Archive, total int64, err error) {
 
-	var (
-		total    int64
-		archives []response.Archive
-	)
+	var archives []response.Archive
 
 	var years []string
-	m := make(map[string][]response.Archive)
-	if err := global.RY_DB.Debug().Raw("SELECT FROM_UNIXTIME(updated_at, '%Y') AS year FROM ry_blog GROUP By year ORDER BY year DESC").Scan(&years).Error; err != nil {
+	m = make(map[string][]response.Archive)
+	if err = global.RY_DB.Debug().Raw("SELECT FROM_UNIXTIME(updated_at, '%Y') AS year FROM ry_blog GROUP By year ORDER BY year DESC").Scan(&years).Error; err != nil {
 		global.RY_LOG.Errorf("%s", err)
 		return nil, 0, errors.New("失败1")
 	}
 
 	for _, year := range years {
-		if err := global.RY_DB.Debug().Raw("SELECT id,title,updated_at,flag FROM ry_blog WHERE FROM_UNIXTIME(updated_at, '%Y') = ?", year).Scan(&archives).Error; err != nil {
+		if err = global.RY_DB.Debug().Raw("SELECT id,title,updated_at,flag FROM ry_blog WHERE FROM_UNIXTIME(updated_at, '%Y') = ?", year).Scan(&archives).Error; err != nil {
 			global.RY_LOG.Errorf("%s", err)
 			return nil, 0, errors.New("失败2")
 		}
-		m[year+"年"] = archives
+		m[year] = archives
 	}
 
-	if err := global.RY_DB.Model(&model.Blog{}).Count(&total).Error; err != nil {
+	if err = global.RY_DB.Model(&model.Blog{}).Count(&total).Error; err != nil {
 		global.RY_LOG.Errorf("%s", err)
 		return nil, 0, errors.New("失败3")
 	}

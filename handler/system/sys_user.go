@@ -15,7 +15,9 @@ type UserHandler struct {
 	userService system.UserService
 }
 
-// 注册
+/**
+* 注册
+ */
 func (uh *UserHandler) Register(ctx *gin.Context) {
 	var user model.User
 	// 绑定表单数据
@@ -33,7 +35,9 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 	command.Success(ctx, "注册成功", nil)
 }
 
-// 登录
+/**
+* 登录
+ */
 func (uh *UserHandler) Login(ctx *gin.Context) {
 	// 绑定表单参数
 	var form model.User
@@ -46,25 +50,44 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
+	} else {
+		uh.createToken(ctx, *user)
 	}
-	// 生成token
-	token := utils.CreateToken(user.Username)
-	command.Success(ctx, "登录成功", gin.H{"token": token})
 }
 
-// 获取用户信息
+// 登录后签发token
+func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
+	bc := utils.BaseClaims{
+		Id:       user.Id,
+		Username: user.Username,
+		Avatar:   user.Avatar,
+	}
+	if token, err := utils.CreateToken(bc); err != nil {
+		global.RY_LOG.Error("token生成失败!", err)
+		command.Failed(ctx, http.StatusInternalServerError, "获取token失败")
+		return
+	} else {
+		command.Success(ctx, "登录成功", gin.H{"token": token})
+	}
+
+}
+
+/**
+* 获取用户信息
+ */
 func (uh *UserHandler) Info(ctx *gin.Context) {
-	userInfo := ctx.MustGet("user")
-
-	userMap := make(map[string]interface{})
-	userMap["id"] = userInfo.(model.User).Id
-	userMap["username"] = userInfo.(model.User).Username
-	userMap["avatar"] = userInfo.(model.User).Avatar
-
-	command.Success(ctx, "信息获取成功", gin.H{"user": userMap})
+	userId := utils.GetUserId(ctx)
+	if user, err := uh.userService.GetUserInfo(userId); err != nil {
+		global.RY_LOG.Errorf("用户信息获取失败! - {%s}", err)
+		command.Failed(ctx, http.StatusInternalServerError, "获取失败")
+	} else {
+		command.Success(ctx, "获取成功", gin.H{"user": user})
+	}
 }
 
-// 修改名字
+/**
+* 修改用户名
+ */
 func (uh *UserHandler) UpdateUsername(ctx *gin.Context) {
 	var user model.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
@@ -78,30 +101,3 @@ func (uh *UserHandler) UpdateUsername(ctx *gin.Context) {
 	}
 	command.Success(ctx, "修改成功", nil)
 }
-
-// 更改头像
-
-// 找回密码
-// func (uh UserHandler) RetrievePassword(ctx *gin.Context) {
-// 	email := ctx.Param("email")
-// 	uh.userService.RetrievePassword(email, "")
-// }
-
-// 修改密码
-// func (uh UserHandler) UpdatePassword(ctx *gin.Context) {
-// 	var m map[string]string
-// 	userInfo := ctx.MustGet("user")
-
-// 	if err := ctx.ShouldBindJSON(&m); err != nil {
-// 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-// 		global.RY_LOG.Warnf("%s-{%v}", "数据绑定失败", err)
-// 		return
-// 	}
-
-// 	if err := uh.userService.UpdatePassword(m, userInfo.(model.User)); err != nil {
-// 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-// 		global.RY_LOG.Warnf("%v", err)
-// 		return
-// 	}
-// 	command.Success(ctx, "修改成功", nil)
-// }
