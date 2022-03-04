@@ -6,8 +6,8 @@ import (
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
-	"github.com/qianxia/blog/request"
-	"github.com/qianxia/blog/response"
+	"github.com/qianxia/blog/model/request"
+	"github.com/qianxia/blog/model/response"
 	"github.com/qianxia/blog/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -16,10 +16,8 @@ import (
 type BlogService struct{}
 
 /**
-新增博客
-根据前端所选的额外选项进行相应的变化，
-进行博客新增的数据插入时，不仅要在博客表中新增数据，还要在博客标签表中进行数据的插入
-*/
+* 新增博客
+ */
 func (bs BlogService) Save(post request.Post) error {
 	// 根据post.tags[]的值查询对应的id
 	tags := make([]model.Tag, 0, 4)
@@ -59,7 +57,9 @@ func (bs BlogService) Save(post request.Post) error {
 	return nil
 }
 
-// 个人博客列表展示
+/**
+* 个人博客列表展示
+ */
 func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
@@ -67,11 +67,6 @@ func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, 
 		global.RY_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}
-
-	// if err := global.RY_DB.Debug().Select("id,title,updated_at").Where("user_id = ?", id).Count(&total).Error; err != nil {
-	// 	global.RY_LOG.Error(err)
-	// 	return nil, errors.New("查询失败")
-	// }
 
 	var pageList response.PageList
 	pageList.Total = total
@@ -83,7 +78,9 @@ func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, 
 	return &pageList, nil
 }
 
-// 最新推荐展示
+/**
+* 最新推荐展示
+ */
 func (bs BlogService) LatestList() ([]model.Blog, error) {
 	list := make([]model.Blog, 0, 4)
 	if err := global.RY_DB.Debug().Select("id,title").Order("updated_at DESC").Limit(4).Offset(-1).Find(&list).Error; err != nil {
@@ -93,7 +90,9 @@ func (bs BlogService) LatestList() ([]model.Blog, error) {
 	return list, nil
 }
 
-// 首页博客展示及分页
+/**
+* 首页博客展示及分页
+ */
 func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) {
 	var (
 		// 获取total
@@ -139,14 +138,13 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 	pageList.CurrentPage = page["pageNo"]
 
 	pageList.DataList = blogs
-	// 返回vo
+
 	return &pageList, nil
 }
 
 /**
-博客删除
-删除时除了要删除博客表中的数据以外，还要删除博客标签表中对应的数据
-*/
+* 博客删除
+ */
 func (bs BlogService) Delete(id int64) error {
 	var blog model.Blog
 
@@ -176,7 +174,9 @@ func (bs BlogService) Delete(id int64) error {
 	return nil
 }
 
-// 获取博客信息
+/**
+* 获取博客信息
+ */
 func (bs BlogService) GetBlog(id uint64) (map[string]interface{}, error) {
 
 	var b model.Blog

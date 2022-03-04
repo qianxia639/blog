@@ -5,11 +5,14 @@ import (
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
-	"github.com/qianxia/blog/response"
+	"github.com/qianxia/blog/model/response"
 )
 
 type ArchiveService struct{}
 
+/**
+* 按年份显示全部博客信息
+ */
 func (*ArchiveService) GetArchiveGroupByYear() (m map[string][]response.Archive, total int64, err error) {
 
 	var archives []response.Archive

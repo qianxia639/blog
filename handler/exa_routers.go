@@ -10,18 +10,22 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 	//  ========== blog router group ==========
 	blogGroup := e.Group("/blog")
 	{
-		// 新增博客
-		blogGroup.POST("/save", middleware.Auth(), example.GetInstance().CreateBlog)
-		//个人博客展示
-		blogGroup.GET("/list", middleware.Auth(), example.GetInstance().BlogList)
 		// 博客分页列表
 		blogGroup.GET("/pageList", example.GetInstance().BlogPageList)
-		// 根据id删除博客
-		blogGroup.DELETE("/:id", example.GetInstance().DeleteBlog)
 		// 最新推荐(按更新时间降序排列)
 		blogGroup.GET("/latestList", example.GetInstance().LatestList)
 		// 获取博客信息
 		blogGroup.GET("/:id", example.GetInstance().GetBlog)
+
+		blogGroup = blogGroup.Group("/", middleware.Auth())
+		{
+			// 新增博客
+			blogGroup.POST("/save", example.GetInstance().CreateBlog)
+			//个人博客展示
+			blogGroup.GET("/list", example.GetInstance().BlogList)
+			// 根据id删除博客
+			blogGroup.DELETE("/:id", example.GetInstance().DeleteBlog)
+		}
 	}
 
 	//  ========== type router group ==========
@@ -45,7 +49,7 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 	archiveGroup := e.Group("/archive")
 	{
 		// 归档列表
-		archiveGroup.GET("/list", middleware.Auth(), example.GetInstance().ArchiveList)
+		archiveGroup.GET("/list", example.GetInstance().ArchiveList)
 	}
 	return e
 }

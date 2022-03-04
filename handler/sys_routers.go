@@ -14,18 +14,25 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		userGroup.POST("/register", system.GetInstance().Register)
 		// 登录
 		userGroup.POST("/login", system.GetInstance().Login)
-		ug := userGroup.Group("/", middleware.Auth())
+
+		userGroup = userGroup.Group("/", middleware.Auth())
 		{
 			// 用户信息
-			ug.GET("/info", system.GetInstance().Info)
+			userGroup.GET("/info", system.GetInstance().Info)
 			// 修改名称
-			ug.PUT("/updateName", system.GetInstance().UpdateUsername)
+			userGroup.PUT("/updateName", system.GetInstance().UpdateUsername)
 		}
 
 		// 修改密码
 		// userGroup.PUT("/updatePwd", system.GetInstance().UpdatePassword)
 	}
+
 	//  ========== search router group ==========
+	searchGroup := e.Group("/search")
+	{
+		// 搜索博客
+		searchGroup.GET("/:title", system.GetInstance().SearchBlog)
+	}
 
 	return e
 }

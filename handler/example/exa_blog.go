@@ -7,16 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
-	"github.com/qianxia/blog/model"
-	"github.com/qianxia/blog/request"
+	"github.com/qianxia/blog/model/request"
 	"github.com/qianxia/blog/service/example"
+	"github.com/qianxia/blog/utils"
 )
 
 type BlogHandler struct {
 	blogService example.BlogService
 }
 
-// 新增博客
+/**
+* 新增博客
+ */
 func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	var post request.Post
 	if err := ctx.ShouldBindJSON(&post); err != nil {
@@ -25,8 +27,8 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 		return
 	}
 	// 获取登录的用户信息
-	userInfo := ctx.MustGet("user")
-	post.UserId = userInfo.(model.User).Id
+	userId := utils.GetUserId(ctx)
+	post.UserId = userId
 
 	err := bh.blogService.Save(post)
 	if err != nil {
@@ -36,10 +38,12 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	command.Success(ctx, "操作成功", nil)
 }
 
-// 显示所有博客
+/**
+* 个人博客展示
+ */
 func (bh BlogHandler) BlogList(ctx *gin.Context) {
 	// 获取登录的用户信息
-	userInfo := ctx.MustGet("user")
+	userId := utils.GetUserId(ctx)
 
 	pageSize, _ := strconv.Atoi(ctx.Query("paginate"))
 	pageNo, _ := strconv.Atoi(ctx.Query("page"))
@@ -57,15 +61,17 @@ func (bh BlogHandler) BlogList(ctx *gin.Context) {
 		pageMap["pageNo"] = 1
 	}
 
-	blogs, err := bh.blogService.List(userInfo.(model.User).Id, pageMap)
+	blogs, err := bh.blogService.List(userId, pageMap)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-	command.Success(ctx, "查询成功", gin.H{"pageList": blogs})
+	command.Success(ctx, "查询成功", blogs)
 }
 
-// 个人博客删除
+/**
+* 个人博客删除
+ */
 func (bh BlogHandler) DeleteBlog(ctx *gin.Context) {
 
 	id, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
@@ -78,7 +84,9 @@ func (bh BlogHandler) DeleteBlog(ctx *gin.Context) {
 	command.Success(ctx, "操作成功", nil)
 }
 
-// 查询博客显示在首页并分页
+/**
+* 查询博客显示在首页并分页
+ */
 func (bh BlogHandler) BlogPageList(ctx *gin.Context) {
 
 	pageSize, _ := strconv.Atoi(ctx.Query("paginate"))
@@ -108,7 +116,9 @@ func (bh BlogHandler) BlogPageList(ctx *gin.Context) {
 	command.Success(ctx, "查询成功", gin.H{"pageList": pageList})
 }
 
-// 最新推荐
+/**
+* 最新推荐
+ */
 func (bh BlogHandler) LatestList(ctx *gin.Context) {
 	list, err := bh.blogService.LatestList()
 	if err != nil {
@@ -118,7 +128,9 @@ func (bh BlogHandler) LatestList(ctx *gin.Context) {
 	command.Success(ctx, "查询成功", gin.H{"latestList": list})
 }
 
-// 根据id获取博客信息
+/**
+* 根据id获取博客信息
+ */
 func (bh BlogHandler) GetBlog(ctx *gin.Context) {
 	blogId, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
 	if blogs, err := bh.blogService.GetBlog(uint64(blogId)); err != nil {

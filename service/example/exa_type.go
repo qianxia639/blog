@@ -6,7 +6,7 @@ import (
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
-	"github.com/qianxia/blog/response"
+	"github.com/qianxia/blog/model/response"
 	"github.com/qianxia/blog/utils"
 )
 
