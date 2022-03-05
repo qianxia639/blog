@@ -4,15 +4,15 @@ type Blog struct {
 	// 主键
 	Id uint64 `json:"id" gorm:"primaryKey"`
 	// 用户id，
-	UserId uint64 `json:"userId" gorm:"NOT NULL"`
+	UserId uint64 `json:"userId" gorm:"NOT NULL;comment:用户Id"`
 	// 分类id
-	TypeId uint16 `json:"typeId" gorm:"NOT NULL"`
+	TypeId uint16 `json:"typeId" gorm:"NOT NULL;comment:分类Id"`
 	// 标题
-	Title string `json:"title" gorm:"size:20;NOT NULL"`
+	Title string `json:"title" gorm:"size:20;NOT NULL;comment:标题"`
 	// 描述
-	Description string `json:"description" gorm:"NOT NULL"`
+	Description string `json:"description" gorm:"NOT NULL;comment:描述"`
 	// 内容
-	Content string `json:"content" gorm:"type:longtext;NOT NULL"`
+	Content string `json:"content" gorm:"type:longtext;NOT NULL;comment:内容"`
 	// 标记
 	Flag string `json:"flag" gorm:"type:varchar(10);comment:标记"`
 	// 浏览次数

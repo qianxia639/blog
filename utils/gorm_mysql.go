@@ -29,7 +29,7 @@ func InitDb(y *config.Config) *gorm.DB {
 	}), &gorm.Config{
 		Logger: logger.Default,
 		NamingStrategy: schema.NamingStrategy{
-			TablePrefix:   "ry_",
+			TablePrefix:   "qx_",
 			SingularTable: true,
 		},
 		DisableForeignKeyConstraintWhenMigrating: true,

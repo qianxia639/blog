@@ -19,13 +19,13 @@ func (*ArchiveService) GetArchiveGroupByYear() (m map[string][]response.Archive,
 
 	var years []string
 	m = make(map[string][]response.Archive)
-	if err = global.QX_DB.Debug().Raw("SELECT FROM_UNIXTIME(updated_at, '%Y') AS year FROM QX_blog GROUP By year ORDER BY year DESC").Scan(&years).Error; err != nil {
+	if err = global.QX_DB.Debug().Raw("SELECT FROM_UNIXTIME(updated_at, '%Y') AS year FROM qx_blog GROUP By year ORDER BY year DESC").Scan(&years).Error; err != nil {
 		global.QX_LOG.Errorf("%s", err)
 		return nil, 0, errors.New("失败1")
 	}
 
 	for _, year := range years {
-		if err = global.QX_DB.Debug().Raw("SELECT id,title,updated_at,flag FROM QX_blog WHERE FROM_UNIXTIME(updated_at, '%Y') = ?", year).Scan(&archives).Error; err != nil {
+		if err = global.QX_DB.Debug().Raw("SELECT id,title,updated_at,flag FROM qx_blog WHERE FROM_UNIXTIME(updated_at, '%Y') = ?", year).Scan(&archives).Error; err != nil {
 			global.QX_LOG.Errorf("%s", err)
 			return nil, 0, errors.New("失败2")
 		}
