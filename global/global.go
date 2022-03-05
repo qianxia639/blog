@@ -9,13 +9,13 @@ import (
 )
 
 var (
-	RY_DB          *gorm.DB
-	RY_LOG         *zap.SugaredLogger
-	RY_YAML_CONFIG *config.Config
+	QX_DB          *gorm.DB
+	QX_LOG         *zap.SugaredLogger
+	QX_YAML_CONFIG *config.Config
 )
 
 // ============== log path ==============
 var (
-	RY_INFO_PATH = "./log/info." + time.Now().Format("2006-01-02") + ".log"
-	RY_WARN_PATH = "./log/error." + time.Now().Format("2006-01-02") + ".log"
+	QX_INFO_PATH = "./log/info." + time.Now().Format("2006-01-02") + ".log"
+	QX_WARN_PATH = "./log/error." + time.Now().Format("2006-01-02") + ".log"
 )

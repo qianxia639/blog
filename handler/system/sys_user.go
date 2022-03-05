@@ -23,7 +23,7 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 	// 绑定表单数据
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
+		global.QX_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
 		return
 	}
 	_, err := uh.userService.Register(user)
@@ -43,7 +43,7 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 	var form model.User
 	if err := ctx.ShouldBindJSON(&form); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
+		global.QX_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
 		return
 	}
 	user, err := uh.userService.Login(form)
@@ -63,7 +63,7 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 		Avatar:   user.Avatar,
 	}
 	if token, err := utils.CreateToken(bc); err != nil {
-		global.RY_LOG.Error("token生成失败!", err)
+		global.QX_LOG.Error("token生成失败!", err)
 		command.Failed(ctx, http.StatusInternalServerError, "获取token失败")
 		return
 	} else {
@@ -78,7 +78,7 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 func (uh *UserHandler) Info(ctx *gin.Context) {
 	userId := utils.GetUserId(ctx)
 	if user, err := uh.userService.GetUserInfo(userId); err != nil {
-		global.RY_LOG.Errorf("用户信息获取失败! - {%s}", err)
+		global.QX_LOG.Errorf("用户信息获取失败! - {%s}", err)
 		command.Failed(ctx, http.StatusInternalServerError, "获取失败")
 	} else {
 		command.Success(ctx, "获取成功", gin.H{"user": user})
@@ -92,7 +92,7 @@ func (uh *UserHandler) UpdateUsername(ctx *gin.Context) {
 	var user model.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.RY_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
+		global.QX_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
 		return
 	}
 	if err := uh.userService.UpdateUsername(user); err != nil {

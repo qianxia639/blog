@@ -1,7 +1,6 @@
 package routers
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,28 +28,24 @@ func Init() *gin.Engine {
 	include(handler.ExampleRouters, handler.SystemRouters)
 
 	r := gin.Default()
-	r.Use(middleware.CORS())
+	r.Use(middleware.CORS(), middleware.Logger())
 	for _, opt := range options {
 		opt(r)
 	}
 	return r
 }
 
-func Load() *sql.DB {
+func Load() {
 	// 读取yaml配置文件
-	global.RY_YAML_CONFIG = utils.DeCode()
+	global.QX_YAML_CONFIG = utils.DeCode()
 
 	// 加载log日志
-	global.RY_LOG = utils.InitLogger("./log/info."+time.Now().Format("2006-01-02")+".log", global.RY_WARN_PATH, zap.InfoLevel)
+	global.QX_LOG = utils.InitLogger("./log/info."+time.Now().Format("2006-01-02")+".log", global.QX_WARN_PATH, zap.InfoLevel)
 
 	// 加载MySQL配置信息
-	global.RY_DB = utils.InitDb(global.RY_YAML_CONFIG)
-	if global.RY_DB != nil {
+	global.QX_DB = utils.InitDb(global.QX_YAML_CONFIG)
+	if global.QX_DB != nil {
 		// 初始化表
-		initialize.RegisterTables(global.RY_DB)
-		db, _ := global.RY_DB.DB()
-		// 关闭mysql连接
-		return db
+		initialize.RegisterTables(global.QX_DB)
 	}
-	return nil
 }

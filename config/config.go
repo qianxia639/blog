@@ -14,8 +14,4 @@ type Config struct {
 		Charset  string `yaml:"charset"`
 		Loc      string `yaml:"loc"`
 	}
-	Redis struct {
-		Port int    `yaml:"port"`
-		Host string `yaml:"host"`
-	}
 }

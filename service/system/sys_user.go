@@ -16,7 +16,7 @@ type UserService struct{}
 func (*UserService) Register(user model.User) (*model.User, error) {
 	var u model.User
 
-	if err := global.RY_DB.Debug().Select("email").Where("email = ?", user.Email).Find(&u).Error; err == nil {
+	if err := global.QX_DB.Debug().Select("email").Where("email = ?", user.Email).Find(&u).Error; err == nil {
 		if u.Email == user.Email {
 			return nil, errors.New("邮箱已注册")
 		}
@@ -31,7 +31,7 @@ func (*UserService) Register(user model.User) (*model.User, error) {
 		Password: newPassword,
 	}
 
-	if err := global.RY_DB.Debug().Create(&newUser).Error; err != nil {
+	if err := global.QX_DB.Debug().Create(&newUser).Error; err != nil {
 		return nil, errors.New("用户注册失败")
 	}
 	return &newUser, nil
@@ -44,7 +44,7 @@ func (*UserService) Login(user model.User) (*model.User, error) {
 	var u model.User
 
 	// 判断用户名是否存在
-	if err := global.RY_DB.Debug().Select("email,password").Where("email = ?", user.Email).Find(&u).Error; err == nil {
+	if err := global.QX_DB.Debug().Select("email,password").Where("email = ?", user.Email).Find(&u).Error; err == nil {
 		if u.Email != user.Email {
 			return nil, errors.New("用户名不存在")
 		}
@@ -57,7 +57,7 @@ func (*UserService) Login(user model.User) (*model.User, error) {
 
 	// 匹配用户名和密码
 	var u1 model.User
-	if err := global.RY_DB.Debug().Select("id,username,avatar").Where("email = ? AND password = ?", u.Email, u.Password).Find(&u1).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,username,avatar").Where("email = ? AND password = ?", u.Email, u.Password).Find(&u1).Error; err != nil {
 		return nil, errors.New("用户名或密码错误")
 	}
 
@@ -69,7 +69,7 @@ func (*UserService) Login(user model.User) (*model.User, error) {
  */
 func (*UserService) GetUserInfo(id uint64) (*model.User, error) {
 	var user model.User
-	if err := global.RY_DB.Debug().Select("id,username,avatar").Where("id = ?", id).Find(&user).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,username,avatar").Where("id = ?", id).Find(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -80,14 +80,14 @@ func (*UserService) GetUserInfo(id uint64) (*model.User, error) {
  */
 func (*UserService) UpdateUsername(user model.User) error {
 	var u model.User
-	if err := global.RY_DB.Debug().Select("id,username").Where("username = ?", user.Username).Find(&u).Error; err == nil {
+	if err := global.QX_DB.Debug().Select("id,username").Where("username = ?", user.Username).Find(&u).Error; err == nil {
 		if u.Username == user.Username {
-			global.RY_LOG.Error("%s-{%v}", "上一次的用户名", err)
+			global.QX_LOG.Error("%s-{%v}", "上一次的用户名", err)
 			return errors.New("不能更改为当前用户名")
 		}
 	}
-	if err := global.RY_DB.Debug().Model(&u).Where("id = ?", user.Id).Update("username", user.Username).Error; err != nil {
-		global.RY_LOG.Error("%s", err)
+	if err := global.QX_DB.Debug().Model(&u).Where("id = ?", user.Id).Update("username", user.Username).Error; err != nil {
+		global.QX_LOG.Error("%s", err)
 		return errors.New("用户名修改失败")
 	}
 	return nil

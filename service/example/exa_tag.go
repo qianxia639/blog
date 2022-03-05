@@ -13,8 +13,8 @@ func (ts *TagService) List() ([]string, error) {
 	tags := make([]model.Tag, 0, 10)
 	var tagNames []string
 
-	if err := global.RY_DB.Debug().Select("id,tag_name").Find(&tags).Error; err != nil {
-		global.RY_LOG.Error(err)
+	if err := global.QX_DB.Debug().Select("id,tag_name").Find(&tags).Error; err != nil {
+		global.QX_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}
 

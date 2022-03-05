@@ -15,13 +15,13 @@ func Auth() gin.HandlerFunc {
 		// 从请求头中获取X-Token头信息
 		token := ctx.Request.Header.Get("X-Token")
 		if token == "" {
-			global.RY_LOG.Error("未登录或非法访问")
+			global.QX_LOG.Error("未登录或非法访问")
 			command.Failed(ctx, http.StatusUnauthorized, "未登录或非法访问")
 			ctx.Abort()
 			return
 		}
 		if !strings.HasPrefix(token, "Bearer ") {
-			global.RY_LOG.Error("token格式有误")
+			global.QX_LOG.Error("token格式有误")
 			command.Failed(ctx, http.StatusUnauthorized, "token格式有误")
 			ctx.Abort()
 			return
@@ -31,7 +31,7 @@ func Auth() gin.HandlerFunc {
 		// 解析token
 		claims, err := utils.ParseToken(token)
 		if err != nil {
-			global.RY_LOG.Error(err)
+			global.QX_LOG.Error(err)
 			command.Failed(ctx, http.StatusUnauthorized, err.Error())
 			ctx.Abort()
 			return

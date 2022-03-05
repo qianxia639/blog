@@ -13,7 +13,7 @@ func DeCode() (config *config.Config) {
 	yamlFile, _ := ioutil.ReadFile(fileName)
 	err := yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
-		global.RY_LOG.Errorf("%v", err)
+		global.QX_LOG.Errorf("%v", err)
 		return nil
 	}
 	return

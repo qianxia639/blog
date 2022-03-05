@@ -5,7 +5,6 @@ go 1.16
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/gin-gonic/gin v1.7.4
-	github.com/go-redis/redis/v8 v8.11.4 // indirect
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect

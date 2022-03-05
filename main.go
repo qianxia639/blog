@@ -17,12 +17,13 @@ func main() {
 	router := routers.Init()
 
 	// 加载配置信息
-	db := routers.Load()
-	defer global.RY_LOG.Sync()
-	defer db.Close()
+	routers.Load()
 
+	db, _ := global.QX_DB.DB()
+	defer db.Close()
+	defer global.QX_LOG.Sync()
 	srv := &http.Server{
-		Addr:           fmt.Sprintf("%s:%d", global.RY_YAML_CONFIG.Server.Host, global.RY_YAML_CONFIG.Server.Port),
+		Addr:           fmt.Sprintf("%s:%d", global.QX_YAML_CONFIG.Server.Host, global.QX_YAML_CONFIG.Server.Port),
 		Handler:        router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
@@ -32,7 +33,7 @@ func main() {
 	go func() {
 		// 服务连接
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			global.RY_LOG.Fatalf("listen: %s\n", err)
+			global.QX_LOG.Fatalf("listen: %s\n", err)
 		}
 	}()
 
@@ -44,6 +45,6 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		global.RY_LOG.Fatal("Server Shutdown: ", err)
+		global.QX_LOG.Fatal("Server Shutdown: ", err)
 	}
 }

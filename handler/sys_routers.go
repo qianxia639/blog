@@ -31,7 +31,7 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 	searchGroup := e.Group("/search")
 	{
 		// 搜索博客
-		searchGroup.GET("/:title", system.GetInstance().SearchBlog)
+		searchGroup.GET("/blog", system.GetInstance().SearchBlog)
 	}
 
 	return e

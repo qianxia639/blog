@@ -23,7 +23,7 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	var post request.Post
 	if err := ctx.ShouldBindJSON(&post); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, "数据绑定失败")
-		global.RY_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
+		global.QX_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
 		return
 	}
 	// 获取登录的用户信息
