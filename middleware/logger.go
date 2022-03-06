@@ -11,7 +11,7 @@ func Logger() gin.HandlerFunc {
 		method := ctx.Request.Method
 		// body, _ := ioutil.ReadAll(ctx.Request.Body)
 
-		global.QX_LOG.Infof("请求的信息: { %s | %s | {%s}}", method, path)
+		global.QX_LOG.Infof("请求的信息: { %s | %s | }", method, path)
 
 		ctx.Next()
 	}
