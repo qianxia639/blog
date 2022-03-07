@@ -13,7 +13,7 @@ type SearchHandler struct {
 }
 
 /**
-* 搜索博客
+* 搜索所有博客
  */
 func (sh *SearchHandler) SearchBlog(ctx *gin.Context) {
 	query := ctx.Query("query")
@@ -22,5 +22,21 @@ func (sh *SearchHandler) SearchBlog(ctx *gin.Context) {
 		return
 	} else {
 		command.Success(ctx, "查询成功", blogs)
+	}
+}
+
+/**
+* 搜索个人博客
+ */
+func (sh *SearchHandler) SearchPriBlog(ctx *gin.Context) {
+	title := ctx.Query("title")
+	startDate := ctx.Query("startDate")
+	endDate := ctx.Query("endDate")
+
+	if m, err := sh.searchService.SearchPriBlog(title, startDate, endDate); err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		return
+	} else {
+		command.Success(ctx, "成功", m)
 	}
 }

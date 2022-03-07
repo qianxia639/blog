@@ -28,7 +28,7 @@ func Init() *gin.Engine {
 	include(handler.ExampleRouters, handler.SystemRouters)
 
 	r := gin.Default()
-	r.Use(middleware.CORS(), middleware.Logger())
+	r.Use(middleware.CORS())
 	for _, opt := range options {
 		opt(r)
 	}

@@ -13,7 +13,7 @@ import (
 type SearchService struct{}
 
 /**
-* 根据title搜索博客
+* 根据title和description搜索博客
  */
 func (*SearchService) SearchBlog(query string) (*response.PageList, error) {
 	var (
@@ -53,6 +53,24 @@ func (*SearchService) SearchBlog(query string) (*response.PageList, error) {
 	}
 
 	// 将total和dataList封装到pageList中
+	var pageList response.PageList
+	pageList.Total = total
+	pageList.DataList = blogs
+
+	return &pageList, nil
+}
+
+/**
+* 根据title和时间进行搜索
+ */
+func (*SearchService) SearchPriBlog(title, startDate, endDate string) (*response.PageList, error) {
+	var blogs []response.Blog
+	var total int64
+	// TODO 这里是有问题的
+	if err := global.QX_DB.Debug().Model(&model.Blog{}).Select("id,title,updated_at").Where("title LIKE ?", "%"+title+"%").Or("updated_at BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)", startDate, endDate).Find(&blogs).Count(&total).Error; err != nil {
+		return nil, err
+	}
+
 	var pageList response.PageList
 	pageList.Total = total
 	pageList.DataList = blogs

@@ -30,8 +30,10 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 	//  ========== search router group ==========
 	searchGroup := e.Group("/search")
 	{
-		// 搜索博客
+		// 搜索所有博客
 		searchGroup.GET("/blog", system.GetInstance().SearchBlog)
+		// 搜索个人博客列表
+		searchGroup.GET("/priblog", system.GetInstance().SearchPriBlog)
 	}
 
 	return e
