@@ -35,6 +35,7 @@ func (bs BlogService) Save(post request.Post) error {
 		Description: post.Description,
 		Content:     post.Content,
 		Flag:        post.Flag,
+		Publish:     true,
 		Tags:        tags,
 	}
 
@@ -58,12 +59,44 @@ func (bs BlogService) Save(post request.Post) error {
 }
 
 /**
+* 保存博客
+ */
+func (bs BlogService) SaveBlog(post request.Post) error {
+	// 根据post.tags[]的值查询对应的id
+	tags := make([]model.Tag, 0, 4)
+
+	if err := global.QX_DB.Debug().Select("id").Where("tag_name in (?)", post.Tags).Find(&tags).Error; err != nil {
+		global.QX_LOG.Error(err)
+		return errors.New("数据查询失败")
+	}
+
+	// 构建数据
+	blog := model.Blog{
+		UserId:      post.UserId,
+		TypeId:      post.TypeId,
+		Title:       post.Title,
+		Description: post.Description,
+		Content:     post.Content,
+		Flag:        post.Flag,
+		Publish:     false,
+		Tags:        tags,
+	}
+
+	// 插入博客表数据以及博客标签中间表数据
+	if err := global.QX_DB.Debug().Create(&blog).Error; err != nil {
+		global.QX_LOG.Error(err)
+		return errors.New("数据插入失败")
+	}
+	return nil
+}
+
+/**
 * 个人博客列表展示
  */
 func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
-	if err := global.QX_DB.Debug().Select("id,title,updated_at").Where("user_id = ?", id).Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Count(&total).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,title,publish,updated_at").Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Count(&total).Error; err != nil {
 		global.QX_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}
@@ -83,7 +116,7 @@ func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, 
  */
 func (bs BlogService) LatestList() ([]model.Blog, error) {
 	list := make([]model.Blog, 0, 4)
-	if err := global.QX_DB.Debug().Select("id,title").Order("updated_at DESC").Limit(4).Offset(-1).Find(&list).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,title").Where("publish = ?", true).Order("updated_at DESC").Limit(5).Offset(-1).Find(&list).Error; err != nil {
 		global.QX_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}
@@ -101,7 +134,7 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 		// 获取dataList
 		blogs []response.Index
 	)
-	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&b).Count(&total).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Where("publish = ?", true).Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&b).Count(&total).Error; err != nil {
 		global.QX_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}

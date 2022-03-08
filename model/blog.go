@@ -17,6 +17,8 @@ type Blog struct {
 	Flag string `json:"flag" gorm:"type:varchar(10);comment:标记"`
 	// 浏览次数
 	Views uint32 `json:"views" gorm:"comment:浏览次数"`
+	// 是否已发布
+	Publish bool `json:"publish" gorm:"comment:是否已发布"`
 	// 创建时间
 	CreatedAt int64 `json:"createdAt" gorm:"autoCreateTine:milli;comment:创建时间"`
 	// 更新时间
