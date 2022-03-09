@@ -96,15 +96,23 @@ func (bs BlogService) SaveBlog(post request.Post) error {
 func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
-	if err := global.QX_DB.Debug().Select("id,title,publish,updated_at").Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Count(&total).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,title,publish,updated_at").Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error; err != nil {
 		global.QX_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}
+
+	global.QX_DB.Debug().Model(&model.Blog{}).Count(&total)
 
 	var pageList response.PageList
 	pageList.Total = total
 	pageList.PerPage = page["pageSize"]
 	pageList.CurrentPage = page["pageNo"]
+
+	if int(total)/pageList.PerPage == 0 {
+		pageList.LastPage = int(total) / pageList.PerPage
+	} else {
+		pageList.LastPage = int(total)/pageList.PerPage + 1
+	}
 
 	pageList.DataList = blogs
 
@@ -134,7 +142,7 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 		// 获取dataList
 		blogs []response.Index
 	)
-	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Where("publish = ?", true).Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&b).Count(&total).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Where("publish = ?", true).Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&b).Error; err != nil {
 		global.QX_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}
@@ -164,11 +172,17 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 		blogs = append(blogs, index)
 	}
 
+	global.QX_DB.Model(&model.Blog{}).Count(&total)
 	// 将total和dataList封装到pageList中
 	var pageList response.PageList
 	pageList.Total = total
 	pageList.PerPage = page["pageSize"]
 	pageList.CurrentPage = page["pageNo"]
+	if int(total)/pageList.PerPage == 0 {
+		pageList.LastPage = int(total) / pageList.PerPage
+	} else {
+		pageList.LastPage = int(total)/pageList.PerPage + 1
+	}
 
 	pageList.DataList = blogs
 

@@ -78,7 +78,7 @@ func (bh BlogHandler) BlogList(ctx *gin.Context) {
 
 	switch {
 	case pageMap["pageSize"] == 0:
-		pageMap["pageSize"] = 5
+		pageMap["pageSize"] = 10
 	case pageMap["pageNo"] == 0:
 		pageMap["pageNo"] = 1
 	}
