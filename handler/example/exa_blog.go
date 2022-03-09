@@ -1,12 +1,14 @@
 package example
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
+	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/request"
 	"github.com/qianxia/blog/service/example"
 	"github.com/qianxia/blog/utils"
@@ -104,6 +106,17 @@ func (bh BlogHandler) DeleteBlog(ctx *gin.Context) {
 		return
 	}
 	command.Success(ctx, "操作成功", nil)
+}
+
+/**
+* 修改博客
+ */
+func (bh *BlogHandler) UpdateBlog(ctx *gin.Context) {
+	var blog model.Blog
+	ctx.ShouldBindJSON(&blog)
+	fmt.Println("blog ===> ", blog)
+
+	bh.blogService.Update(blog)
 }
 
 /**

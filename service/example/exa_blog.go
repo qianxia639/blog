@@ -222,12 +222,19 @@ func (bs BlogService) Delete(id int64) error {
 }
 
 /**
+* 修改博客
+ */
+func (*BlogService) Update(blog model.Blog) error {
+	return nil
+}
+
+/**
 * 获取博客信息
  */
 func (bs BlogService) GetBlog(id uint64) (map[string]interface{}, error) {
 
 	var b model.Blog
-	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,content,flag,views,updated_at").Preload("Tags").Where("id = ?", id).Find(&b).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,content,description,flag,publish,views,updated_at").Preload("Tags").Where("id = ?", id).Find(&b).Error; err != nil {
 		global.QX_LOG.Error(err)
 		return nil, errors.New("查询失败")
 	}
@@ -243,13 +250,16 @@ func (bs BlogService) GetBlog(id uint64) (map[string]interface{}, error) {
 		return nil, errors.New("查询失败")
 	}
 
-	if err := global.QX_DB.Debug().Model(&model.Blog{Id: id}).Update("views", gorm.Expr("views + 1")).Error; err != nil {
-		global.QX_LOG.Error(err)
-		return nil, err
+	if b.Publish {
+		if err := global.QX_DB.Debug().Model(&model.Blog{Id: id}).Update("views", gorm.Expr("views + 1")).Error; err != nil {
+			global.QX_LOG.Error(err)
+			return nil, err
+		}
 	}
 
 	m := make(map[string]interface{}, 11)
 	m["id"] = fmt.Sprintf("%v", id)
+	m["description"] = b.Description
 	m["title"] = b.Title
 	m["content"] = b.Content
 	m["flag"] = b.Flag

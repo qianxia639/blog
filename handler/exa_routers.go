@@ -23,6 +23,8 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 			blogGroup.POST("/save", example.GetInstance().CreateBlog)
 			// 保存博客 publish = false
 			blogGroup.POST("/saveBlog", example.GetInstance().SaveBlog)
+			// 编辑博客
+			blogGroup.PUT("/update", example.GetInstance().UpdateBlog)
 			//个人博客展示
 			blogGroup.GET("/list", example.GetInstance().BlogList)
 			// 根据id删除博客

@@ -67,9 +67,11 @@ func (*SearchService) SearchPriBlog(title, startDate, endDate string) (*response
 	var blogs []response.Blog
 	var total int64
 	// TODO 这里是有问题的
-	if err := global.QX_DB.Debug().Model(&model.Blog{}).Select("id,title,publish,updated_at").Where("title LIKE ?", "%"+title+"%").Or("updated_at BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)", startDate, endDate).Find(&blogs).Count(&total).Error; err != nil {
+	if err := global.QX_DB.Debug().Model(&model.Blog{}).Select("id,title,publish,updated_at").Where("title LIKE ?", "%"+title+"%").Or("updated_at BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)", startDate, endDate).Find(&blogs).Error; err != nil {
 		return nil, err
 	}
+
+	global.QX_DB.Model(&model.Blog{}).Where("title LIKE ?", "%"+title+"%").Count(&total)
 
 	var pageList response.PageList
 	pageList.Total = total
