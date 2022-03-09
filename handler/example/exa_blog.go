@@ -161,4 +161,7 @@ func (bh BlogHandler) GetBlog(ctx *gin.Context) {
 	} else {
 		command.Success(ctx, "查询成功", gin.H{"blogs": blogs})
 	}
+
+	b1 := NewBlog(uint64(blogId), &Blog1{})
+	b1.GetBlog()
 }
