@@ -5,7 +5,7 @@ import (
 )
 
 type Index struct {
-	Id          string      `json:"blogId"`
+	Id          uint64      `json:"blogId"`
 	Title       string      `json:"title"`
 	Description string      `json:"description"`
 	UpdatedAt   string      `json:"updatedAt"`

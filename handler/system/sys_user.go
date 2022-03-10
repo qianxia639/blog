@@ -7,6 +7,7 @@ import (
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
+	"github.com/qianxia/blog/model/response"
 	"github.com/qianxia/blog/service/system"
 	"github.com/qianxia/blog/utils"
 )
@@ -81,7 +82,7 @@ func (uh *UserHandler) Info(ctx *gin.Context) {
 		global.QX_LOG.Errorf("用户信息获取失败! - {%s}", err)
 		command.Failed(ctx, http.StatusInternalServerError, "获取失败")
 	} else {
-		command.Success(ctx, "获取成功", gin.H{"user": user})
+		command.Success(ctx, "获取成功", gin.H{"user": response.ToUser(*user)})
 	}
 }
 

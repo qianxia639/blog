@@ -104,14 +104,14 @@ func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, 
 	global.QX_DB.Debug().Model(&model.Blog{}).Count(&total)
 
 	var pageList response.PageList
-	pageList.Total = total
-	pageList.PerPage = page["pageSize"]
-	pageList.CurrentPage = page["pageNo"]
 
-	if int(total)/pageList.PerPage == 0 {
-		pageList.LastPage = int(total) / pageList.PerPage
+	pageList.Pagination.Total = total
+	pageList.Pagination.CurrentPage = page["pageNo"]
+	pageList.Pagination.PerPage = page["pageSize"]
+	if int(total)/page["pageSize"] == 0 {
+		pageList.Pagination.LastPage = int(total) / page["pageSize"]
 	} else {
-		pageList.LastPage = int(total)/pageList.PerPage + 1
+		pageList.Pagination.LastPage = int(total)/page["pageSize"] + 1
 	}
 
 	pageList.DataList = blogs
@@ -160,7 +160,7 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 		}
 
 		index := response.Index{
-			Id:          fmt.Sprintf("%v", v.Id),
+			Id:          v.Id,
 			Title:       v.Title,
 			Description: v.Description,
 			UpdatedAt:   utils.TimestampToString(v.UpdatedAt),
@@ -175,13 +175,13 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 	global.QX_DB.Model(&model.Blog{}).Count(&total)
 	// 将total和dataList封装到pageList中
 	var pageList response.PageList
-	pageList.Total = total
-	pageList.PerPage = page["pageSize"]
-	pageList.CurrentPage = page["pageNo"]
-	if int(total)/pageList.PerPage == 0 {
-		pageList.LastPage = int(total) / pageList.PerPage
+	pageList.Pagination.Total = total
+	pageList.Pagination.CurrentPage = page["pageNo"]
+	pageList.Pagination.PerPage = page["pageSize"]
+	if int(total)/page["pageSize"] == 0 {
+		pageList.Pagination.LastPage = int(total) / page["pageSize"]
 	} else {
-		pageList.LastPage = int(total)/pageList.PerPage + 1
+		pageList.Pagination.LastPage = int(total)/page["pageSize"] + 1
 	}
 
 	pageList.DataList = blogs

@@ -39,7 +39,8 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 		typeGroup.GET("/listOrder", example.GetInstance().ListOrder)
 		// 分类列表(不排序)
 		typeGroup.GET("/list", example.GetInstance().List)
-		typeGroup.GET("/:id", example.GetInstance().TypeList)
+		// 点击分类进行博客的展示并分页
+		typeGroup.GET("/page", example.GetInstance().TypeList)
 	}
 
 	//  ========== tag router group ==========

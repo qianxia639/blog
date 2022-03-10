@@ -2,6 +2,7 @@ package system
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
@@ -32,8 +33,10 @@ func (sh *SearchHandler) SearchPriBlog(ctx *gin.Context) {
 	title := ctx.Query("title")
 	startDate := ctx.Query("startDate")
 	endDate := ctx.Query("endDate")
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("paginate", "10"))
+	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
 
-	if m, err := sh.searchService.SearchPriBlog(title, startDate, endDate); err != nil {
+	if m, err := sh.searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNo); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	} else {

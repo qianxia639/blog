@@ -2,7 +2,6 @@ package system
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
@@ -41,7 +40,7 @@ func (*SearchService) SearchBlog(query string) (*response.PageList, error) {
 		}
 
 		blogs = append(blogs, response.Index{
-			Id:          fmt.Sprintf("%v", v.Id),
+			Id:          v.Id,
 			Title:       v.Title,
 			Description: v.Description,
 			UpdatedAt:   utils.TimestampToString(v.UpdatedAt),
@@ -54,7 +53,7 @@ func (*SearchService) SearchBlog(query string) (*response.PageList, error) {
 
 	// 将total和dataList封装到pageList中
 	var pageList response.PageList
-	pageList.Total = total
+	pageList.Pagination.Total = total
 	pageList.DataList = blogs
 
 	return &pageList, nil
@@ -63,18 +62,28 @@ func (*SearchService) SearchBlog(query string) (*response.PageList, error) {
 /**
 * 根据title和时间进行搜索
  */
-func (*SearchService) SearchPriBlog(title, startDate, endDate string) (*response.PageList, error) {
+func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, pageNo int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
 	// TODO 这里是有问题的
-	if err := global.QX_DB.Debug().Model(&model.Blog{}).Select("id,title,publish,updated_at").Where("title LIKE ?", "%"+title+"%").Or("updated_at BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)", startDate, endDate).Find(&blogs).Error; err != nil {
+	if err := global.QX_DB.Debug().Model(&model.Blog{}).Select("id,title,publish,updated_at").Where("title LIKE ?", "%"+title+"%").
+		Or("updated_at BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)", startDate, endDate).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Error; err != nil {
 		return nil, err
 	}
 
 	global.QX_DB.Model(&model.Blog{}).Where("title LIKE ?", "%"+title+"%").Count(&total)
 
 	var pageList response.PageList
-	pageList.Total = total
+
+	pageList.Pagination.Total = total
+	pageList.Pagination.CurrentPage = pageNo
+	pageList.Pagination.PerPage = pageSize
+	if int(total)/pageSize == 0 {
+		pageList.Pagination.LastPage = int(total) / pageSize
+	} else {
+		pageList.Pagination.LastPage = int(total)/pageSize + 1
+	}
+
 	pageList.DataList = blogs
 
 	return &pageList, nil
