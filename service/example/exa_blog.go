@@ -224,7 +224,42 @@ func (bs BlogService) Delete(id int64) error {
 /**
 * 修改博客
  */
-func (*BlogService) Update(blog model.Blog) error {
+func (*BlogService) Update(id uint64, b interface{}) error {
+
+	tx := global.QX_DB.Begin()
+	// if err := tx.Debug().Model(&model.Blog{Id: id}).Omit("tags").Updates(b.(map[string]interface{})).Error; err != nil {
+	// 	tx.Rollback()
+	// 	return err
+	// }
+
+	bm := b.(map[string]interface{})
+
+	var blog model.Blog
+	// bm
+	// tagNames := strings.Split(bm["tags"].(string), " ")
+
+	for i := 0; i < len(blog.Tags); i++ {
+		for j := 0; j < len(bm["tags"].([]interface{})); j++ {
+			// blog.Tags[i].TagName = bm["tags"].([]interface{})[j]
+		}
+	}
+
+	blog = model.Blog{
+		TypeId:      uint16(bm["typeId"].(float64)),
+		Title:       bm["title"].(string),
+		Description: bm["description"].(string),
+		Content:     bm["content"].(string),
+		Flag:        bm["flag"].(string),
+		Publish:     true,
+		Tags:        blog.Tags,
+	}
+
+	if err := tx.Session(&gorm.Session{FullSaveAssociations: true}).Model(&model.Blog{Id: id}).Updates(&blog).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
 	return nil
 }
 
@@ -255,7 +290,7 @@ func (bs BlogService) GetBlog(id uint64) (map[string]interface{}, error) {
 		return nil, err
 	}
 	m := make(map[string]interface{}, 11)
-	m["id"] = fmt.Sprintf("%v", id)
+	m["id"] = id
 	m["description"] = b.Description
 	m["title"] = b.Title
 	m["content"] = b.Content
@@ -269,4 +304,24 @@ func (bs BlogService) GetBlog(id uint64) (map[string]interface{}, error) {
 
 	// 返回
 	return m, nil
+}
+
+/**
+* 获取要编辑的博客信息
+ */
+func (*BlogService) GetUpdateBlog(id uint64) (map[string]interface{}, error) {
+	var b model.Blog
+	err := global.QX_DB.Debug().Select("id,title,content,description,flag").Where("id = ?", id).Find(&b).Error
+
+	fmt.Println("b ===> ", b)
+
+	m := make(map[string]interface{}, 6)
+	m["id"] = id
+	m["description"] = b.Description
+	m["title"] = b.Title
+	m["content"] = b.Content
+	m["flag"] = b.Flag
+
+	// 返回
+	return m, err
 }

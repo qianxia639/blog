@@ -1,14 +1,12 @@
 package example
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
-	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/request"
 	"github.com/qianxia/blog/service/example"
 	"github.com/qianxia/blog/utils"
@@ -105,11 +103,20 @@ func (bh BlogHandler) DeleteBlog(ctx *gin.Context) {
 * 修改博客
  */
 func (bh *BlogHandler) UpdateBlog(ctx *gin.Context) {
-	var blog model.Blog
-	ctx.ShouldBindJSON(&blog)
-	fmt.Println("blog ===> ", blog)
 
-	bh.blogService.Update(blog)
+	var m map[string]interface{}
+
+	ctx.ShouldBindJSON(&m)
+
+	mb := m["params"]
+	b := mb.(map[string]interface{})["blog"]
+	id := mb.(map[string]interface{})["id"]
+
+	if err := bh.blogService.Update(uint64(id.(float64)), b); err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	command.Success(ctx, command.OperationSuccess, nil)
 }
 
 /**
@@ -154,14 +161,25 @@ func (bh BlogHandler) LatestList(ctx *gin.Context) {
 * 根据id获取博客信息
  */
 func (bh BlogHandler) GetBlog(ctx *gin.Context) {
-	blogId, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
-	if blogs, err := bh.blogService.GetBlog(uint64(blogId)); err != nil {
+	blogId, _ := strconv.ParseUint(ctx.Params.ByName("id"), 10, 64)
+	if blogs, err := bh.blogService.GetBlog(blogId); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	} else {
 		command.Success(ctx, "查询成功", gin.H{"blogs": blogs})
 	}
+}
 
-	b1 := NewBlog(uint64(blogId), &Blog1{})
-	b1.GetBlog()
+/**
+* 获取要编辑的博客的信息
+ */
+func (bh *BlogHandler) GetUpdateBlog(ctx *gin.Context) {
+	blogId, _ := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	if blogs, err := bh.blogService.GetUpdateBlog(blogId); err != nil {
+		global.QX_LOG.Error(err)
+		command.Failed(ctx, http.StatusInternalServerError, command.FindFailed)
+		return
+	} else {
+		command.Success(ctx, command.FindSuccess, gin.H{"blogs": blogs})
+	}
 }
