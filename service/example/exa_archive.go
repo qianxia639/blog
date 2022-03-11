@@ -1,8 +1,6 @@
 package example
 
 import (
-	"errors"
-
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/response"
@@ -20,21 +18,18 @@ func (*ArchiveService) GetArchiveGroupByYear() (m map[string][]response.Archive,
 	var years []string
 	m = make(map[string][]response.Archive)
 	if err = global.QX_DB.Debug().Raw("SELECT FROM_UNIXTIME(updated_at, '%Y') AS year FROM qx_blog GROUP By year ORDER BY year DESC").Scan(&years).Error; err != nil {
-		global.QX_LOG.Errorf("%s", err)
-		return nil, 0, errors.New("失败1")
+		return nil, 0, err
 	}
 
 	for _, year := range years {
-		if err = global.QX_DB.Debug().Raw("SELECT id,title,updated_at,flag FROM qx_blog WHERE FROM_UNIXTIME(updated_at, '%Y') = ?", year).Scan(&archives).Error; err != nil {
-			global.QX_LOG.Errorf("%s", err)
-			return nil, 0, errors.New("失败2")
+		if err = global.QX_DB.Debug().Raw("SELECT id,title,updated_at,flag FROM qx_blog WHERE FROM_UNIXTIME(updated_at, '%Y') = ? AND publish = ?", year, true).Scan(&archives).Error; err != nil {
+			return nil, 0, err
 		}
 		m[year] = archives
 	}
 
-	if err = global.QX_DB.Model(&model.Blog{}).Count(&total).Error; err != nil {
-		global.QX_LOG.Errorf("%s", err)
-		return nil, 0, errors.New("失败3")
+	if err = global.QX_DB.Debug().Model(&model.Blog{}).Where("publish = ?", true).Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
 
 	return m, total, nil

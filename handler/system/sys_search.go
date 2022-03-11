@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
+	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/service/system"
 )
 
@@ -19,10 +20,11 @@ type SearchHandler struct {
 func (sh *SearchHandler) SearchBlog(ctx *gin.Context) {
 	query := ctx.Query("query")
 	if blogs, err := sh.searchService.SearchBlog(query); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		global.QX_LOG.Error(err)
+		command.Failed(ctx, http.StatusInternalServerError, "搜索失败")
 		return
 	} else {
-		command.Success(ctx, "查询成功", blogs)
+		command.Success(ctx, "搜索成功", blogs)
 	}
 }
 
@@ -37,9 +39,10 @@ func (sh *SearchHandler) SearchPriBlog(ctx *gin.Context) {
 	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
 
 	if m, err := sh.searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNo); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		global.QX_LOG.Error(err)
+		command.Failed(ctx, http.StatusInternalServerError, "搜索失败")
 		return
 	} else {
-		command.Success(ctx, "成功", m)
+		command.Success(ctx, "搜索成功", m)
 	}
 }

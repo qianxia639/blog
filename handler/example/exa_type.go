@@ -19,10 +19,10 @@ func (th TypeHandler) ListOrder(ctx *gin.Context) {
 	types, err := th.typeService.ListOrderByAmountDesc()
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, command.FindFailed)
+		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
 		return
 	}
-	command.Success(ctx, command.FindSuccess, gin.H{"type": types})
+	command.Success(ctx, "查询成功", gin.H{"type": types})
 }
 
 // 不排序只显示列表
@@ -30,10 +30,10 @@ func (th TypeHandler) List(ctx *gin.Context) {
 	types, err := th.typeService.List()
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, command.FindFailed)
+		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
 		return
 	}
-	command.Success(ctx, command.FindSuccess, gin.H{"type": types})
+	command.Success(ctx, "查询成功", gin.H{"type": types})
 }
 
 //	点击分类进行查询并分页
@@ -46,8 +46,8 @@ func (th TypeHandler) TypeList(ctx *gin.Context) {
 	typeList, err := th.typeService.TypeList(id, pageSize, pageNo)
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, command.OperationFailed)
+		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
 		return
 	}
-	command.Success(ctx, command.OperationSuccess, typeList)
+	command.Success(ctx, "查询成功", typeList)
 }

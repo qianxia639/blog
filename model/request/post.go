@@ -1,6 +1,7 @@
 package request
 
 type Post struct {
+	Id          uint64 `json:"id"`
 	TypeId      uint16 `json:"typeId"`
 	UserId      uint64 `json:"userId"`
 	Description string `json:"description"`

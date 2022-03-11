@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/qianxia/blog/global"
+	"github.com/qianxia/blog/initialize"
 	"github.com/qianxia/blog/routers"
 )
 
@@ -17,7 +18,7 @@ func main() {
 	router := routers.Init()
 
 	// 加载配置信息
-	routers.Load()
+	initialize.Load()
 
 	db, _ := global.QX_DB.DB()
 	defer db.Close()

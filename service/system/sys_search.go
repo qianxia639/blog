@@ -1,8 +1,6 @@
 package system
 
 import (
-	"errors"
-
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/response"
@@ -23,20 +21,17 @@ func (*SearchService) SearchBlog(query string) (*response.PageList, error) {
 		blogs []response.Index
 	)
 	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Where("title LIKE ? OR description LIKE ?", "%"+query+"%", "%"+query+"%").Find(&b).Count(&total).Error; err != nil {
-		global.QX_LOG.Error(err)
-		return nil, errors.New("查询失败")
+		return nil, err
 	}
 
 	for _, v := range b {
 		var users model.User
 		if err := global.QX_DB.Debug().Select("username,avatar").Where("id = ?", v.UserId).Find(&users).Error; err != nil {
-			global.QX_LOG.Error(err)
-			return nil, errors.New("查询失败")
+			return nil, err
 		}
 		var types model.Type
 		if err := global.QX_DB.Debug().Select("type_name").Where("id = ?", v.TypeId).Find(&types).Error; err != nil {
-			global.QX_LOG.Error(err)
-			return nil, errors.New("查询失败")
+			return nil, err
 		}
 
 		blogs = append(blogs, response.Index{
