@@ -40,29 +40,6 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 }
 
 /**
-* 保存博客
- */
-func (bh BlogHandler) SaveBlog(ctx *gin.Context) {
-	var post request.Post
-	if err := ctx.ShouldBindJSON(&post); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, "数据绑定失败")
-		global.QX_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
-		return
-	}
-	// 获取登录的用户信息
-	userId := utils.GetUserId(ctx)
-	post.UserId = userId
-
-	err := bh.blogService.SaveBlog(post)
-	if err != nil {
-		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "保存失败")
-		return
-	}
-	command.Success(ctx, "保存成功", nil)
-}
-
-/**
 * 个人博客展示
  */
 func (bh BlogHandler) BlogList(ctx *gin.Context) {

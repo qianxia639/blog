@@ -22,13 +22,13 @@ func (*ArchiveService) GetArchiveGroupByYear() (m map[string][]response.Archive,
 	}
 
 	for _, year := range years {
-		if err = global.QX_DB.Debug().Raw("SELECT id,title,updated_at,flag FROM qx_blog WHERE FROM_UNIXTIME(updated_at, '%Y') = ? AND publish = ?", year, true).Scan(&archives).Error; err != nil {
+		if err = global.QX_DB.Debug().Raw("SELECT id,title,updated_at,flag FROM qx_blog WHERE FROM_UNIXTIME(updated_at, '%Y') = ?", year).Scan(&archives).Error; err != nil {
 			return nil, 0, err
 		}
 		m[year] = archives
 	}
 
-	if err = global.QX_DB.Debug().Model(&model.Blog{}).Where("publish = ?", true).Count(&total).Error; err != nil {
+	if err = global.QX_DB.Debug().Model(&model.Blog{}).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 

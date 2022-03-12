@@ -20,10 +20,3 @@ func RegisterTables(db *gorm.DB) {
 		os.Exit(0)
 	}
 }
-
-func InitData() {
-	global.QX_DB.Create(&model.Type{Id: 1, TypeName: "Golang"})
-	global.QX_DB.Create(&model.Type{Id: 2, TypeName: "日志"})
-	global.QX_DB.Create(&model.Type{Id: 3, TypeName: "数据库"})
-	global.QX_DB.Create(&model.Type{Id: 4, TypeName: "前端"})
-}

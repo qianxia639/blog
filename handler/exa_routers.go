@@ -19,10 +19,8 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 
 		blogGroup = blogGroup.Group("/", middleware.Auth())
 		{
-			// 新增博客 publish = false
+			// 新增博客
 			blogGroup.POST("/save", example.GetInstance().CreateBlog)
-			// 保存博客 publish = false
-			blogGroup.POST("/saveBlog", example.GetInstance().SaveBlog)
 			// 获取要编辑的博客的信息
 			blogGroup.GET("/update/:id", example.GetInstance().GetUpdateBlog)
 			// 编辑博客

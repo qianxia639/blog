@@ -21,5 +21,4 @@ func Load() {
 		// 初始化表
 		RegisterTables(global.QX_DB)
 	}
-	InitData()
 }

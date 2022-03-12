@@ -26,7 +26,7 @@ func CreateToken(baseClaims BaseClaims) (string, error) {
 		BaseClaims: baseClaims,
 		RegisteredClaims: jwt.RegisteredClaims{
 			NotBefore: jwt.NewNumericDate(time.Now()),                         // 生效时间
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(2 * 24 * time.Hour)), // 过期时间
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)), // 过期时间
 			Issuer:    "qianxia",                                              // 签发人
 		},
 	}

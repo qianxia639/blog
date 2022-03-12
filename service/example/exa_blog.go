@@ -33,7 +33,6 @@ func (bs BlogService) Save(post request.Post) error {
 		Description: post.Description,
 		Content:     post.Content,
 		Flag:        post.Flag,
-		Publish:     true,
 		Tags:        tags,
 	}
 
@@ -51,36 +50,6 @@ func (bs BlogService) Save(post request.Post) error {
 	}
 	// 提交事务
 	tx.Commit()
-	return nil
-}
-
-/**
-* 保存博客
- */
-func (bs BlogService) SaveBlog(post request.Post) error {
-	// 根据post.tags[]的值查询对应的id
-	tags := make([]model.Tag, 0, 4)
-
-	if err := global.QX_DB.Debug().Select("id").Where("tag_name in (?)", post.Tags).Find(&tags).Error; err != nil {
-		return err
-	}
-
-	// 构建数据
-	blog := model.Blog{
-		UserId:      post.UserId,
-		TypeId:      post.TypeId,
-		Title:       post.Title,
-		Description: post.Description,
-		Content:     post.Content,
-		Flag:        post.Flag,
-		Publish:     false,
-		Tags:        tags,
-	}
-
-	// 插入博客表数据以及博客标签中间表数据
-	if err := global.QX_DB.Debug().Create(&blog).Error; err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -117,7 +86,7 @@ func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, 
  */
 func (bs BlogService) LatestList() ([]model.Blog, error) {
 	list := make([]model.Blog, 0, 4)
-	if err := global.QX_DB.Debug().Select("id,title").Where("publish = ?", true).Order("updated_at DESC").Limit(5).Offset(-1).Find(&list).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,title").Order("updated_at DESC").Limit(5).Offset(-1).Find(&list).Error; err != nil {
 		return nil, err
 	}
 	return list, nil
@@ -134,7 +103,7 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 		// 获取dataList
 		blogs []response.Index
 	)
-	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Where("publish = ?", true).Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&b).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&b).Error; err != nil {
 		return nil, err
 	}
 
@@ -161,7 +130,7 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 		blogs = append(blogs, index)
 	}
 
-	global.QX_DB.Model(&model.Blog{}).Where("publish = ?", true).Count(&total)
+	global.QX_DB.Model(&model.Blog{}).Count(&total)
 	// 将total和dataList封装到pageList中
 	var pageList response.PageList
 	pageList.Pagination.Total = total
@@ -217,7 +186,6 @@ func (*BlogService) Update(post request.Post) error {
 		Description: post.Description,
 		Content:     post.Content,
 		Flag:        post.Flag,
-		Publish:     true,
 	}).Error
 
 	return err
