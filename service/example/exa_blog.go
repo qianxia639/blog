@@ -59,7 +59,7 @@ func (bs BlogService) Save(post request.Post) error {
 func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
-	if err := global.QX_DB.Debug().Select("id,title,publish,updated_at").Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,title,updated_at").Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error; err != nil {
 		return nil, err
 	}
 
