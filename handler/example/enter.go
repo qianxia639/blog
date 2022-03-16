@@ -2,21 +2,19 @@ package example
 
 import "sync"
 
-type ExampleRouterGroup struct {
+type exampleRouterGroup struct {
 	BlogHandler
 	TypeHandler
 	TagHandler
 	ArchiveHandler
 }
 
-var exampleRouterGroups = new(ExampleRouterGroup)
+var exampleRouterGroups *exampleRouterGroup
 var once sync.Once
 
-func GetInstance() *ExampleRouterGroup {
+func GetInstance() *exampleRouterGroup {
 	once.Do(func() {
-		if exampleRouterGroups == nil {
-			exampleRouterGroups = &ExampleRouterGroup{}
-		}
+		exampleRouterGroups = new(exampleRouterGroup)
 	})
 	return exampleRouterGroups
 }

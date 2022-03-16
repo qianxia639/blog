@@ -3,6 +3,6 @@ package response
 type Blog struct {
 	Id        string `json:"id"`
 	Title     string `json:"title"`
-	Publish   bool   `json:"publish"`
+	Views     uint32 `json:"views"`
 	UpdatedAt int64  `json:"updatedAt"`
 }

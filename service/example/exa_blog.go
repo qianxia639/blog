@@ -59,7 +59,7 @@ func (bs BlogService) Save(post request.Post) error {
 func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
-	if err := global.QX_DB.Debug().Select("id,title,updated_at").Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,title,updated_at,views").Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error; err != nil {
 		return nil, err
 	}
 
@@ -181,14 +181,12 @@ func (bs BlogService) Delete(id int64) error {
  */
 func (*BlogService) Update(post request.Post) error {
 
-	err := global.QX_DB.Begin().Debug().Model(&model.Blog{Id: post.Id}).Omit("id,user_id,views").Updates(&model.Blog{
+	return global.QX_DB.Debug().Model(&model.Blog{Id: post.Id}).Omit("id,user_id,views").Updates(&model.Blog{
 		Title:       post.Title,
 		Description: post.Description,
 		Content:     post.Content,
 		Flag:        post.Flag,
 	}).Error
-
-	return err
 }
 
 /**
