@@ -5,6 +5,7 @@ import (
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/response"
 	"github.com/qianxia/blog/utils"
+	"gorm.io/gorm"
 )
 
 type SearchService struct{}
@@ -60,11 +61,12 @@ func (*SearchService) SearchBlog(query string) (*response.PageList, error) {
 func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, pageNo int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
-	// TODO 这里是有问题的
-	if err := global.QX_DB.Debug().Model(&model.Blog{}).Select("id,title,updated_at").Where("title LIKE ?", "%"+title+"%").
-		Or("updated_at BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)", startDate, endDate).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error; err != nil {
-		return nil, err
-	}
+
+	err := global.QX_DB.Debug().Model(&model.Blog{}).Scopes(func(db *gorm.DB) *gorm.DB {
+		return db.Where("title LIKE ?", "%"+title+"%")
+	}, func(db *gorm.DB) *gorm.DB {
+		return db.Where("updated_at BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)", startDate, endDate)
+	}).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
 
 	// global.QX_DB.Model(&model.Blog{}).Where("title LIKE ?", "%"+title+"%").Count(&total)
 
@@ -81,5 +83,5 @@ func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, 
 
 	pageList.DataList = blogs
 
-	return &pageList, nil
+	return &pageList, err
 }

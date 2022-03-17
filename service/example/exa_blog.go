@@ -59,11 +59,11 @@ func (bs BlogService) Save(post request.Post) error {
 func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
-	if err := global.QX_DB.Debug().Select("id,title,updated_at,views").Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,title,updated_at,views").Where("user_id = ?", id).Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error; err != nil {
 		return nil, err
 	}
 
-	global.QX_DB.Debug().Model(&model.Blog{}).Count(&total)
+	global.QX_DB.Debug().Model(&model.Blog{}).Where("user_id = ?", id).Count(&total)
 
 	var pageList response.PageList
 
@@ -208,7 +208,7 @@ func (bs BlogService) GetBlog(id uint64) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	if err := global.QX_DB.Debug().Model(&model.Blog{Id: id}).Update("views", gorm.Expr("views + 1")).Error; err != nil {
+	if err := global.QX_DB.Debug().Model(&model.Blog{Id: id}).UpdateColumn("views", gorm.Expr("views + 1")).Error; err != nil {
 		return nil, err
 	}
 	m := make(map[string]interface{}, 11)

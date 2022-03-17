@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
@@ -20,13 +19,6 @@ func Auth() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		if !strings.HasPrefix(token, "Bearer ") {
-			global.QX_LOG.Error("token格式有误")
-			command.Failed(ctx, http.StatusUnauthorized, "token格式有误")
-			ctx.Abort()
-			return
-		}
-		token = token[7:]
 
 		// 解析token
 		claims, err := utils.ParseToken(token)

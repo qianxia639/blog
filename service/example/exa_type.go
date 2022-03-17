@@ -35,7 +35,7 @@ func (ts *TypeService) TypeList(id, pageSize, pageNo int) (*response.PageList, e
 		blogs []response.Index
 	)
 
-	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Where("type_id = ? AND publish = ?", id, true).
+	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Where("type_id = ?", id).
 		Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&b).Count(&total).Error; err != nil {
 		return nil, err
 	}

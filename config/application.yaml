@@ -11,3 +11,8 @@ mysql:
   charset: utf8mb4
   loc: Asia/Shanghai
 
+qiniu:
+  access_key: 
+  secret_key: 
+  bucket: 
+  server_url: 
