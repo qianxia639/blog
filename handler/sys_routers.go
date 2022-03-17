@@ -36,5 +36,12 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		searchGroup.GET("/priblog", system.GetInstance().SearchPriBlog)
 	}
 
+	// ========== upload router group ==========
+	fileGroup := e.Group("/upload")
+	{
+		// markdown文件上传
+		fileGroup.POST("/mdFile", system.GetInstance().UploadMdFile)
+	}
+
 	return e
 }

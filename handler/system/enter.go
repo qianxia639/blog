@@ -5,6 +5,7 @@ import "sync"
 type systemRouterGroup struct {
 	UserHandler
 	SearchHandler
+	UploadHandler
 }
 
 var systemRouterGroups *systemRouterGroup

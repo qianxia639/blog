@@ -10,3 +10,4 @@ mysql:
   password: qianxia
   charset: utf8mb4
   loc: Asia/Shanghai
+

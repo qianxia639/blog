@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	QX_DB          *gorm.DB
-	QX_LOG         *zap.SugaredLogger
-	QX_YAML_CONFIG *config.Config
+	QX_DB     *gorm.DB
+	QX_LOG    *zap.SugaredLogger
+	QX_CONFIG *config.Config
 )
 
 // ============== log path ==============

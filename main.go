@@ -24,7 +24,7 @@ func main() {
 	defer db.Close()
 	defer global.QX_LOG.Sync()
 	srv := &http.Server{
-		Addr:           fmt.Sprintf("%s:%d", global.QX_YAML_CONFIG.Server.Host, global.QX_YAML_CONFIG.Server.Port),
+		Addr:           fmt.Sprintf("%s:%d", global.QX_CONFIG.Server.Host, global.QX_CONFIG.Server.Port),
 		Handler:        router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,

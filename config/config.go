@@ -14,4 +14,10 @@ type Config struct {
 		Charset  string `yaml:"charset"`
 		Loc      string `yaml:"loc"`
 	}
+	Qiniu struct {
+		AccessKey string `yaml:"access_key"`
+		SecretKey string `yaml:"secret_key"`
+		Bucket    string `yaml:"bucket"`
+		ServerUrl string `yaml:"server_url"`
+	}
 }

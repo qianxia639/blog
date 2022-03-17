@@ -19,7 +19,7 @@ func include(opts ...Option) {
 // 初始化
 func Init() *gin.Engine {
 	// 加载app的配置路由
-	include(handler.ExampleRouters, handler.SystemRouters, handler.UploadRouters)
+	include(handler.ExampleRouters, handler.SystemRouters)
 
 	r := gin.Default()
 	r.Use(middleware.CORS())
