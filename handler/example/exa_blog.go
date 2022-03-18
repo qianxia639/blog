@@ -46,14 +46,13 @@ func (bh BlogHandler) BlogList(ctx *gin.Context) {
 	// 获取登录的用户信息
 	userId := utils.GetUserId(ctx)
 
-	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("paginate", "10"))
-	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	offset := (pageNo - 1) * pageSize
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "10"))
+	pageNum, _ := strconv.Atoi(ctx.DefaultQuery("pageNum", "1"))
 
 	pageMap := make(map[string]int, 3)
 	pageMap["pageSize"] = pageSize
-	pageMap["pageNo"] = pageNo
-	pageMap["offset"] = offset
+	pageMap["pageNum"] = pageNum
+	pageMap["offset"] = (pageNum - 1) * pageSize
 
 	blogs, err := bh.blogService.List(userId, pageMap)
 	if err != nil {
@@ -102,16 +101,15 @@ func (bh *BlogHandler) UpdateBlog(ctx *gin.Context) {
  */
 func (bh BlogHandler) BlogPageList(ctx *gin.Context) {
 
-	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("paginate", "6"))
-	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	offset := (pageNo - 1) * pageSize
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "6"))
+	pageNum, _ := strconv.Atoi(ctx.DefaultQuery("pageNum", "1"))
 
 	pageMap := make(map[string]int, 3)
 
 	pageMap["pageSize"] = pageSize
-	pageMap["pageNo"] = pageNo
+	pageMap["pageNum"] = pageNum
 
-	pageMap["offset"] = offset
+	pageMap["offset"] = (pageNum - 1) * pageSize
 
 	pageList, err := bh.blogService.PageList(pageMap)
 

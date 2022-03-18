@@ -40,10 +40,10 @@ func (th TypeHandler) List(ctx *gin.Context) {
 func (th TypeHandler) TypeList(ctx *gin.Context) {
 
 	id, _ := strconv.Atoi(ctx.Query("id"))
-	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("paginate", "6"))
-	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "6"))
+	pageNum, _ := strconv.Atoi(ctx.DefaultQuery("pageNum", "1"))
 
-	typeList, err := th.typeService.TypeList(id, pageSize, pageNo)
+	typeList, err := th.typeService.TypeList(id, pageSize, pageNum)
 	if err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "查询失败")

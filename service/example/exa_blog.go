@@ -59,6 +59,7 @@ func (bs BlogService) Save(post request.Post) error {
 func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
+
 	if err := global.QX_DB.Debug().Select("id,title,updated_at,views").Where("user_id = ?", id).Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error; err != nil {
 		return nil, err
 	}
@@ -67,14 +68,9 @@ func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, 
 
 	var pageList response.PageList
 
-	pageList.Pagination.Total = total
-	pageList.Pagination.CurrentPage = page["pageNo"]
-	pageList.Pagination.PerPage = page["pageSize"]
-	if int(total)/page["pageSize"] == 0 {
-		pageList.Pagination.LastPage = int(total) / page["pageSize"]
-	} else {
-		pageList.Pagination.LastPage = int(total)/page["pageSize"] + 1
-	}
+	pageList.Total = total
+	pageList.PageNum = page["pageNum"]
+	pageList.PageSize = page["pageSize"]
 
 	pageList.DataList = blogs
 
@@ -133,14 +129,9 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 	global.QX_DB.Model(&model.Blog{}).Count(&total)
 	// 将total和dataList封装到pageList中
 	var pageList response.PageList
-	pageList.Pagination.Total = total
-	pageList.Pagination.CurrentPage = page["pageNo"]
-	pageList.Pagination.PerPage = page["pageSize"]
-	if int(total)/page["pageSize"] == 0 {
-		pageList.Pagination.LastPage = int(total) / page["pageSize"]
-	} else {
-		pageList.Pagination.LastPage = int(total)/page["pageSize"] + 1
-	}
+	pageList.Total = total
+	pageList.PageNum = page["pageNum"]
+	pageList.PageSize = page["pageSize"]
 
 	pageList.DataList = blogs
 

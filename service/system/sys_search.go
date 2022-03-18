@@ -49,7 +49,7 @@ func (*SearchService) SearchBlog(query string) (*response.PageList, error) {
 
 	// 将total和dataList封装到pageList中
 	var pageList response.PageList
-	pageList.Pagination.Total = total
+	pageList.Total = total
 	pageList.DataList = blogs
 
 	return &pageList, nil
@@ -58,7 +58,7 @@ func (*SearchService) SearchBlog(query string) (*response.PageList, error) {
 /**
 * 根据title和时间进行搜索
  */
-func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, pageNo int) (*response.PageList, error) {
+func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, pageNum int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
 
@@ -66,20 +66,15 @@ func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, 
 		return db.Where("title LIKE ?", "%"+title+"%")
 	}, func(db *gorm.DB) *gorm.DB {
 		return db.Where("updated_at BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)", startDate, endDate)
-	}).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
+	}).Offset((pageNum - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
 
 	// global.QX_DB.Model(&model.Blog{}).Where("title LIKE ?", "%"+title+"%").Count(&total)
 
 	var pageList response.PageList
 
-	pageList.Pagination.Total = total
-	pageList.Pagination.CurrentPage = pageNo
-	pageList.Pagination.PerPage = pageSize
-	if int(total)/pageSize == 0 {
-		pageList.Pagination.LastPage = int(total) / pageSize
-	} else {
-		pageList.Pagination.LastPage = int(total)/pageSize + 1
-	}
+	pageList.Total = total
+	pageList.PageNum = pageNum
+	pageList.PageSize = pageSize
 
 	pageList.DataList = blogs
 

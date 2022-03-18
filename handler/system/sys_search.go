@@ -35,10 +35,10 @@ func (sh *SearchHandler) SearchPriBlog(ctx *gin.Context) {
 	title := ctx.Query("title")
 	startDate := ctx.Query("startDate")
 	endDate := ctx.Query("endDate")
-	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("paginate", "10"))
-	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "10"))
+	pageNum, _ := strconv.Atoi(ctx.DefaultQuery("pageNum", "1"))
 
-	if m, err := sh.searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNo); err != nil {
+	if m, err := sh.searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNum); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "搜索失败")
 		return

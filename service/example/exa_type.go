@@ -12,8 +12,8 @@ type TypeService struct{}
 // 查詢type列表，按amount降序排列
 func (ts *TypeService) ListOrderByAmountDesc() ([]model.Type, error) {
 	types := make([]model.Type, 0, 4)
-	err := global.QX_DB.Debug().Select("id,type_name,amount").Preload("Blogs").Order("amount DESC").Find(&types).Error
 
+	err := global.QX_DB.Debug().Select("id,type_name,amount").Order("amount DESC").Find(&types).Error
 	return types, err
 }
 
@@ -26,7 +26,7 @@ func (ts *TypeService) List() ([]model.Type, error) {
 }
 
 // 点击分类进行查询并分页
-func (ts *TypeService) TypeList(id, pageSize, pageNo int) (*response.PageList, error) {
+func (ts *TypeService) TypeList(id, pageSize, pageNum int) (*response.PageList, error) {
 	var (
 		// 获取total
 		total int64
@@ -36,7 +36,7 @@ func (ts *TypeService) TypeList(id, pageSize, pageNo int) (*response.PageList, e
 	)
 
 	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Where("type_id = ?", id).
-		Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&b).Count(&total).Error; err != nil {
+		Offset((pageNum - 1) * pageSize).Limit(pageSize).Find(&b).Count(&total).Error; err != nil {
 		return nil, err
 	}
 
@@ -64,15 +64,9 @@ func (ts *TypeService) TypeList(id, pageSize, pageNo int) (*response.PageList, e
 
 	// 将total和dataList封装到pageList中
 	var pageList response.PageList
-	pageList.Pagination.Total = total
-	pageList.Pagination.PerPage = pageSize
-	pageList.Pagination.CurrentPage = pageNo
-
-	if int(total)/pageSize == 0 {
-		pageList.Pagination.LastPage = int(total) / pageSize
-	} else {
-		pageList.Pagination.LastPage = int(total)/pageSize + 1
-	}
+	pageList.Total = total
+	pageList.PageNum = pageNum
+	pageList.PageSize = pageSize
 
 	pageList.DataList = blogs
 
