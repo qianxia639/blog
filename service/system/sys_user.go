@@ -16,14 +16,13 @@ type UserService struct{}
 func (*UserService) Register(user model.User) (*model.User, error) {
 	var u model.User
 
-	if err := global.QX_DB.Debug().Select("email").Where("email = ?", user.Email).Find(&u).Error; err == nil {
-		if u.Email == user.Email {
-			return nil, errors.New("邮箱已注册")
-		}
+	global.QX_DB.Debug().Select("email").Where("email = ?", user.Email).Find(&u)
+	if u.Email == user.Email {
+		return nil, errors.New("邮箱已注册")
 	}
 
 	// 对明文进行加密处理
-	newPassword := utils.Md5([]byte(user.Password))
+	newPassword, _ := utils.Encrypt(user.Password)
 	// 创建用户
 	newUser := model.User{
 		Username: user.Email,
@@ -44,24 +43,16 @@ func (*UserService) Login(user model.User) (*model.User, error) {
 	var u model.User
 
 	// 判断用户名是否存在
-	if err := global.QX_DB.Debug().Select("email,password").Where("email = ?", user.Email).Find(&u).Error; err == nil {
-		if u.Email != user.Email {
-			return nil, errors.New("用户名不存在")
-		}
+	global.QX_DB.Debug().Select("id,username,avatar,email,password").Where("email = ?", user.Email).Find(&u)
+	if u.Email != user.Email {
+		return nil, errors.New("邮箱未注册")
 	}
 
-	// 匹配密码
-	if u.Password != utils.Md5([]byte(user.Password)) {
-		return nil, errors.New("密码错误")
+	if err := utils.Decrypt(u.Password, user.Password); err != nil {
+		return nil, errors.New("密码不匹配")
 	}
 
-	// 匹配用户名和密码
-	var u1 model.User
-	if err := global.QX_DB.Debug().Select("id,username,avatar").Where("email = ? AND password = ?", u.Email, u.Password).Find(&u1).Error; err != nil {
-		return nil, errors.New("用户名或密码错误")
-	}
-
-	return &u1, nil
+	return &u, nil
 }
 
 /**
@@ -80,12 +71,11 @@ func (*UserService) GetUserInfo(id uint64) (*model.User, error) {
  */
 func (*UserService) UpdateUsername(user model.User) error {
 	var u model.User
-	if err := global.QX_DB.Debug().Select("id,username").Where("username = ?", user.Username).Find(&u).Error; err == nil {
-		if u.Username == user.Username {
-			global.QX_LOG.Error("%s-{%v}", "上一次的用户名", err)
-			return errors.New("不能更改为当前用户名")
-		}
+	global.QX_DB.Debug().Select("id,username").Where("username = ?", user.Username).Find(&u)
+	if u.Username == user.Username {
+		return errors.New("不能更改为当前用户名")
 	}
+
 	if err := global.QX_DB.Debug().Model(&u).Where("id = ?", user.Id).Update("username", user.Username).Error; err != nil {
 		global.QX_LOG.Error("%s", err)
 		return errors.New("用户名修改失败")

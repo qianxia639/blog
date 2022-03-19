@@ -6,7 +6,7 @@ type User struct {
 	// 用户名
 	Username string `json:"username" gorm:"size:20;NOT NULL;comment:用户名(默认为邮箱号)"`
 	// 密码
-	Password string `json:"password" gorm:"type:char(32);NOT NULL;comment:密码"`
+	Password string `json:"password" gorm:"size:80;NOT NULL;comment:密码"`
 	// 邮箱 (做登录账户)
 	Email string `json:"email" gorm:"index;size:20;NOT NULL;comment:邮箱"`
 	// 头像
