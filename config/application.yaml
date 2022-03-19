@@ -12,7 +12,7 @@ mysql:
   loc: Asia/Shanghai
 
 qiniu:
-  access_key: 
-  secret_key: 
-  bucket: 
-  server_url: 
+  access_key: vz0iB4SnKnxXAEoxbW6TQvVxrfqOspnhYQzrPL3j
+  secret_key: GufJ3mD3z13EFXAaW_Y_PzI4n-uj4_I7ax-Vz6Dr
+  bucket: lyy-blog
+  server_url: http://r8rvr1zhk.hn-bkt.clouddn.com/
