@@ -58,19 +58,24 @@ func (*SearchService) SearchBlog(query string) (*response.PageList, error) {
 /**
 * 根据title和时间进行搜索
  */
-func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, pageNum int) (*response.PageList, error) {
+func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, pageNum int, userId uint64) (pageList response.PageList, err error) {
 	var blogs []response.Blog
 	var total int64
 
-	err := global.QX_DB.Debug().Model(&model.Blog{}).Scopes(func(db *gorm.DB) *gorm.DB {
-		return db.Where("title LIKE ?", "%"+title+"%")
-	}, func(db *gorm.DB) *gorm.DB {
-		return db.Where("updated_at BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)", startDate, endDate)
-	}).Offset((pageNum - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
+	if title == "" && startDate == "" && endDate == "" {
+		err = global.QX_DB.Debug().Model(&model.Blog{}).Where("user_id = ?", userId).Offset((pageNum - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
+
+	} else {
+		err = global.QX_DB.Debug().Model(&model.Blog{}).Scopes(func(db *gorm.DB) *gorm.DB {
+			return db.Where("title LIKE ? AND user_id = ?", "%"+title+"%", userId)
+		}, func(db *gorm.DB) *gorm.DB {
+			return db.Where("updated_at BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)", startDate, endDate)
+		}).Offset((pageNum - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
+	}
 
 	// global.QX_DB.Model(&model.Blog{}).Where("title LIKE ?", "%"+title+"%").Count(&total)
 
-	var pageList response.PageList
+	// var pageList response.PageList
 
 	pageList.Total = total
 	pageList.PageNum = pageNum
@@ -78,5 +83,5 @@ func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, 
 
 	pageList.DataList = blogs
 
-	return &pageList, err
+	return
 }

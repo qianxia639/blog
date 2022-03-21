@@ -8,6 +8,7 @@ import (
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/service/system"
+	"github.com/qianxia/blog/utils"
 )
 
 type SearchHandler struct {
@@ -37,8 +38,9 @@ func (sh *SearchHandler) SearchPriBlog(ctx *gin.Context) {
 	endDate := ctx.Query("endDate")
 	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "10"))
 	pageNum, _ := strconv.Atoi(ctx.DefaultQuery("pageNum", "1"))
+	userId := utils.GetUserId(ctx)
 
-	if m, err := sh.searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNum); err != nil {
+	if m, err := sh.searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNum, userId); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "搜索失败")
 		return
