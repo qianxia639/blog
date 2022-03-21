@@ -26,7 +26,7 @@ func (ts *TypeService) List() ([]model.Type, error) {
 }
 
 // 点击分类进行查询并分页
-func (ts *TypeService) TypeList(id, pageSize, pageNum int) (*response.PageList, error) {
+func (ts *TypeService) TypeList(id, pageSize, pageNum int) (pageList response.PageList, err error) {
 	var (
 		// 获取total
 		total int64
@@ -35,20 +35,19 @@ func (ts *TypeService) TypeList(id, pageSize, pageNum int) (*response.PageList, 
 		blogs []response.Index
 	)
 
-	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Where("type_id = ?", id).
-		Offset((pageNum - 1) * pageSize).Limit(pageSize).Find(&b).Count(&total).Error; err != nil {
-		return nil, err
-	}
+	err = global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Where("type_id = ?", id).
+		Offset((pageNum - 1) * pageSize).Limit(pageSize).Find(&b).Count(&total).Error
 
 	for _, v := range b {
 		var users model.User
-		if err := global.QX_DB.Debug().Select("username,avatar").Where("id = ?", v.UserId).Find(&users).Error; err != nil {
-			return nil, err
+		if err = global.QX_DB.Debug().Select("username,avatar").Where("id = ?", v.UserId).Find(&users).Error; err != nil {
+			return
 		}
 		var types model.Type
-		if err := global.QX_DB.Debug().Select("type_name").Where("id = ?", v.TypeId).Find(&types).Error; err != nil {
-			return nil, err
+		if err = global.QX_DB.Debug().Select("type_name").Where("id = ?", v.TypeId).Find(&types).Error; err != nil {
+			return
 		}
+
 		index := response.Index{
 			Id:          v.Id,
 			Title:       v.Title,
@@ -63,12 +62,12 @@ func (ts *TypeService) TypeList(id, pageSize, pageNum int) (*response.PageList, 
 	}
 
 	// 将total和dataList封装到pageList中
-	var pageList response.PageList
+	// var pageList response.PageList
 	pageList.Total = total
 	pageList.PageNum = pageNum
 	pageList.PageSize = pageSize
 
 	pageList.DataList = blogs
 
-	return &pageList, nil
+	return
 }

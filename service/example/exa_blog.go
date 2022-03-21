@@ -1,8 +1,6 @@
 package example
 
 import (
-	"errors"
-
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/request"
@@ -21,9 +19,7 @@ func (bs BlogService) Save(post request.Post) error {
 	// 根据post.tags[]的值查询对应的id
 	tags := make([]model.Tag, 0, 4)
 
-	if err := global.QX_DB.Debug().Select("id").Where("tag_name in (?)", post.Tags).Find(&tags).Error; err != nil {
-		return err
-	}
+	err := global.QX_DB.Debug().Select("id").Where("tag_name in (?)", post.Tags).Find(&tags).Error
 
 	// 构建数据
 	blog := model.Blog{
@@ -50,7 +46,7 @@ func (bs BlogService) Save(post request.Post) error {
 	}
 	// 提交事务
 	tx.Commit()
-	return nil
+	return err
 }
 
 /**
@@ -60,9 +56,7 @@ func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, 
 	var blogs []response.Blog
 	var total int64
 
-	if err := global.QX_DB.Debug().Select("id,title,updated_at,views").Where("user_id = ?", id).Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error; err != nil {
-		return nil, err
-	}
+	err := global.QX_DB.Debug().Select("id,title,updated_at,views").Where("user_id = ?", id).Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error
 
 	global.QX_DB.Debug().Model(&model.Blog{}).Where("user_id = ?", id).Count(&total)
 
@@ -74,7 +68,7 @@ func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, 
 
 	pageList.DataList = blogs
 
-	return &pageList, nil
+	return &pageList, err
 }
 
 /**
@@ -82,16 +76,15 @@ func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, 
  */
 func (bs BlogService) LatestList() ([]model.Blog, error) {
 	list := make([]model.Blog, 0, 4)
-	if err := global.QX_DB.Debug().Select("id,title").Order("updated_at DESC").Limit(5).Offset(-1).Find(&list).Error; err != nil {
-		return nil, err
-	}
-	return list, nil
+	err := global.QX_DB.Debug().Select("id,title").Order("updated_at DESC").Limit(5).Offset(-1).Find(&list).Error
+
+	return list, err
 }
 
 /**
 * 首页博客展示及分页
  */
-func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) {
+func (bs BlogService) PageList(page map[string]int) (pageList response.PageList, err error) {
 	var (
 		// 获取total
 		total int64
@@ -99,18 +92,16 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 		// 获取dataList
 		blogs []response.Index
 	)
-	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&b).Error; err != nil {
-		return nil, err
-	}
+	err = global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&b).Error
 
 	for _, v := range b {
 		var users model.User
-		if err := global.QX_DB.Debug().Select("username,avatar").Where("id = ?", v.UserId).Find(&users).Error; err != nil {
-			return nil, err
+		if err = global.QX_DB.Debug().Select("username,avatar").Where("id = ?", v.UserId).Find(&users).Error; err != nil {
+			return
 		}
 		var types model.Type
-		if err := global.QX_DB.Debug().Select("type_name").Where("id = ?", v.TypeId).Find(&types).Error; err != nil {
-			return nil, err
+		if err = global.QX_DB.Debug().Select("type_name").Where("id = ?", v.TypeId).Find(&types).Error; err != nil {
+			return
 		}
 
 		index := response.Index{
@@ -128,14 +119,13 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 
 	global.QX_DB.Model(&model.Blog{}).Count(&total)
 	// 将total和dataList封装到pageList中
-	var pageList response.PageList
 	pageList.Total = total
 	pageList.PageNum = page["pageNum"]
 	pageList.PageSize = page["pageSize"]
 
 	pageList.DataList = blogs
 
-	return &pageList, nil
+	return
 }
 
 /**
@@ -144,9 +134,7 @@ func (bs BlogService) PageList(page map[string]int) (*response.PageList, error) 
 func (bs BlogService) Delete(id int64) error {
 	var blog model.Blog
 
-	if err := global.QX_DB.Debug().Select("id,type_id").Where("id = ?", id).Find(&blog).Error; err != nil {
-		return errors.New("操作失败")
-	}
+	err := global.QX_DB.Debug().Select("id,type_id").Where("id = ?", id).Find(&blog).Error
 
 	// 开启事务
 	tx := global.QX_DB.Begin()
@@ -164,7 +152,7 @@ func (bs BlogService) Delete(id int64) error {
 	// 提交事务
 	tx.Commit()
 
-	return nil
+	return err
 }
 
 /**
