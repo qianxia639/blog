@@ -12,7 +12,6 @@ type Config struct {
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 		Charset  string `yaml:"charset"`
-		Loc      string `yaml:"loc"`
 	}
 	Qiniu struct {
 		AccessKey string `yaml:"access_key"`

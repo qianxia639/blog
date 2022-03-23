@@ -9,7 +9,6 @@ mysql:
   username: root
   password: qianxia
   charset: utf8mb4
-  loc: Asia/Shanghai
 
 qiniu:
   access_key: 
