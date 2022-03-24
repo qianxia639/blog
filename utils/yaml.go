@@ -9,11 +9,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func DeCode() (config *config.Config) {
+func ParseConfig() (config *config.Config) {
 	dir, _ := os.Getwd()
 	fileName := dir + "/config/application.yaml"
 	yamlFile, _ := ioutil.ReadFile(fileName)
 	err := yaml.Unmarshal(yamlFile, &config)
+	// err := yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
 		global.QX_LOG.Errorf("%v", err)
 		return nil
