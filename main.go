@@ -15,7 +15,7 @@ import (
 
 func main() {
 	// 初始化路由
-	router := routers.Init()
+	router := routers.InitRouter()
 
 	// 加载配置信息
 	initialize.Load()

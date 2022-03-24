@@ -90,12 +90,14 @@ func (uh *UserHandler) Info(ctx *gin.Context) {
 * 修改用户名
  */
 func (uh *UserHandler) UpdateUsername(ctx *gin.Context) {
+
 	var user model.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		global.QX_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
 		return
 	}
+	user.Id = utils.GetUserId(ctx)
 	if err := uh.userService.UpdateUsername(user); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return

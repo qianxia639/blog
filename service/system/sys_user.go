@@ -72,12 +72,9 @@ func (*UserService) UpdateUsername(user model.User) error {
 	var u model.User
 	global.QX_DB.Debug().Select("id,username").Where("username = ?", user.Username).Find(&u)
 	if u.Username == user.Username {
-		return errors.New("不能更改为当前用户名")
+		return errors.New("用户名已存在")
 	}
 
-	if err := global.QX_DB.Debug().Model(&u).Where("id = ?", user.Id).Update("username", user.Username).Error; err != nil {
-		global.QX_LOG.Error("%s", err)
-		return errors.New("用户名修改失败")
-	}
+	global.QX_DB.Debug().Model(&u).Where("id = ?", user.Id).Update("username", user.Username)
 	return nil
 }
