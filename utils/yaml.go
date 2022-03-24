@@ -14,7 +14,6 @@ func ParseConfig() (config *config.Config) {
 	fileName := dir + "/config/application.yaml"
 	yamlFile, _ := ioutil.ReadFile(fileName)
 	err := yaml.Unmarshal(yamlFile, &config)
-	// err := yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
 		global.QX_LOG.Errorf("%v", err)
 		return nil
