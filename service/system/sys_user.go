@@ -13,7 +13,7 @@ type UserService struct{}
 /**
 * 注册
  */
-func (*UserService) Register(user model.User) (*model.User, error) {
+func (us *UserService) Register(user model.User) (*model.User, error) {
 	var u model.User
 
 	global.QX_DB.Debug().Select("email").Where("email = ?", user.Email).Find(&u)
@@ -75,6 +75,5 @@ func (*UserService) UpdateUsername(user model.User) error {
 		return errors.New("用户名已存在")
 	}
 
-	global.QX_DB.Debug().Model(&u).Where("id = ?", user.Id).Update("username", user.Username)
-	return nil
+	return global.QX_DB.Debug().Model(&u).Where("id = ?", user.Id).Update("username", user.Username).Error
 }
