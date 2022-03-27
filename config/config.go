@@ -6,6 +6,8 @@ type Config struct {
 		Host string `yaml:"host"`
 	}
 	MySQL struct {
+		MaxIdle  int    `yaml:"max_idle"`
+		MaxOpen  int    `yaml:"max_open"`
 		Port     int    `yaml:"port"`
 		Host     string `yaml:"host"`
 		DbName   string `yaml:"dbname"`

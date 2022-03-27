@@ -9,6 +9,10 @@ mysql:
   username: root
   password: qianxia
   charset: utf8mb4
+  # 连接池最大空闲数
+  max_idle: 8
+  # 连接池最大连接数
+  max_open: 20
 
 qiniu:
   access_key: 

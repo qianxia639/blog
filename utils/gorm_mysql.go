@@ -35,9 +35,9 @@ func InitDb(y *config.Config) *gorm.DB {
 
 	sqlDB, _ := db.DB()
 	// 连接池最大空闲连接数
-	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxIdleConns(y.MySQL.MaxIdle)
 	//数据库最大连接数
-	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetMaxOpenConns(y.MySQL.MaxOpen)
 	// 连接可复用的最大时间。
 	sqlDB.SetConnMaxLifetime(time.Hour)
 	// db.Logger.LogMode(3)
