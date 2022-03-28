@@ -23,7 +23,7 @@ func DeCodeYAML(path string) (config *config.Config) {
 	yamlFile, _ := ioutil.ReadFile(path)
 	err := yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
-		global.QX_LOG.Errorf("%v", err)
+		global.QX_LOG.Errorf("decode yaml err: %v", err)
 		return nil
 	}
 	return
