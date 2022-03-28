@@ -3,7 +3,7 @@ module github.com/qianxia/blog
 go 1.16
 
 require (
-	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/BurntSushi/toml v1.0.0
 	github.com/gin-gonic/gin v1.7.4
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/golang/protobuf v1.5.2 // indirect

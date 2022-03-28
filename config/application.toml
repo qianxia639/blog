@@ -1,0 +1,21 @@
+[server]
+port = 6754
+host = "localhost"
+
+[mysql]
+host = "localhost"
+port = 3306
+dbname = "blog"
+username = "root"
+password = "qianxia"
+charset = "utf8mb4"
+# 连接池最大空闲数
+max_idle = 8
+# 连接池最大连接数
+max_open = 20
+
+[qiniu]
+access_key = ""
+secret_key = ""
+bucket = ""
+server_url = ""
