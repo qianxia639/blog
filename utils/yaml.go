@@ -10,16 +10,17 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func ParseConfig() (config *config.Config) {
-	var fileName string
-	if runtime.GOOS == "windows" {
+func DeCodeYAML(path string) (config *config.Config) {
+
+	switch runtime.GOOS {
+	case "windows":
 		dir, _ := os.Getwd()
-		fileName = dir + "/config/application.yaml"
-	} else if runtime.GOOS == "linux" {
-		fileName = "/opt/conf/application.yaml"
+		path = dir + "/config/application.yaml"
+	case "linux":
+		path = "/opt/conf/application.yaml"
 	}
 
-	yamlFile, _ := ioutil.ReadFile(fileName)
+	yamlFile, _ := ioutil.ReadFile(path)
 	err := yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
 		global.QX_LOG.Errorf("%v", err)

@@ -22,6 +22,7 @@ func InitRouter() *gin.Engine {
 	include(handler.ExampleRouters, handler.SystemRouters)
 
 	r := gin.Default()
+	// gin.SetMode(gin.ReleaseMode)
 	r.Use(middleware.CORS())
 	for _, opt := range options {
 		opt(r)

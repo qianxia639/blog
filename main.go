@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"time"
 
 	"github.com/qianxia/blog/global"
@@ -13,12 +15,26 @@ import (
 	"github.com/qianxia/blog/routers"
 )
 
+var (
+	confPath string
+	fileType string
+)
+
+func init() {
+	if runtime.GOOS == "windows" {
+		flag.StringVar(&confPath, "conf-path", "./config/application.toml", "配置文件路径")
+	} else if runtime.GOOS == "linux" {
+		flag.StringVar(&confPath, "conf-path", "/opt/conf/application.toml", "配置文件路径")
+	}
+	flag.StringVar(&fileType, "t", "toml", `配置文件类型(支持toml和yaml)`)
+}
+
 func main() {
+	flag.Parse()
 	// 初始化路由
 	router := routers.InitRouter()
-
 	// 加载配置信息
-	initialize.Load()
+	initialize.Load(confPath, fileType)
 
 	db, _ := global.QX_DB.DB()
 	defer db.Close()

@@ -8,11 +8,16 @@ import (
 	"go.uber.org/zap"
 )
 
-func Load() {
-	// 读取yaml配置文件
-	// global.QX_CONFIG = utils.ParseConfig()
-	global.QX_CONFIG = utils.DeCode()
-
+func Load(path, fileType string) {
+	// 读取配置文件
+	switch fileType {
+	case "yaml":
+		global.QX_CONFIG = utils.DeCodeYAML(path)
+	case "toml":
+		global.QX_CONFIG = utils.DeCodeTOML(path)
+	default:
+		global.QX_CONFIG = utils.DeCodeTOML(path)
+	}
 	// 加载log日志
 	global.QX_LOG = utils.InitLogger("./log/info."+time.Now().Format("2006-01-02")+".log", global.QX_WARN_PATH, zap.InfoLevel)
 
