@@ -32,6 +32,6 @@ func UploadFile(file multipart.File, fileSize int64) (string, error) {
 	if err := formUpload.PutWithoutKey(context.Background(), &ret, upToken, file, fileSize, nil); err != nil {
 		return "", err
 	} else {
-		return global.QX_CONFIG.Qiniu.ServerUrl + ret.Key, nil
+		return global.QX_CONFIG.Qiniu.ServerUrl + "/" + ret.Key, nil
 	}
 }
