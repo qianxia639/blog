@@ -26,7 +26,7 @@ func init() {
 	} else if runtime.GOOS == "linux" {
 		flag.StringVar(&confPath, "conf-path", "/opt/conf/application.toml", "配置文件路径")
 	}
-	flag.StringVar(&fileType, "t", "toml", "配置文件类型(支持toml和yaml)")
+	flag.StringVar(&fileType, "type", "toml", "配置文件类型(支持toml和yaml)")
 }
 
 func main() {

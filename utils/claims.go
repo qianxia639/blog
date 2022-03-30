@@ -26,3 +26,29 @@ func GetUserId(ctx *gin.Context) uint64 {
 		return claims.(*CustomClaims).Id
 	}
 }
+
+// 从Gin的Context中获取jwt并解析其中的用户名
+func GetUsername(ctx *gin.Context) string {
+	if claims, exists := ctx.Get("claims"); !exists {
+		if cl, err := GetClaims(ctx); err != nil {
+			return ""
+		} else {
+			return cl.Username
+		}
+	} else {
+		return claims.(*CustomClaims).Username
+	}
+}
+
+// 从Gin的Context中获取jwt并解析其中的用户头像
+func GetAvatar(ctx *gin.Context) string {
+	if claims, exists := ctx.Get("claims"); !exists {
+		if cl, err := GetClaims(ctx); err != nil {
+			return ""
+		} else {
+			return cl.Avatar
+		}
+	} else {
+		return claims.(*CustomClaims).Avatar
+	}
+}

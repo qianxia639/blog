@@ -18,13 +18,16 @@ type BlogService struct{}
 func (bs BlogService) Save(post request.Post) error {
 	// 根据post.tags[]的值查询对应的id
 	tags := make([]model.Tag, 0, 4)
-
+	var tp []string
 	err := global.QX_DB.Debug().Select("id").Where("tag_name in (?)", post.Tags).Find(&tags).Error
+	global.QX_DB.Debug().Model(&model.Type{}).Select("type_name").Where("id = ?", post.TypeId).Find(&tp)
 
 	// 构建数据
 	blog := model.Blog{
 		UserId:      post.UserId,
+		Username:    post.Username,
 		TypeId:      post.TypeId,
+		TypeName:    tp[0],
 		Title:       post.Title,
 		Description: post.Description,
 		Content:     post.Content,
@@ -88,34 +91,34 @@ func (bs BlogService) PageList(page map[string]int) (pageList response.PageList,
 	var (
 		// 获取total
 		total int64
-		b     []model.Blog
+		blogs []model.Blog
 		// 获取dataList
-		blogs []response.Index
+		// blogs []response.Index
 	)
-	err = global.QX_DB.Debug().Select("id,user_id,type_id,title,description,updated_at").Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&b).Error
+	err = global.QX_DB.Debug().Select("id,user_id,type_id,username,type_name,title,description,updated_at").Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error
 
-	for _, v := range b {
-		var users model.User
-		if err = global.QX_DB.Debug().Select("username,avatar").Where("id = ?", v.UserId).Find(&users).Error; err != nil {
-			return
-		}
-		var types model.Type
-		if err = global.QX_DB.Debug().Select("type_name").Where("id = ?", v.TypeId).Find(&types).Error; err != nil {
-			return
-		}
+	// for _, v := range b {
+	// 	var users model.User
+	// 	if err = global.QX_DB.Debug().Select("username,avatar").Where("id = ?", v.UserId).Find(&users).Error; err != nil {
+	// 		return
+	// 	}
+	// 	var types model.Type
+	// 	if err = global.QX_DB.Debug().Select("type_name").Where("id = ?", v.TypeId).Find(&types).Error; err != nil {
+	// 		return
+	// 	}
 
-		index := response.Index{
-			Id:          v.Id,
-			Title:       v.Title,
-			Description: v.Description,
-			UpdatedAt:   utils.TimestampToString(v.UpdatedAt),
-			TypeName:    types.TypeName,
-			Avatar:      users.Avatar,
-			Username:    users.Username,
-			Tags:        v.Tags,
-		}
-		blogs = append(blogs, index)
-	}
+	// 	index := response.Index{
+	// 		Id:          v.Id,
+	// 		Title:       v.Title,
+	// 		Description: v.Description,
+	// 		UpdatedAt:   utils.TimestampToString(v.UpdatedAt),
+	// 		TypeName:    types.TypeName,
+	// 		Avatar:      users.Avatar,
+	// 		Username:    users.Username,
+	// 		Tags:        v.Tags,
+	// 	}
+	// 	blogs = append(blogs, index)
+	// }
 
 	global.QX_DB.Model(&model.Blog{}).Count(&total)
 	// 将total和dataList封装到pageList中
@@ -171,21 +174,21 @@ func (*BlogService) Update(post request.Post) error {
 /**
 * 获取博客信息
  */
-func (bs BlogService) GetBlog(id uint64) (map[string]interface{}, error) {
+func (bs BlogService) GetBlog(id uint64, avatar string) (map[string]interface{}, error) {
 
 	var b model.Blog
-	if err := global.QX_DB.Debug().Select("id,user_id,type_id,title,content,description,flag,views,updated_at").Preload("Tags").Where("id = ?", id).Find(&b).Error; err != nil {
+	if err := global.QX_DB.Debug().Select("id,username,type_name,title,content,description,flag,views,updated_at").Preload("Tags").Where("id = ?", id).Find(&b).Error; err != nil {
 		return nil, err
 	}
 
-	var users model.User
-	if err := global.QX_DB.Debug().Select("username,avatar").Where("id = ?", b.UserId).Find(&users).Error; err != nil {
-		return nil, err
-	}
-	var types model.Type
-	if err := global.QX_DB.Debug().Select("type_name").Where("id = ?", b.TypeId).Find(&types).Error; err != nil {
-		return nil, err
-	}
+	// var users model.User
+	// if err := global.QX_DB.Debug().Select("username,avatar").Where("id = ?", b.UserId).Find(&users).Error; err != nil {
+	// 	return nil, err
+	// }
+	// var types model.Type
+	// if err := global.QX_DB.Debug().Select("type_name").Where("id = ?", b.TypeId).Find(&types).Error; err != nil {
+	// 	return nil, err
+	// }
 
 	if err := global.QX_DB.Debug().Model(&model.Blog{Id: id}).UpdateColumn("views", gorm.Expr("views + 1")).Error; err != nil {
 		return nil, err
@@ -198,9 +201,9 @@ func (bs BlogService) GetBlog(id uint64) (map[string]interface{}, error) {
 	m["flag"] = b.Flag
 	m["views"] = b.Views
 	m["updatedAt"] = utils.TimestampToString(b.UpdatedAt)
-	m["username"] = users.Username
-	m["avatar"] = users.Avatar
-	m["typeName"] = types.TypeName
+	m["username"] = b.Username
+	m["avatar"] = avatar
+	m["typeName"] = b.TypeName
 	m["tagNames"] = b.Tags
 
 	// 返回

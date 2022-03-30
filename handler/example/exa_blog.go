@@ -27,8 +27,8 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 		return
 	}
 	// 获取登录的用户信息
-	userId := utils.GetUserId(ctx)
-	post.UserId = userId
+	post.UserId = utils.GetUserId(ctx)
+	post.Username = utils.GetUsername(ctx)
 
 	err := bh.blogService.Save(post)
 	if err != nil {
@@ -140,7 +140,8 @@ func (bh BlogHandler) LatestList(ctx *gin.Context) {
  */
 func (bh BlogHandler) GetBlog(ctx *gin.Context) {
 	blogId, _ := strconv.ParseUint(ctx.Params.ByName("id"), 10, 64)
-	if blogs, err := bh.blogService.GetBlog(blogId); err != nil {
+	avatar := utils.GetAvatar(ctx)
+	if blogs, err := bh.blogService.GetBlog(blogId, avatar); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
 		return

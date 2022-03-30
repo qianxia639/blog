@@ -11,7 +11,6 @@ import (
 )
 
 func DeCodeYAML(path string) (config *config.Config) {
-
 	switch runtime.GOOS {
 	case "windows":
 		dir, _ := os.Getwd()

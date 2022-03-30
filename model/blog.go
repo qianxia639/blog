@@ -7,6 +7,10 @@ type Blog struct {
 	UserId uint64 `json:"userId" gorm:"NOT NULL;comment:用户Id"`
 	// 分类id
 	TypeId uint16 `json:"typeId" gorm:"NOT NULL;comment:分类Id"`
+	// 用户名
+	Username string `json:"username" gorm:"comment:用户名"`
+	// 分类类名
+	TypeName string `json:"typeName" gorm:"comment:分类类名"`
 	// 标题
 	Title string `json:"title" gorm:"size:20;NOT NULL;comment:标题"`
 	// 描述
