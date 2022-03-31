@@ -22,7 +22,7 @@ type BlogHandler struct {
 func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	var post request.Post
 	if err := ctx.ShouldBindJSON(&post); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, "数据绑定失败")
+		command.Failed(ctx, http.StatusInternalServerError, "缺少必要的参数")
 		global.QX_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
 		return
 	}
@@ -33,10 +33,10 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	err := bh.blogService.Save(post)
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "创建失败")
+		command.Failed(ctx, http.StatusInternalServerError, "发布博客失败")
 		return
 	}
-	command.Success(ctx, "创建成功", nil)
+	command.Success(ctx, "发布博客成功", nil)
 }
 
 /**

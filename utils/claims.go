@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
 )
 
@@ -10,6 +11,8 @@ func GetClaims(ctx *gin.Context) (*CustomClaims, error) {
 	claims, err := ParseToken(token)
 	if err != nil {
 		global.QX_LOG.Error("解析jwt信息失败,请检查请求头是否存在X-Token")
+		command.Failed(ctx, 401, err.Error())
+		return nil, err
 	}
 	return claims, nil
 }
