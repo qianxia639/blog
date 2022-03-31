@@ -4,8 +4,6 @@ go 1.16
 
 require (
 	github.com/BurntSushi/toml v1.0.0
-	github.com/casbin/casbin/v2 v2.43.1
-	github.com/casbin/gorm-adapter/v3 v3.5.0
 	github.com/gin-gonic/gin v1.7.4
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/golang/protobuf v1.5.2 // indirect

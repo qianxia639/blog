@@ -15,7 +15,6 @@ func RegisterTables(db *gorm.DB) {
 		&model.Tag{},
 		&model.Blog{},
 		&model.Comment{},
-		&model.Role{},
 	); err != nil {
 		global.QX_LOG.Fatalf("表自动迁移失败,err: %s", err)
 		os.Exit(0)

@@ -15,7 +15,8 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		// 登录
 		userGroup.POST("/login", system.GetInstance().Login)
 
-		userGroup = userGroup.Group("/", middleware.Auth())
+		userGroup = userGroup.Group("/")
+		userGroup.Use(middleware.Auth())
 		{
 			// 用户信息
 			userGroup.GET("/info", system.GetInstance().Info)
@@ -38,6 +39,7 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 
 	// ========== upload router group ==========
 	fileGroup := e.Group("/upload")
+	fileGroup.Use(middleware.Auth())
 	{
 		// markdown文件上传
 		fileGroup.POST("/mdFile", system.GetInstance().UploadMdFile)

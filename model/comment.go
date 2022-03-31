@@ -7,8 +7,8 @@ type Comment struct {
 	Id uint64 `json:"id"`
 	// 博客id
 	BlogId uint64 `json:"blogId" gorm:"NOT NULL"`
-	// 评论id
-	ParentCommentId uint64 `json:"parentCommentId"`
+	// 父评论id
+	ParentId uint64 `json:"parentId" gorm:"父评论Id"`
 	// 用户名
 	Username string `json:"username" gorm:"size:20;NOT NULL"`
 	// 头像

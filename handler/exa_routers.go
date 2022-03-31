@@ -17,7 +17,8 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 		// 获取博客信息
 		blogGroup.GET("/:id", example.GetInstance().GetBlog)
 
-		blogGroup = blogGroup.Group("/", middleware.Auth())
+		blogGroup = blogGroup.Group("/")
+		blogGroup.Use(middleware.Auth())
 		{
 			// 新增博客
 			blogGroup.POST("/save", example.GetInstance().CreateBlog)
