@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,6 +12,7 @@ import (
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/initialize"
 	"github.com/qianxia/blog/routers"
+	"github.com/qianxia/blog/server"
 )
 
 var (
@@ -39,13 +39,8 @@ func main() {
 	db, _ := global.QX_DB.DB()
 	defer db.Close()
 	defer global.QX_LOG.Sync()
-	srv := &http.Server{
-		Addr:           fmt.Sprintf("%s:%d", global.QX_CONFIG.Server.Host, global.QX_CONFIG.Server.Port),
-		Handler:        router,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
+
+	srv := server.Server(router)
 
 	go func() {
 		// 服务连接

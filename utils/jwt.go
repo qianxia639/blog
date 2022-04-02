@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -58,8 +57,8 @@ func ParseToken(tokenStr string) (*CustomClaims, error) {
 		if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 			return claims, nil
 		}
-		return nil, errors.New("无法解析的token")
+		return nil, jwt.ErrTokenUnverifiable
 	} else {
-		return nil, errors.New("无法解析的token")
+		return nil, jwt.ErrTokenUnverifiable
 	}
 }
