@@ -8,7 +8,7 @@ type User struct {
 	// 密码
 	Password string `json:"password" gorm:"size:80;NOT NULL;comment:密码"`
 	// 邮箱 (做登录账户)
-	Email string `json:"email" gorm:"index;size:20;NOT NULL;comment:邮箱"`
+	Email string `json:"email" gorm:"index;size:20;NOT NULL;comment:邮箱" validate:"email"`
 	// 头像
 	Avatar string `json:"avatar" gorm:"default:https://picsum.photos/30/30/?image=41;comment:头像"`
 	// 创建时间

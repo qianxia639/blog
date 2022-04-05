@@ -6,6 +6,7 @@ import (
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/utils"
+	"gorm.io/gorm"
 )
 
 type UserService struct{}
@@ -75,5 +76,17 @@ func (*UserService) UpdateUsername(user model.User) error {
 		return errors.New("用户名已存在")
 	}
 
-	return global.QX_DB.Debug().Model(&u).Where("id = ?", user.Id).Update("username", user.Username).Error
+	return global.QX_DB.Transaction(func(tx *gorm.DB) error {
+		// 修改user表中的username
+		if err := tx.Debug().Model(&u).Where("id = ?", user.Id).Update("username", user.Username).Error; err != nil {
+			return err
+		}
+
+		// 修改blog表中的username
+		if err := tx.Debug().Model(&model.Blog{}).Where("user_id = ?", user.Id).Update("username", user.Username).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
 }
