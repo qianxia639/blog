@@ -6,6 +6,7 @@ import (
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/utils"
+	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 
@@ -26,6 +27,7 @@ func (us *UserService) Register(user model.User) (*model.User, error) {
 	newPassword, _ := utils.Encrypt(user.Password)
 	// 创建用户
 	newUser := model.User{
+		UUID:     uuid.NewV4().String(),
 		Username: user.Email,
 		Email:    user.Email,
 		Password: newPassword,
@@ -44,7 +46,7 @@ func (*UserService) Login(user model.User) (*model.User, error) {
 	var u model.User
 
 	// 判断用户名是否存在
-	global.QX_DB.Debug().Select("id,username,avatar,email,password").Where("email = ?", user.Email).Find(&u)
+	global.QX_DB.Debug().Select("id,uuid,username,avatar,email,password").Where("email = ?", user.Email).Find(&u)
 	if u.Email != user.Email {
 		return nil, errors.New("邮箱未注册")
 	}

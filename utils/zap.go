@@ -9,8 +9,13 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+var (
+	infoPath  = "./log/info." + time.Now().Format("2006-01-02") + ".log"
+	errorPath = "./log/error." + time.Now().Format("2006-01-02") + ".log"
+)
+
 // 初始化日志
-func InitLogger(logPath, errPath string, logLevel zapcore.Level) *zap.SugaredLogger {
+func Zap() *zap.SugaredLogger {
 	config := zapcore.EncoderConfig{
 		MessageKey:   "message",                   // 结构化(json)输出: msg的key
 		LevelKey:     "level",                     // 日志级别的key
@@ -28,17 +33,17 @@ func InitLogger(logPath, errPath string, logLevel zapcore.Level) *zap.SugaredLog
 
 	// 自定义日志级别 Info
 	infoLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool {
-		return l < zapcore.WarnLevel && l >= logLevel
+		return l < zapcore.WarnLevel && l >= zap.InfoLevel
 	})
 
 	// 自定义日志级别 warn
 	warnLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool {
-		return l >= zapcore.WarnLevel && l >= logLevel
+		return l >= zapcore.WarnLevel && l >= zap.InfoLevel
 	})
 
 	// 获取io.writer的实现
-	infoWriter := getWriter(logPath)
-	warnWriter := getWriter(errPath)
+	infoWriter := getWriter(infoPath)
+	warnWriter := getWriter(errorPath)
 
 	core := zapcore.NewTee(
 		// 将info及以下写入logPath，NewConsoleEncoder 是非结构化输出

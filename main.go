@@ -15,10 +15,7 @@ import (
 	"github.com/qianxia/blog/server"
 )
 
-var (
-	confPath string
-	fileType string
-)
+var confPath string
 
 func init() {
 	if runtime.GOOS == "windows" {
@@ -26,7 +23,7 @@ func init() {
 	} else if runtime.GOOS == "linux" {
 		flag.StringVar(&confPath, "conf-path", "/opt/conf/application.toml", "配置文件路径")
 	}
-	flag.StringVar(&fileType, "type", "toml", "配置文件类型(支持toml和yaml)")
+
 }
 
 func main() {
@@ -34,7 +31,7 @@ func main() {
 	// 初始化路由
 	router := routers.InitRouter()
 	// 加载配置信息
-	initialize.Load(confPath, fileType)
+	initialize.Load(confPath)
 
 	db, _ := global.QX_DB.DB()
 	defer db.Close()

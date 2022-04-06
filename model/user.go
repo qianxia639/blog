@@ -3,6 +3,8 @@ package model
 type User struct {
 	// 主键
 	Id uint64 `gorm:"primaryKey;comment:主键"`
+	// 用户UUID
+	UUID string `json:"uuid" gorm:"size:36;NOT NULL;comment:用户UUID"`
 	// 用户名
 	Username string `json:"username" gorm:"size:20;NOT NULL;comment:用户名(默认为邮箱号)"`
 	// 密码

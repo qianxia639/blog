@@ -60,6 +60,7 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 	bc := utils.BaseClaims{
 		Id:       user.Id,
+		UUID:     user.UUID,
 		Username: user.Username,
 		Avatar:   user.Avatar,
 	}

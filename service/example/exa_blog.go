@@ -89,39 +89,14 @@ func (bs BlogService) LatestList() ([]model.Blog, error) {
  */
 func (bs BlogService) PageList(page map[string]int) (pageList response.PageList, err error) {
 	var (
-		// 获取total
 		total int64
 		blogs []model.Blog
-		// 获取dataList
-		// blogs []response.Index
 	)
 	err = global.QX_DB.Debug().Select("id,user_id,type_id,username,type_name,title,description,updated_at").Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error
 
-	// for _, v := range b {
-	// 	var users model.User
-	// 	if err = global.QX_DB.Debug().Select("username,avatar").Where("id = ?", v.UserId).Find(&users).Error; err != nil {
-	// 		return
-	// 	}
-	// 	var types model.Type
-	// 	if err = global.QX_DB.Debug().Select("type_name").Where("id = ?", v.TypeId).Find(&types).Error; err != nil {
-	// 		return
-	// 	}
-
-	// 	index := response.Index{
-	// 		Id:          v.Id,
-	// 		Title:       v.Title,
-	// 		Description: v.Description,
-	// 		UpdatedAt:   utils.TimestampToString(v.UpdatedAt),
-	// 		TypeName:    types.TypeName,
-	// 		Avatar:      users.Avatar,
-	// 		Username:    users.Username,
-	// 		Tags:        v.Tags,
-	// 	}
-	// 	blogs = append(blogs, index)
-	// }
-
 	global.QX_DB.Model(&model.Blog{}).Count(&total)
-	// 将total和dataList封装到pageList中
+
+	// 将分页信息和dataList封装到pageList中
 	pageList.Total = total
 	pageList.PageNum = page["pageNum"]
 	pageList.PageSize = page["pageSize"]
@@ -180,15 +155,6 @@ func (bs BlogService) GetBlog(id uint64, avatar string) (map[string]interface{},
 	if err := global.QX_DB.Debug().Select("id,username,type_name,title,content,description,flag,views,updated_at").Preload("Tags").Where("id = ?", id).Find(&b).Error; err != nil {
 		return nil, err
 	}
-
-	// var users model.User
-	// if err := global.QX_DB.Debug().Select("username,avatar").Where("id = ?", b.UserId).Find(&users).Error; err != nil {
-	// 	return nil, err
-	// }
-	// var types model.Type
-	// if err := global.QX_DB.Debug().Select("type_name").Where("id = ?", b.TypeId).Find(&types).Error; err != nil {
-	// 	return nil, err
-	// }
 
 	if err := global.QX_DB.Debug().Model(&model.Blog{Id: id}).UpdateColumn("views", gorm.Expr("views + 1")).Error; err != nil {
 		return nil, err

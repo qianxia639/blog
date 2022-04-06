@@ -7,12 +7,12 @@ import (
 	"github.com/qianxia/blog/middleware"
 )
 
-type Option func(*gin.Engine) *gin.Engine
+type option func(*gin.Engine) *gin.Engine
 
-var options = []Option{}
+var options = []option{}
 
 // 注册app的路由配置
-func include(opts ...Option) {
+func include(opts ...option) {
 	options = append(options, opts...)
 }
 
