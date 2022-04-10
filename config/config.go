@@ -1,10 +1,10 @@
 package config
 
 type Config struct {
-	Server struct {
+	Http struct {
 		Port int    `mapstructure:"port" yaml:"port" toml:"port"`
 		Host string `mapstructure:"host" yaml:"host" toml:"host"`
-	} `mapstructure:"server"`
+	} `mapstructure:"http"`
 	MySQL struct {
 		MaxIdle  int    `mapstructure:"max_idle" yaml:"max_idle" toml:"max_idle"`
 		MaxOpen  int    `mapstructure:"max_open" yaml:"max_open" toml:"max_open"`

@@ -17,7 +17,7 @@ func include(opts ...option) {
 }
 
 // 初始化
-func InitRouter() *gin.Engine {
+func Router() *gin.Engine {
 	// 加载app的配置路由
 	include(handler.ExampleRouters, handler.SystemRouters)
 

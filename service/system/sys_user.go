@@ -63,7 +63,7 @@ func (*UserService) Login(user model.User) (*model.User, error) {
  */
 func (*UserService) GetUserInfo(id uint64) (*model.User, error) {
 	var user model.User
-	err := global.QX_DB.Debug().Select("id,username,avatar").Where("id = ?", id).Find(&user).Error
+	err := global.QX_DB.Debug().Select("id,uuid,username,avatar").Where("id = ?", id).Find(&user).Error
 
 	return &user, err
 }

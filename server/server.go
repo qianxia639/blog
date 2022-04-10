@@ -10,7 +10,7 @@ import (
 
 func Server(handler http.Handler) *http.Server {
 	return &http.Server{
-		Addr:           fmt.Sprintf("%s:%d", global.QX_CONFIG.Server.Host, global.QX_CONFIG.Server.Port),
+		Addr:           fmt.Sprintf("%s:%d", global.QX_CONFIG.Http.Host, global.QX_CONFIG.Http.Port),
 		Handler:        handler,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,

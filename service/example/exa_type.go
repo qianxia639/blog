@@ -1,6 +1,8 @@
 package example
 
 import (
+	"errors"
+
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/response"
@@ -43,4 +45,18 @@ func (ts *TypeService) TypeList(id, pageSize, pageNum int) (response.PageList, e
 	pageList.DataList = blogs
 
 	return pageList, err
+}
+
+// 新增分类
+func (ts *TypeService) CreateType(typeName string) error {
+
+	var t []string
+
+	global.QX_DB.Debug().Model(&model.Type{}).Select("type_name").Where("type_name = ?", typeName).Find(&t)
+
+	if len(t) != 0 {
+		return errors.New("该分类已存在")
+	}
+
+	return global.QX_DB.Debug().Model(&model.Type{}).Create(&model.Type{TypeName: typeName}).Error
 }

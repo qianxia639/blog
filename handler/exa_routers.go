@@ -42,6 +42,13 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 		typeGroup.GET("/list", example.GetInstance().List)
 		// 点击分类进行博客的展示并分页
 		typeGroup.GET("/page", example.GetInstance().TypeList)
+
+		typeGroup = typeGroup.Group("")
+		typeGroup.Use(middleware.Auth())
+		{
+			typeGroup.POST("/save", example.GetInstance().CreateType)
+		}
+
 	}
 
 	//  ========== tag router group ==========

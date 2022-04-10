@@ -29,7 +29,7 @@ func init() {
 func main() {
 	flag.Parse()
 	// 初始化路由
-	router := routers.InitRouter()
+	router := routers.Router()
 	// 加载配置信息
 	initialize.Load(confPath)
 

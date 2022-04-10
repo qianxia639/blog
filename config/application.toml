@@ -1,4 +1,4 @@
-[server]
+[http]
 port = 6754
 host = "localhost"
 

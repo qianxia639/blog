@@ -6,6 +6,7 @@ type systemRouterGroup struct {
 	UserHandler
 	SearchHandler
 	UploadHandler
+	CommentHandler
 }
 
 var systemRouterGroups *systemRouterGroup

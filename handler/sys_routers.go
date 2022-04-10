@@ -45,5 +45,14 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		fileGroup.POST("/mdFile", system.GetInstance().UploadMdFile)
 	}
 
+	// ========== comment router group ==========
+	commentGroup := e.Group("/comment")
+	{
+		// 获取comment列表
+		commentGroup.GET("/list", system.GetInstance().CommentList)
+		// 发布评论
+		commentGroup.POST("/save", system.GetInstance().Save)
+	}
+
 	return e
 }

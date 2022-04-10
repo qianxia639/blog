@@ -15,7 +15,7 @@ type TypeHandler struct {
 }
 
 // 按amount降序排列
-func (th TypeHandler) ListOrder(ctx *gin.Context) {
+func (th *TypeHandler) ListOrder(ctx *gin.Context) {
 	types, err := th.typeService.ListOrderByAmountDesc()
 	if err != nil {
 		global.QX_LOG.Error(err)
@@ -26,7 +26,7 @@ func (th TypeHandler) ListOrder(ctx *gin.Context) {
 }
 
 // 不排序只显示列表
-func (th TypeHandler) List(ctx *gin.Context) {
+func (th *TypeHandler) List(ctx *gin.Context) {
 	types, err := th.typeService.List()
 	if err != nil {
 		global.QX_LOG.Error(err)
@@ -37,7 +37,7 @@ func (th TypeHandler) List(ctx *gin.Context) {
 }
 
 //	点击分类进行查询并分页
-func (th TypeHandler) TypeList(ctx *gin.Context) {
+func (th *TypeHandler) TypeList(ctx *gin.Context) {
 
 	id, _ := strconv.Atoi(ctx.Query("id"))
 	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "6"))
@@ -50,4 +50,18 @@ func (th TypeHandler) TypeList(ctx *gin.Context) {
 		return
 	}
 	command.Success(ctx, "查询成功", typeList)
+}
+
+// 新增分类
+func (th *TypeHandler) CreateType(ctx *gin.Context) {
+	var m map[string]string
+	ctx.ShouldBindJSON(&m)
+	if err := th.typeService.CreateType(m["typeName"]); err != nil {
+		global.QX_LOG.Errorf("insert type err: %v", err)
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	command.Success(ctx, "添加成功", nil)
+
 }
