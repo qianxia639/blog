@@ -1,6 +1,12 @@
 package example
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/request"
@@ -19,7 +25,7 @@ func (bs BlogService) Save(post request.Post) error {
 	// 根据post.tags[]的值查询对应的id
 	tags := make([]model.Tag, 0, 4)
 	var tp []string
-	err := global.QX_DB.Debug().Select("id").Where("tag_name in (?)", post.Tags).Find(&tags).Error
+	err := global.QX_DB.Debug().Select("id,tag_name").Where("tag_name in (?)", post.Tags).Find(&tags).Error
 	global.QX_DB.Debug().Model(&model.Type{}).Select("type_name").Where("id = ?", post.TypeId).Find(&tp)
 
 	// 构建数据
@@ -49,6 +55,25 @@ func (bs BlogService) Save(post request.Post) error {
 	}
 	// 提交事务
 	tx.Commit()
+
+	b, err := json.Marshal(&blog)
+	if err != nil {
+		return err
+	}
+	// 插入数据到elasticsearch中
+	res, err := esapi.IndexRequest{
+		Index:      "blog",
+		Body:       bytes.NewReader(b),
+		DocumentID: fmt.Sprintf("%v", blog.Id),
+		Refresh:    "true",
+	}.Do(context.Background(), global.QX_ES)
+
+	if err != nil {
+		return err
+	}
+
+	defer res.Body.Close()
+
 	return err
 }
 

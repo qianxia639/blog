@@ -27,3 +27,48 @@ type Blog struct {
 	UpdatedAt int64 `json:"updatedAt" gorm:"autoUpdateTine:milli;comment:更新时间"`
 	Tags      []Tag `gorm:"many2many:blog_tag;"`
 }
+
+var BlogMapping = `
+{
+	"mappings": {
+	  "properties": {
+		"id": {
+		  "type": "long"
+		},
+		"userId": {
+		  "type": "long"
+		},
+		"typeId": {
+		  "type": "integer"
+		},
+		"username": {
+		  "type": "keyword"
+		},
+		"typeName": {
+		  "type": "keyword"
+		},
+		"title": {
+		  "type": "text"
+		},
+		"description": {
+		  "type": "text"
+		},
+		"content": {
+		  "type": "text"
+		},
+		"flag": {
+		  "type": "keyword"
+		},
+		"views": {
+		  "type": "integer"
+		},
+		"createdAt": {
+		  "type": "date"
+		},
+		"updatedAt": {
+		  "type": "date"
+		}
+	  }
+	}
+  }
+`

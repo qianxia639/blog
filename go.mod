@@ -3,6 +3,7 @@ module github.com/qianxia/blog
 go 1.16
 
 require (
+	github.com/elastic/go-elasticsearch/v7 v7.6.0
 	github.com/gin-gonic/gin v1.7.4
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/qiniu/go-sdk/v7 v7.11.1
