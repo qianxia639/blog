@@ -48,10 +48,12 @@ var BlogMapping = `
 		  "type": "keyword"
 		},
 		"title": {
-		  "type": "text"
+		  "type": "text",
+		  "analyzer": "ik_max_word"
 		},
 		"description": {
-		  "type": "text"
+		  "type": "text",
+		   "analyzer": "ik_max_word"
 		},
 		"content": {
 		  "type": "text"

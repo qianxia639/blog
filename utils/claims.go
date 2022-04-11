@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
+	uuid "github.com/satori/go.uuid"
 )
 
 func GetClaims(ctx *gin.Context) (*CustomClaims, error) {
@@ -31,10 +32,10 @@ func GetUserId(ctx *gin.Context) uint64 {
 }
 
 // 从Gin的Context中获取jwt并解析其中的用户UUID
-func GetUserUUID(ctx *gin.Context) string {
+func GetUserUUID(ctx *gin.Context) uuid.UUID {
 	if claims, exists := ctx.Get("claims"); !exists {
 		if cl, err := GetClaims(ctx); err != nil {
-			return ""
+			return uuid.UUID{}
 		} else {
 			return cl.UUID
 		}

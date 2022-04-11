@@ -56,14 +56,15 @@ func (bs BlogService) Save(post request.Post) error {
 	// 提交事务
 	tx.Commit()
 
-	b, err := json.Marshal(&blog)
-	if err != nil {
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(blog); err != nil {
 		return err
 	}
+
 	// 插入数据到elasticsearch中
 	res, err := esapi.IndexRequest{
 		Index:      "blog",
-		Body:       bytes.NewReader(b),
+		Body:       bytes.NewReader(buf.Bytes()),
 		DocumentID: fmt.Sprintf("%v", blog.Id),
 		Refresh:    "true",
 	}.Do(context.Background(), global.QX_ES)
@@ -155,6 +156,12 @@ func (bs BlogService) Delete(id int64) error {
 	// 提交事务
 	tx.Commit()
 
+	// 删除elasticsearch中对应的文档记录
+	_, err = esapi.DeleteRequest{
+		Index:      "blog",
+		DocumentID: fmt.Sprintf("%v", id),
+	}.Do(context.Background(), global.QX_ES)
+
 	return err
 }
 
@@ -163,12 +170,38 @@ func (bs BlogService) Delete(id int64) error {
  */
 func (*BlogService) Update(post request.Post) error {
 
-	return global.QX_DB.Debug().Model(&model.Blog{Id: post.Id}).Omit("id,user_id,views").Updates(&model.Blog{
+	err := global.QX_DB.Debug().Model(&model.Blog{Id: post.Id}).Omit("id,user_id,views").Updates(&model.Blog{
 		Title:       post.Title,
 		Description: post.Description,
 		Content:     post.Content,
 		Flag:        post.Flag,
 	}).Error
+
+	if err != nil {
+		return err
+	}
+
+	update := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"title":       post.Title,
+			"description": post.Description,
+			"content":     post.Content,
+			"flag":        post.Flag,
+		},
+	}
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(update); err != nil {
+		return err
+	}
+	// 修改elasticsearch中对应的文档记录
+	_, err = esapi.UpdateRequest{
+		Index:      "blog",
+		DocumentID: fmt.Sprintf("%v", post.Id),
+		Body:       bytes.NewReader(buf.Bytes()),
+	}.Do(context.Background(), global.QX_ES)
+
+	return err
 }
 
 /**

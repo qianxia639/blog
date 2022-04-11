@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	uuid "github.com/satori/go.uuid"
 )
 
 var jwtKey = []byte("lyyBlog")
@@ -15,7 +16,7 @@ type CustomClaims struct {
 
 type BaseClaims struct {
 	Id       uint64
-	UUID     string
+	UUID     uuid.UUID
 	Username string
 	Avatar   string
 }

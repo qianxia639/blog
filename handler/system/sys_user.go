@@ -78,8 +78,8 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 * 获取用户信息
  */
 func (uh *UserHandler) Info(ctx *gin.Context) {
-	userId := utils.GetUserId(ctx)
-	if user, err := uh.userService.GetUserInfo(userId); err != nil {
+	uuid := utils.GetUserUUID(ctx)
+	if user, err := uh.userService.GetUserInfo(uuid); err != nil {
 		global.QX_LOG.Errorf("用户信息获取失败! - {%s}", err)
 		command.Failed(ctx, http.StatusInternalServerError, "获取失败")
 	} else {

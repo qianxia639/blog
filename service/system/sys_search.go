@@ -38,7 +38,7 @@ func (*SearchService) SearchBlog(key string) (*response.PageList, error) {
 			},
 		},
 		"highlight": map[string]interface{}{
-			"pre_tags":  "<span style='color:red'>",
+			"pre_tags":  "<span style='color:#07b9ff'>",
 			"post_tags": "</span>",
 			"fields": map[string]interface{}{
 				"title":       map[string]interface{}{},

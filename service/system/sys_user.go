@@ -27,7 +27,7 @@ func (us *UserService) Register(user model.User) (*model.User, error) {
 	newPassword, _ := utils.Encrypt(user.Password)
 	// 创建用户
 	newUser := model.User{
-		UUID:     uuid.NewV4().String(),
+		UUID:     uuid.NewV4(),
 		Username: user.Email,
 		Email:    user.Email,
 		Password: newPassword,
@@ -61,9 +61,9 @@ func (*UserService) Login(user model.User) (*model.User, error) {
 /**
 * 获取用户信息
  */
-func (*UserService) GetUserInfo(id uint64) (*model.User, error) {
+func (*UserService) GetUserInfo(uuid uuid.UUID) (*model.User, error) {
 	var user model.User
-	err := global.QX_DB.Debug().Select("id,uuid,username,avatar").Where("id = ?", id).Find(&user).Error
+	err := global.QX_DB.Debug().Select("id,uuid,username,avatar").Where("uuid = ?", uuid).Find(&user).Error
 
 	return &user, err
 }
