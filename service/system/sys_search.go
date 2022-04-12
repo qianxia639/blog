@@ -12,10 +12,37 @@ import (
 
 type SearchService struct{}
 
-/**
-* 根据title或description搜索博客
- */
-func (*SearchService) SearchBlog(key string) (*response.PageList, error) {
+// 根据title搜索博客
+//
+// GET /blog/_search
+// {
+//   "query": {
+//     "bool": {
+//       "must": [
+//         {
+//           "multi_match": {
+//             "query": "测试",
+//             "fields": ["title","description"]
+//           }
+//         }
+//       ],
+//       "filter": {
+//         "term": {
+//           "title": "测"
+//         }
+//       }
+//     }
+//   },
+//   "highlight": {
+//     "pre_tags": ["<span style='color:red'>"],
+//     "post_tags": ["</span>"],
+//     "fields": {
+//       "description": {},
+//       "title": {}
+//     }
+//   }
+// }
+func (*SearchService) SearchBlog(title string) (*response.PageList, error) {
 	// var (
 	// 	// 获取total
 	// 	total int64
@@ -27,11 +54,41 @@ func (*SearchService) SearchBlog(key string) (*response.PageList, error) {
 	// 	return nil, err
 	// }
 
+	// var pageList response.PageList
+	// pageList.Total = total
+	// pageList.DataList = blogs
+
+	// query := map[string]interface{}{
+	// 	"query": map[string]interface{}{
+	// 		"multi_match": map[string]interface{}{
+	// 			"query":  title,
+	// 			"fields": []string{"title", "description"},
+	// 		},
+	// 	},
+	// 	"highlight": map[string]interface{}{
+	// 		"pre_tags":  "<span style='color:#07b9ff'>",
+	// 		"post_tags": "</span>",
+	// 		"fields": map[string]interface{}{
+	// 			"title":       map[string]interface{}{},
+	// 			"description": map[string]interface{}{},
+	// 		},
+	// 	},
+	// }
+
 	query := map[string]interface{}{
 		"query": map[string]interface{}{
-			"multi_match": map[string]interface{}{
-				"query":  key,
-				"fields": []string{"title", "description"},
+			"bool": map[string]interface{}{
+				"must": map[string]interface{}{
+					"multi_match": map[string]interface{}{
+						"query":  title,
+						"fields": []string{"title", "description"},
+					},
+				},
+				"filter": map[string]interface{}{
+					"term": map[string]interface{}{
+						"title": string([]rune(title)[0]),
+					},
+				},
 			},
 		},
 		"highlight": map[string]interface{}{
@@ -44,17 +101,6 @@ func (*SearchService) SearchBlog(key string) (*response.PageList, error) {
 		},
 	}
 
-	// var buf bytes.Buffer
-	// if err := json.NewEncoder(&buf).Encode(query); err != nil {
-	// 	return nil, err
-	// }
-
-	// res, err := global.QX_ES.Search(
-	// 	global.QX_ES.Search.WithContext(context.Background()),
-	// 	global.QX_ES.Search.WithIndex("blog"),
-	// 	global.QX_ES.Search.WithBody(&buf),
-	// 	global.QX_ES.Search.WithTrackTotalHits(true),
-	// )
 	res, err := ElasticSearch.Search("blog", query)
 
 	if err != nil {
@@ -73,37 +119,42 @@ func (*SearchService) SearchBlog(key string) (*response.PageList, error) {
 	var pageList response.PageList
 	pageList.Total = int64(r["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64))
 
-	// 遍历返回信息中hits的hits
-	for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
-		var title interface{}
-		var description interface{}
+	ch := make(chan []response.Search)
 
-		if hit.(map[string]interface{})["highlight"].(map[string]interface{})["title"] == nil {
-			title = hit.(map[string]interface{})["_source"].(map[string]interface{})["title"]
-		} else {
-			title = hit.(map[string]interface{})["highlight"].(map[string]interface{})["title"].([]interface{})[0]
+	go func() {
+		// 遍历返回信息中hits的hits
+		for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
+			var title interface{}
+			var description interface{}
+
+			if hit.(map[string]interface{})["highlight"].(map[string]interface{})["title"] == nil {
+				title = hit.(map[string]interface{})["_source"].(map[string]interface{})["title"]
+			} else {
+				title = hit.(map[string]interface{})["highlight"].(map[string]interface{})["title"].([]interface{})[0]
+			}
+
+			if hit.(map[string]interface{})["highlight"].(map[string]interface{})["description"] == nil {
+				description = hit.(map[string]interface{})["_source"].(map[string]interface{})["description"]
+			} else {
+				description = hit.(map[string]interface{})["highlight"].(map[string]interface{})["description"].([]interface{})[0]
+			}
+
+			resp = append(resp, response.Search{
+				Id:          hit.(map[string]interface{})["_source"].(map[string]interface{})["id"],
+				UserId:      hit.(map[string]interface{})["_source"].(map[string]interface{})["userId"],
+				TypeId:      hit.(map[string]interface{})["_source"].(map[string]interface{})["typeId"],
+				TypeName:    hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
+				Username:    hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
+				Title:       title,
+				Description: description,
+				UpdatedAt:   utils.TimestampToString(int64(hit.(map[string]interface{})["_source"].(map[string]interface{})["updatedAt"].(float64))),
+				Tags:        hit.(map[string]interface{})["_source"].(map[string]interface{})["Tags"],
+			})
 		}
+		ch <- resp
+	}()
 
-		if hit.(map[string]interface{})["highlight"].(map[string]interface{})["description"] == nil {
-			description = hit.(map[string]interface{})["_source"].(map[string]interface{})["description"]
-		} else {
-			description = hit.(map[string]interface{})["highlight"].(map[string]interface{})["description"].([]interface{})[0]
-		}
-
-		resp = append(resp, response.Search{
-			Id:          hit.(map[string]interface{})["_source"].(map[string]interface{})["id"],
-			UserId:      hit.(map[string]interface{})["_source"].(map[string]interface{})["userId"],
-			TypeId:      hit.(map[string]interface{})["_source"].(map[string]interface{})["typeId"],
-			TypeName:    hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
-			Username:    hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
-			Title:       title,
-			Description: description,
-			UpdatedAt:   utils.TimestampToString(int64(hit.(map[string]interface{})["_source"].(map[string]interface{})["updatedAt"].(float64))),
-			Tags:        hit.(map[string]interface{})["_source"].(map[string]interface{})["Tags"],
-		})
-	}
-
-	pageList.DataList = resp
+	pageList.DataList = <-ch
 
 	return &pageList, nil
 }

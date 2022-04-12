@@ -13,7 +13,7 @@ func Load(path string) {
 	global.QX_LOG = utils.Zap()
 	global.QX_ES = utils.ElasticSearch()
 
-	if err := system.ElasticSearch.IndicesAndMapping(); err != nil {
+	if err := system.ElasticSearch.IndicesMapping(); err != nil {
 		global.QX_LOG.Fatal(err)
 		return
 	}

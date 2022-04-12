@@ -6,7 +6,6 @@ import (
 )
 
 func Viper(path string) {
-
 	v := viper.New()
 	// 设置配置文件路径
 	v.SetConfigFile(path)
