@@ -1,16 +1,13 @@
 package example
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
 	"fmt"
 
-	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/request"
 	"github.com/qianxia/blog/model/response"
+	"github.com/qianxia/blog/service/system"
 	"github.com/qianxia/blog/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -56,18 +53,15 @@ func (bs BlogService) Save(post request.Post) error {
 	// 提交事务
 	tx.Commit()
 
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(blog); err != nil {
-		return err
-	}
+	res, err := system.ElasticSearch.Insert("blog", fmt.Sprintf("%v", blog.Id), &blog)
 
 	// 插入数据到elasticsearch中
-	res, err := esapi.IndexRequest{
-		Index:      "blog",
-		Body:       bytes.NewReader(buf.Bytes()),
-		DocumentID: fmt.Sprintf("%v", blog.Id),
-		Refresh:    "true",
-	}.Do(context.Background(), global.QX_ES)
+	// res, err := esapi.IndexRequest{
+	// 	Index:      "blog",
+	// 	Body:       bytes.NewReader(buf.Bytes()),
+	// 	DocumentID: fmt.Sprintf("%v", blog.Id),
+	// 	Refresh:    "true",
+	// }.Do(context.Background(), global.QX_ES)
 
 	if err != nil {
 		return err
@@ -157,10 +151,12 @@ func (bs BlogService) Delete(id int64) error {
 	tx.Commit()
 
 	// 删除elasticsearch中对应的文档记录
-	_, err = esapi.DeleteRequest{
-		Index:      "blog",
-		DocumentID: fmt.Sprintf("%v", id),
-	}.Do(context.Background(), global.QX_ES)
+	// _, err = esapi.DeleteRequest{
+	// 	Index:      "blog",
+	// 	DocumentID: fmt.Sprintf("%v", id),
+	// }.Do(context.Background(), global.QX_ES)
+	res, err := system.ElasticSearch.Delete("blog", fmt.Sprintf("%v", id))
+	defer res.Body.Close()
 
 	return err
 }
@@ -181,7 +177,7 @@ func (*BlogService) Update(post request.Post) error {
 		return err
 	}
 
-	update := map[string]interface{}{
+	doc := map[string]interface{}{
 		"doc": map[string]interface{}{
 			"title":       post.Title,
 			"description": post.Description,
@@ -190,16 +186,17 @@ func (*BlogService) Update(post request.Post) error {
 		},
 	}
 
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(update); err != nil {
-		return err
-	}
-	// 修改elasticsearch中对应的文档记录
-	_, err = esapi.UpdateRequest{
-		Index:      "blog",
-		DocumentID: fmt.Sprintf("%v", post.Id),
-		Body:       bytes.NewReader(buf.Bytes()),
-	}.Do(context.Background(), global.QX_ES)
+	// var buf bytes.Buffer
+	// if err := json.NewEncoder(&buf).Encode(update); err != nil {
+	// 	return err
+	// }
+	// // 修改elasticsearch中对应的文档记录
+	// _, err = esapi.UpdateRequest{
+	// 	Index:      "blog",
+	// 	DocumentID: fmt.Sprintf("%v", post.Id),
+	// 	Body:       bytes.NewReader(buf.Bytes()),
+	// }.Do(context.Background(), global.QX_ES)
+	system.ElasticSearch.Update("blog", fmt.Sprintf("%v", post.Id), doc)
 
 	return err
 }

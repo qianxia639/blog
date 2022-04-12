@@ -1,8 +1,6 @@
 package system
 
 import (
-	"bytes"
-	"context"
 	"encoding/json"
 
 	"github.com/qianxia/blog/global"
@@ -29,7 +27,6 @@ func (*SearchService) SearchBlog(key string) (*response.PageList, error) {
 	// 	return nil, err
 	// }
 
-	var buf bytes.Buffer
 	query := map[string]interface{}{
 		"query": map[string]interface{}{
 			"multi_match": map[string]interface{}{
@@ -47,16 +44,18 @@ func (*SearchService) SearchBlog(key string) (*response.PageList, error) {
 		},
 	}
 
-	if err := json.NewEncoder(&buf).Encode(query); err != nil {
-		return nil, err
-	}
+	// var buf bytes.Buffer
+	// if err := json.NewEncoder(&buf).Encode(query); err != nil {
+	// 	return nil, err
+	// }
 
-	res, err := global.QX_ES.Search(
-		global.QX_ES.Search.WithContext(context.Background()),
-		global.QX_ES.Search.WithIndex("blog"),
-		global.QX_ES.Search.WithBody(&buf),
-		global.QX_ES.Search.WithTrackTotalHits(true),
-	)
+	// res, err := global.QX_ES.Search(
+	// 	global.QX_ES.Search.WithContext(context.Background()),
+	// 	global.QX_ES.Search.WithIndex("blog"),
+	// 	global.QX_ES.Search.WithBody(&buf),
+	// 	global.QX_ES.Search.WithTrackTotalHits(true),
+	// )
+	res, err := ElasticSearch.Search("blog", query)
 
 	if err != nil {
 		return nil, err

@@ -13,7 +13,10 @@ func Load(path string) {
 	global.QX_LOG = utils.Zap()
 	global.QX_ES = utils.ElasticSearch()
 
-	system.ElasticSearch.IndicesAndMapping()
+	if err := system.ElasticSearch.IndicesAndMapping(); err != nil {
+		global.QX_LOG.Fatal(err)
+		return
+	}
 
 	// 加载MySQL配置信息
 	global.QX_DB = utils.InitDb(global.QX_CONFIG)
