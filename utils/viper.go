@@ -5,10 +5,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Viper(path string) {
+func Viper() {
 	v := viper.New()
 	// 设置配置文件路径
-	v.SetConfigFile(path)
+	v.SetConfigFile("./config/application.toml")
 	// 读取配置文件
 	err := v.ReadInConfig()
 	if err != nil {

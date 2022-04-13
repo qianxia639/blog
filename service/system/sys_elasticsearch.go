@@ -1,6 +1,7 @@
 package system
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -58,10 +59,10 @@ func (e *elasticSearchService) Update(index, id string, data map[string]interfac
 	}.Do(context.Background(), global.QX_ES)
 }
 
-func (e *elasticSearchService) Search(index string, data map[string]interface{}) (*esapi.Response, error) {
+func (e *elasticSearchService) Search(index string, data bytes.Buffer) (*esapi.Response, error) {
 	return esapi.SearchRequest{
 		Index:          []string{index},
-		Body:           esutil.NewJSONReader(&data),
+		Body:           &data,
 		TrackTotalHits: true,
 	}.Do(context.Background(), global.QX_ES)
 }

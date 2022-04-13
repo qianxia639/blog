@@ -43,17 +43,6 @@ type SearchService struct{}
 //   }
 // }
 func (*SearchService) SearchBlog(title string) (*response.PageList, error) {
-	// var (
-	// 	// 获取total
-	// 	total int64
-	// 	blogs []model.Blog
-	// 	// 获取dataList
-	// 	// blogs []response.Index
-	// )
-	// if err := global.QX_DB.Debug().Select("id,user_id,type_id,username,type_name,title,description,updated_at").Preload("Tags").Where("title LIKE ? OR description LIKE ?", "%"+key+"%", "%"+key+"%").Find(&blogs).Count(&total).Error; err != nil {
-	// 	return nil, err
-	// }
-
 	// var pageList response.PageList
 	// pageList.Total = total
 	// pageList.DataList = blogs
@@ -75,33 +64,38 @@ func (*SearchService) SearchBlog(title string) (*response.PageList, error) {
 	// 	},
 	// }
 
-	query := map[string]interface{}{
-		"query": map[string]interface{}{
-			"bool": map[string]interface{}{
-				"must": map[string]interface{}{
-					"multi_match": map[string]interface{}{
-						"query":  title,
-						"fields": []string{"title", "description"},
-					},
-				},
-				"filter": map[string]interface{}{
-					"term": map[string]interface{}{
-						"title": string([]rune(title)[0]),
-					},
-				},
-			},
-		},
-		"highlight": map[string]interface{}{
-			"pre_tags":  "<span style='color:#07b9ff'>",
-			"post_tags": "</span>",
-			"fields": map[string]interface{}{
-				"title":       map[string]interface{}{},
-				"description": map[string]interface{}{},
-			},
-		},
+	// query := map[string]interface{}{
+	// 	"query": map[string]interface{}{
+	// 		"bool": map[string]interface{}{
+	// 			"must": map[string]interface{}{
+	// 				"multi_match": map[string]interface{}{
+	// 					"query":  title,
+	// 					"fields": []string{"title", "description"},
+	// 				},
+	// 			},
+	// 			"filter": map[string]interface{}{
+	// 				"term": map[string]interface{}{
+	// 					"title": string([]rune(title)[0]),
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// 	"highlight": map[string]interface{}{
+	// 		"pre_tags":  "<span style='color:#07b9ff'>",
+	// 		"post_tags": "</span>",
+	// 		"fields": map[string]interface{}{
+	// 			"title":       map[string]interface{}{},
+	// 			"description": map[string]interface{}{},
+	// 		},
+	// 	},
+	// }
+
+	tmpl, err := utils.Loadtemplate(title)
+	if err != nil {
+		return nil, err
 	}
 
-	res, err := ElasticSearch.Search("blog", query)
+	res, err := ElasticSearch.Search("blog", tmpl)
 
 	if err != nil {
 		return nil, err

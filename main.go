@@ -1,59 +1,29 @@
 package main
 
 import (
-	"context"
-	"flag"
-	"net/http"
-	"os"
-	"os/signal"
-	"runtime"
-	"time"
-
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/initialize"
-	"github.com/qianxia/blog/routers"
 	"github.com/qianxia/blog/server"
+	"github.com/qianxia/blog/service/system"
+	"github.com/qianxia/blog/utils"
 )
 
-var confPath string
-
-func init() {
-	if runtime.GOOS == "windows" {
-		flag.StringVar(&confPath, "conf-path", "./config/application.toml", "配置文件路径")
-	} else if runtime.GOOS == "linux" {
-		flag.StringVar(&confPath, "conf-path", "/opt/conf/application.toml", "配置文件路径")
+func main() {
+	utils.Viper()                                                 // 初始化配置文件信息
+	global.QX_LOG = utils.Zap()                                   // 初始化zap日志
+	global.QX_ES = utils.ElasticSearch()                          // 初始化elasticsearch
+	if err := system.ElasticSearch.IndicesMapping(); err != nil { // 初始化索引
+		global.QX_LOG.Fatal(err)
+		return
 	}
 
-}
-
-func main() {
-	flag.Parse()
-	// 初始化路由
-	router := routers.Router()
-	// 加载配置信息
-	initialize.Load(confPath)
-
-	db, _ := global.QX_DB.DB()
-	defer db.Close()
+	global.QX_DB = utils.Mysql(global.QX_CONFIG) // 初始化mysq
+	if global.QX_DB != nil {
+		initialize.RegisterTables(global.QX_DB) // 初始化表
+		db, _ := global.QX_DB.DB()
+		defer db.Close() // 关闭连接
+	}
 	defer global.QX_LOG.Sync()
 
-	srv := server.Server(router)
-
-	go func() {
-		// 服务连接
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			global.QX_LOG.Fatalf("listen: %s\n", err)
-		}
-	}()
-
-	// 等待中断信号关闭服务器(设置5秒超时时间)
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
-	<-quit
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := srv.Shutdown(ctx); err != nil {
-		global.QX_LOG.Fatal("Server Shutdown: ", err)
-	}
+	server.Run()
 }

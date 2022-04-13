@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-func InitDb(y *config.Config) *gorm.DB {
+func Mysql(y *config.Config) *gorm.DB {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local",
 		y.MySQL.Username,
 		y.MySQL.Password,
@@ -40,6 +40,5 @@ func InitDb(y *config.Config) *gorm.DB {
 	sqlDB.SetMaxOpenConns(y.MySQL.MaxOpen)
 	// 连接可复用的最大时间。
 	sqlDB.SetConnMaxLifetime(time.Hour)
-	// db.Logger.LogMode(3)
 	return db
 }

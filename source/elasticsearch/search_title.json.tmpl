@@ -1,0 +1,27 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "multi_match": {
+            "query": "{{.title}}",
+            "fields": ["title","description"]
+          }
+        }
+      ],
+      "filter": {
+        "term": {
+          "title": "{{.te}}"
+        }
+      }
+    }
+  },
+  "highlight": {
+    "pre_tags": ["<span style='color:#07b9ff'>"],
+    "post_tags": ["</span>"],
+    "fields": {
+      "description": {},
+      "title": {}
+    }
+  }
+}
