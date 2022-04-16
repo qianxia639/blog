@@ -49,7 +49,7 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 	}
 	user, err := uh.userService.Login(form)
 	if err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+		command.Failed(ctx, http.StatusUnauthorized, err.Error())
 		return
 	} else {
 		uh.createToken(ctx, *user)

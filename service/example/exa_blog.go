@@ -75,19 +75,20 @@ func (bs BlogService) Save(post request.Post) error {
 /**
 * 个人博客列表展示
  */
-func (bs BlogService) List(id uint64, page map[string]int) (*response.PageList, error) {
+func (bs BlogService) List(id uint64, pageNum, pageSize int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
 
-	err := global.QX_DB.Debug().Select("id,title,updated_at,views").Where("user_id = ?", id).Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error
+	offset := (pageNum - 1) * pageSize
+	err := global.QX_DB.Debug().Select("id,title,updated_at,views").Where("user_id = ?", id).Offset(offset).Limit(pageSize).Find(&blogs).Error
 
 	global.QX_DB.Debug().Model(&model.Blog{}).Where("user_id = ?", id).Count(&total)
 
 	var pageList response.PageList
 
 	pageList.Total = total
-	pageList.PageNum = page["pageNum"]
-	pageList.PageSize = page["pageSize"]
+	pageList.PageNum = pageNum
+	pageList.PageSize = pageSize
 
 	pageList.DataList = blogs
 
@@ -107,19 +108,21 @@ func (bs BlogService) LatestList() ([]model.Blog, error) {
 /**
 * 首页博客展示及分页
  */
-func (bs BlogService) PageList(page map[string]int) (pageList response.PageList, err error) {
+func (bs BlogService) PageList(pageSize, pageNum int) (pageList response.PageList, err error) {
 	var (
 		total int64
 		blogs []model.Blog
 	)
-	err = global.QX_DB.Debug().Select("id,user_id,type_id,username,type_name,title,description,updated_at").Preload("Tags").Offset(page["offset"]).Limit(page["pageSize"]).Find(&blogs).Error
+	offset := (pageNum - 1) * pageSize
+	err = global.QX_DB.Debug().Select("id,user_id,type_id,username,type_name,title,description,updated_at").Preload("Tags").
+		Offset(offset).Limit(pageSize).Find(&blogs).Error
 
 	global.QX_DB.Model(&model.Blog{}).Count(&total)
 
 	// 将分页信息和dataList封装到pageList中
 	pageList.Total = total
-	pageList.PageNum = page["pageNum"]
-	pageList.PageSize = page["pageSize"]
+	pageList.PageNum = pageNum
+	pageList.PageSize = pageSize
 
 	pageList.DataList = blogs
 
@@ -185,17 +188,6 @@ func (*BlogService) Update(post request.Post) error {
 			"flag":        post.Flag,
 		},
 	}
-
-	// var buf bytes.Buffer
-	// if err := json.NewEncoder(&buf).Encode(update); err != nil {
-	// 	return err
-	// }
-	// // 修改elasticsearch中对应的文档记录
-	// _, err = esapi.UpdateRequest{
-	// 	Index:      "blog",
-	// 	DocumentID: fmt.Sprintf("%v", post.Id),
-	// 	Body:       bytes.NewReader(buf.Bytes()),
-	// }.Do(context.Background(), global.QX_ES)
 	system.ElasticSearch.Update("blog", fmt.Sprintf("%v", post.Id), doc)
 
 	return err
@@ -214,6 +206,14 @@ func (bs BlogService) GetBlog(id uint64, avatar string) (map[string]interface{},
 	if err := global.QX_DB.Debug().Model(&model.Blog{Id: id}).UpdateColumn("views", gorm.Expr("views + 1")).Error; err != nil {
 		return nil, err
 	}
+
+	doc := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"views": b.Views + 1,
+		},
+	}
+	system.ElasticSearch.Update("blog", fmt.Sprintf("%v", b.Id), doc)
+
 	m := make(map[string]interface{}, 11)
 	m["id"] = id
 	m["description"] = b.Description

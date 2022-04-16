@@ -20,7 +20,9 @@ type SearchHandler struct {
  */
 func (sh *SearchHandler) SearchBlog(ctx *gin.Context) {
 	query := ctx.Query("query")
-	if blogs, err := sh.searchService.SearchBlog(query); err != nil {
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "10"))
+	pageNum, _ := strconv.Atoi(ctx.DefaultQuery("pageNum", "1"))
+	if blogs, err := sh.searchService.SearchBlog(query, pageNum, pageSize); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "搜索失败")
 		return

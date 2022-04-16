@@ -6,7 +6,7 @@ import (
 	"text/template"
 )
 
-func Loadtemplate(title string) (bytes.Buffer, error) {
+func Loadtemplate(title string, pageNum, pageSize int) (bytes.Buffer, error) {
 
 	tmplFile := "./source/elasticsearch/search_title.json.tmpl"
 	t, err := template.ParseGlob(tmplFile)
@@ -18,9 +18,11 @@ func Loadtemplate(title string) (bytes.Buffer, error) {
 	// t = template.Must(template.New("").ParseGlob(tmplFile))
 
 	var buf bytes.Buffer
-	err = t.Execute(&buf, map[string]string{
+	err = t.Execute(&buf, map[string]interface{}{
 		"title": title,
 		"te":    string([]rune(title)[0]),
+		"size":  pageSize,
+		"from":  (pageNum - 1) * pageSize,
 	})
 	return buf, err
 }

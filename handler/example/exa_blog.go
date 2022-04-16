@@ -49,12 +49,7 @@ func (bh BlogHandler) BlogList(ctx *gin.Context) {
 	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "10"))
 	pageNum, _ := strconv.Atoi(ctx.DefaultQuery("pageNum", "1"))
 
-	pageMap := make(map[string]int, 3)
-	pageMap["pageSize"] = pageSize
-	pageMap["pageNum"] = pageNum
-	pageMap["offset"] = (pageNum - 1) * pageSize
-
-	blogs, err := bh.blogService.List(userId, pageMap)
+	blogs, err := bh.blogService.List(userId, pageNum, pageSize)
 	if err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
@@ -101,17 +96,10 @@ func (bh *BlogHandler) UpdateBlog(ctx *gin.Context) {
  */
 func (bh BlogHandler) BlogPageList(ctx *gin.Context) {
 
-	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "6"))
-	pageNum, _ := strconv.Atoi(ctx.DefaultQuery("pageNum", "1"))
+	pageSize, _ := strconv.Atoi(ctx.Query("pageSize"))
+	pageNum, _ := strconv.Atoi(ctx.Query("pageNum"))
 
-	pageMap := make(map[string]int, 3)
-
-	pageMap["pageSize"] = pageSize
-	pageMap["pageNum"] = pageNum
-
-	pageMap["offset"] = (pageNum - 1) * pageSize
-
-	pageList, err := bh.blogService.PageList(pageMap)
+	pageList, err := bh.blogService.PageList(pageSize, pageNum)
 
 	if err != nil {
 		global.QX_LOG.Error(err)

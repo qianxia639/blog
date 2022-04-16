@@ -2,6 +2,7 @@ package system
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
@@ -16,33 +17,42 @@ type SearchService struct{}
 //
 // GET /blog/_search
 // {
-//   "query": {
-//     "bool": {
-//       "must": [
-//         {
-//           "multi_match": {
-//             "query": "测试",
-//             "fields": ["title","description"]
-//           }
-//         }
-//       ],
-//       "filter": {
-//         "term": {
-//           "title": "测"
-//         }
-//       }
-//     }
-//   },
-//   "highlight": {
-//     "pre_tags": ["<span style='color:red'>"],
-//     "post_tags": ["</span>"],
-//     "fields": {
-//       "description": {},
-//       "title": {}
-//     }
+// 	"query": {
+// 	  "bool": {
+// 		"must": [
+// 		  {
+// 			"multi_match": {
+// 			  "query": "测试",
+// 			  "fields": ["title","description"]
+// 			}
+// 		  }
+// 		],
+// 		"filter": {
+// 		  "term": {
+// 			"title": "据"
+// 		  }
+// 		}
+// 	  }
+// 	},
+// 	"highlight": {
+// 	  "pre_tags": "<span style='color:red'>",
+// 	  "post_tags": "</span>",
+// 	  "fields": {
+// 		"description": {},
+// 		"title": {}
+// 	  }
+// 	},
+// 	"from": 0,
+// 	"size": 5,
+// 	"sort": [
+// 	  {
+// 		"views": {
+// 		  "order": "desc"
+// 		}
+// 	  },
+// 	]
 //   }
-// }
-func (*SearchService) SearchBlog(title string) (*response.PageList, error) {
+func (*SearchService) SearchBlog(title string, pageNum, pageSize int) (*response.PageList, error) {
 	// var pageList response.PageList
 	// pageList.Total = total
 	// pageList.DataList = blogs
@@ -64,38 +74,45 @@ func (*SearchService) SearchBlog(title string) (*response.PageList, error) {
 	// 	},
 	// }
 
-	// query := map[string]interface{}{
-	// 	"query": map[string]interface{}{
-	// 		"bool": map[string]interface{}{
-	// 			"must": map[string]interface{}{
-	// 				"multi_match": map[string]interface{}{
-	// 					"query":  title,
-	// 					"fields": []string{"title", "description"},
-	// 				},
-	// 			},
-	// 			"filter": map[string]interface{}{
-	// 				"term": map[string]interface{}{
-	// 					"title": string([]rune(title)[0]),
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// 	"highlight": map[string]interface{}{
-	// 		"pre_tags":  "<span style='color:#07b9ff'>",
-	// 		"post_tags": "</span>",
-	// 		"fields": map[string]interface{}{
-	// 			"title":       map[string]interface{}{},
-	// 			"description": map[string]interface{}{},
-	// 		},
-	// 	},
-	// }
-
-	tmpl, err := utils.Loadtemplate(title)
-	if err != nil {
-		return nil, err
+	query := map[string]interface{}{
+		"query": map[string]interface{}{
+			"bool": map[string]interface{}{
+				"must": map[string]interface{}{
+					"multi_match": map[string]interface{}{
+						"query":  title,
+						"fields": []string{"title", "description"},
+					},
+				},
+				"filter": map[string]interface{}{
+					"term": map[string]interface{}{
+						"title": string([]rune(title)[0]),
+					},
+				},
+			},
+		},
+		"highlight": map[string]interface{}{
+			"pre_tags":  "<span style='color:#07b9ff'>",
+			"post_tags": "</span>",
+			"fields": map[string]interface{}{
+				"title":       map[string]interface{}{},
+				"description": map[string]interface{}{},
+			},
+		},
+		"from": (pageNum - 1) * pageSize,
+		"size": pageSize,
+		"sort": map[string]interface{}{
+			"views": map[string]interface{}{
+				"order": "desc",
+			},
+		},
 	}
 
-	res, err := ElasticSearch.Search("blog", tmpl)
+	// tmpl, err := utils.Loadtemplate(title, pageNum, pageSize)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	res, err := ElasticSearch.Search("blog", query)
 
 	if err != nil {
 		return nil, err
@@ -148,7 +165,12 @@ func (*SearchService) SearchBlog(title string) (*response.PageList, error) {
 		ch <- resp
 	}()
 
+	pageList.PageNum = pageNum
+	pageList.PageSize = pageSize
 	pageList.DataList = <-ch
+
+	fmt.Printf("pageNum: %v\n", pageNum)
+	fmt.Printf("pageSize: %v\n", pageSize)
 
 	return &pageList, nil
 }
