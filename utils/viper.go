@@ -1,27 +1,33 @@
 package utils
 
 import (
+	"os"
+
 	"github.com/qianxia/blog/global"
 	"github.com/spf13/viper"
 )
 
 func Viper() {
-	v := viper.New()
-	// 设置配置文件路径
-	v.SetConfigFile("./config/config.toml")
-	// 读取配置文件
-	err := v.ReadInConfig()
-	if err != nil {
-		global.QX_LOG.Fatalf("Fatal error config file: %v", err)
-		return
-	}
+	// 设置配置文件名
+	viper.SetConfigName("config")
 	// 指定配置文件的扩展名
-	v.SetConfigType("toml")
+	viper.SetConfigType("toml")
+	// 设置配置文件路径
+	workDir, _ := os.Getwd()
+	viper.AddConfigPath(workDir + "/config/test")
+
+	// 读取配置文件
+	if err := viper.ReadInConfig(); err != nil {
+		panic(err)
+		// global.QX_LOG.Fatalf("Fatal error config file: %v", err)
+		// return
+	}
 
 	// 反序列化到指定结构体上
-	err = v.Unmarshal(&global.QX_CONFIG)
+	err := viper.Unmarshal(&global.QX_CONFIG)
 	if err != nil {
-		global.QX_LOG.Fatalf("unable to read remote config: %v", err)
-		return
+		panic(err)
+		// global.QX_LOG.Fatalf("unable to read remote config: %v", err)
+		// return
 	}
 }

@@ -22,8 +22,8 @@ type BlogHandler struct {
 func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	var post request.Post
 	if err := ctx.ShouldBindJSON(&post); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, "缺少必要的参数")
-		global.QX_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
+		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
+		global.QX_LOG.Errorf("parame bind err:", err)
 		return
 	}
 	// 获取登录的用户信息

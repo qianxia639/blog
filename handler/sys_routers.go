@@ -8,20 +8,20 @@ import (
 
 func SystemRouters(e *gin.Engine) *gin.Engine {
 	// ========== user router group ==========
-	userGroup := e.Group("/user")
+	ug := e.Group("/user")
 	{
 		// 注册
-		userGroup.POST("/register", system.GetInstance().Register)
+		ug.POST("/register", system.GetInstance().Register)
 		// 登录
-		userGroup.POST("/login", system.GetInstance().Login)
+		ug.POST("/login", system.GetInstance().Login)
 
-		userGroup = userGroup.Group("/")
-		userGroup.Use(middleware.Auth())
+		ug = ug.Group("/")
+		ug.Use(middleware.Auth())
 		{
 			// 用户信息
-			userGroup.GET("/info", system.GetInstance().Info)
+			ug.GET("/info", system.GetInstance().Info)
 			// 修改名称
-			userGroup.PUT("/updateName", system.GetInstance().UpdateUsername)
+			ug.PUT("/updateName", system.GetInstance().UpdateUsername)
 		}
 
 		// 修改密码
@@ -29,29 +29,38 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 	}
 
 	//  ========== search router group ==========
-	searchGroup := e.Group("/search")
+	sg := e.Group("/search")
 	{
 		// 搜索所有博客
-		searchGroup.GET("/blog", system.GetInstance().SearchBlog)
+		sg.GET("/blog", system.GetInstance().SearchBlog)
 		// 搜索个人博客列表
-		searchGroup.GET("/priblog", system.GetInstance().SearchPriBlog)
+		sg.GET("/priblog", system.GetInstance().SearchPriBlog)
 	}
 
 	// ========== upload router group ==========
-	fileGroup := e.Group("/upload")
-	fileGroup.Use(middleware.Auth())
+	fg := e.Group("/upload")
+	fg.Use(middleware.Auth())
 	{
 		// markdown文件上传
-		fileGroup.POST("/mdFile", system.GetInstance().UploadMdFile)
+		fg.POST("/mdFile", system.GetInstance().UploadMdFile)
 	}
 
 	// ========== comment router group ==========
-	commentGroup := e.Group("/comment")
+	cg := e.Group("/comment")
 	{
 		// 获取comment列表
-		commentGroup.GET("/list", system.GetInstance().CommentList)
+		cg.GET("/list", system.GetInstance().CommentList)
 		// 发布评论
-		commentGroup.POST("/save", system.GetInstance().Save)
+		cg.POST("/save", system.GetInstance().Save)
+	}
+
+	// ========== leave router group ==========
+	lg := e.Group("/leave")
+	{
+		// 获取所有留言记录
+		lg.GET("/all", system.GetInstance().All)
+		// 添加留言
+		lg.POST("/insert", system.GetInstance().Insert)
 	}
 
 	return e

@@ -23,8 +23,8 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 	var user model.User
 	// 绑定表单数据
 	if err := ctx.ShouldBindJSON(&user); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.QX_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
+		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
+		global.QX_LOG.Errorf("parame bind err:", err)
 		return
 	}
 	_, err := uh.userService.Register(user)
@@ -43,8 +43,8 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 	// 绑定表单参数
 	var form model.User
 	if err := ctx.ShouldBindJSON(&form); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.QX_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
+		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
+		global.QX_LOG.Errorf("parame bind err:", err)
 		return
 	}
 	user, err := uh.userService.Login(form)
@@ -94,8 +94,8 @@ func (uh *UserHandler) UpdateUsername(ctx *gin.Context) {
 
 	var user model.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		global.QX_LOG.Errorf("%s-{%v}", "数据绑定失败", err)
+		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
+		global.QX_LOG.Errorf("parame bind err:", err)
 		return
 	}
 	user.Id = utils.GetUserId(ctx)

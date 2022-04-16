@@ -9,4 +9,5 @@ type MySQL struct {
 	Username string `mapstructure:"username" toml:"username"`
 	Password string `mapstructure:"password" toml:"password"`
 	Charset  string `mapstructure:"charset" toml:"charset"`
+	Loc      string `mapstructure:"loc" toml:"loc"`
 }

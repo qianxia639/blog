@@ -7,6 +7,7 @@ type systemRouterGroup struct {
 	SearchHandler
 	UploadHandler
 	CommentHandler
+	LeaveHandler
 }
 
 var systemRouterGroups *systemRouterGroup

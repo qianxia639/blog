@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/qianxia/blog/config"
@@ -12,13 +13,14 @@ import (
 )
 
 func Mysql(y *config.Config) *gorm.DB {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=%s",
 		y.MySQL.Username,
 		y.MySQL.Password,
 		y.MySQL.Host,
 		y.MySQL.Port,
 		y.MySQL.DbName,
 		y.MySQL.Charset,
+		url.PathEscape(y.MySQL.Loc),
 	)
 
 	db, _ := gorm.Open(mysql.New(mysql.Config{

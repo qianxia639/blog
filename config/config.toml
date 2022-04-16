@@ -9,6 +9,7 @@ dbname = "blog"
 username = "root"
 password = "qianxia"
 charset = "utf8mb4"
+loc = "Asia/Shanghai"
 # 连接池最大空闲数
 max_idle = 8
 # 连接池最大连接数
