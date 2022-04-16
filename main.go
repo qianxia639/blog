@@ -17,7 +17,9 @@ func main() {
 		return
 	}
 
-	global.QX_DB = utils.Mysql(global.QX_CONFIG) // 初始化mysq
+	global.QX_REDIS = utils.Redis() // 初始化redis
+
+	global.QX_DB = utils.Mysql(global.QX_CONFIG) // 初始化mysql
 	if global.QX_DB != nil {
 		initialize.RegisterTables(global.QX_DB) // 初始化表
 		db, _ := global.QX_DB.DB()
