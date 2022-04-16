@@ -8,7 +8,7 @@ import (
 func Viper() {
 	v := viper.New()
 	// 设置配置文件路径
-	v.SetConfigFile("./config/application.toml")
+	v.SetConfigFile("./config/config.toml")
 	// 读取配置文件
 	err := v.ReadInConfig()
 	if err != nil {
