@@ -18,3 +18,8 @@ func (*LeaveService) All() ([]model.Leave, error) {
 func (*LeaveService) Insert(l model.Leave) error {
 	return global.QX_DB.Create(&l).Error
 }
+
+// 删除留言记录
+func (*LeaveService) Delete(id uint64) error {
+	return global.QX_DB.Debug().Delete(&model.Leave{}, id).Error
+}

@@ -7,6 +7,7 @@ import (
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
+	"github.com/qianxia/blog/model/request"
 	"github.com/qianxia/blog/model/response"
 	"github.com/qianxia/blog/service/system"
 	"github.com/qianxia/blog/utils"
@@ -20,14 +21,16 @@ type UserHandler struct {
 * 注册
  */
 func (uh *UserHandler) Register(ctx *gin.Context) {
-	var user model.User
-	// 绑定表单数据
-	if err := ctx.ShouldBindJSON(&user); err != nil {
-		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
+	var r request.Register
+
+	_ = ctx.ShouldBindJSON(&r)
+	if err := utils.Verify(r); err != nil {
 		global.QX_LOG.Errorf("parame bind err:", err)
+		command.Failed(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
-	_, err := uh.userService.Register(user)
+
+	_, err := uh.userService.Register(r)
 
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
@@ -41,13 +44,16 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
  */
 func (uh *UserHandler) Login(ctx *gin.Context) {
 	// 绑定表单参数
-	var form model.User
-	if err := ctx.ShouldBindJSON(&form); err != nil {
-		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
-		global.QX_LOG.Errorf("parame bind err:", err)
-		return
-	}
-	user, err := uh.userService.Login(form)
+	var l request.Login
+	// if err := ctx.ShouldBindJSON(&form); err != nil {
+	// 	command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
+	// 	global.QX_LOG.Errorf("parame bind err:", err)
+	// 	return
+	// }
+
+	_ = ctx.ShouldBindJSON(&l)
+
+	user, err := uh.userService.Login(l)
 	if err != nil {
 		command.Failed(ctx, http.StatusUnauthorized, err.Error())
 		return

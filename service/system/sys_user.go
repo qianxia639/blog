@@ -5,6 +5,7 @@ import (
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
+	"github.com/qianxia/blog/model/request"
 	"github.com/qianxia/blog/utils"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
@@ -15,21 +16,26 @@ type UserService struct{}
 /**
 * 注册
  */
-func (us *UserService) Register(user model.User) (*model.User, error) {
+func (us *UserService) Register(r request.Register) (*model.User, error) {
 	var u model.User
 
-	global.QX_DB.Debug().Select("email").Where("email = ?", user.Email).Find(&u)
-	if u.Email == user.Email {
+	global.QX_DB.Debug().Select("email").Where("email = ?", r.Email).Find(&u)
+	if u.Email == r.Email {
 		return nil, errors.New("邮箱已注册")
 	}
 
+	// 判断密码是否一致
+	if r.Password != r.CheckPwd {
+		return nil, errors.New("密码不一致")
+	}
+
 	// 对明文进行加密处理
-	newPassword, _ := utils.Encrypt(user.Password)
+	newPassword, _ := utils.Encrypt(r.Password)
 	// 创建用户
 	newUser := model.User{
 		UUID:     uuid.NewV4(),
-		Username: user.Email,
-		Email:    user.Email,
+		Username: r.Email,
+		Email:    r.Email,
 		Password: newPassword,
 	}
 
@@ -42,16 +48,16 @@ func (us *UserService) Register(user model.User) (*model.User, error) {
 /**
 * 登录
  */
-func (*UserService) Login(user model.User) (*model.User, error) {
+func (*UserService) Login(l request.Login) (*model.User, error) {
 	var u model.User
 
 	// 判断用户名是否存在
-	global.QX_DB.Debug().Select("id,uuid,username,avatar,email,password").Where("email = ?", user.Email).Find(&u)
-	if u.Email != user.Email {
+	global.QX_DB.Debug().Select("id,uuid,username,avatar,email,password").Where("email = ?", l.Email).Find(&u)
+	if u.Email != l.Email {
 		return nil, errors.New("邮箱未注册")
 	}
 
-	if err := utils.Decrypt(u.Password, user.Password); err != nil {
+	if err := utils.Decrypt(u.Password, l.Password); err != nil {
 		return nil, errors.New("密码不匹配")
 	}
 

@@ -2,6 +2,7 @@ package system
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
@@ -46,5 +47,16 @@ func (lh *LeaveHandler) Insert(ctx *gin.Context) {
 	}
 
 	command.Success(ctx, "添加成功", nil)
+}
 
+// 删除留言
+func (lh *LeaveHandler) Delete(ctx *gin.Context) {
+	// id, _ := strconv.ParseUint(ctx.Params.ByName("id"), 10, 64)
+	id, _ := strconv.ParseUint(ctx.Query("id"), 10, 64)
+	if err := lh.leaveService.Delete(id); err != nil {
+		global.QX_LOG.Errorf("delete leave err: %v", err)
+		command.Failed(ctx, http.StatusInternalServerError, "操作失败")
+		return
+	}
+	command.Success(ctx, "操作成功", nil)
 }

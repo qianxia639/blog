@@ -3,22 +3,22 @@ package model
 type Blog struct {
 	// 主键
 	Id uint64 `json:"id" gorm:"primaryKey"`
-	// 用户id，
-	UserId uint64 `json:"userId" gorm:"comment:用户Id" binding:"required"`
+	// 用户id
+	UserId uint64 `json:"userId" gorm:"comment:用户Id"`
 	// 分类id
-	TypeId uint16 `json:"typeId" gorm:"comment:分类Id" binding:"required"`
+	TypeId uint16 `json:"typeId" gorm:"comment:分类Id"`
 	// 用户名
-	Username string `json:"username" gorm:"size:20;comment:用户名" binding:"required"`
+	Username string `json:"username" gorm:"size:20;comment:用户名"`
 	// 分类类名
-	TypeName string `json:"typeName" gorm:"size:20;comment:分类类名" binding:"required"`
+	TypeName string `json:"typeName" gorm:"size:20;comment:分类类名"`
 	// 标题
-	Title string `json:"title" gorm:"size:20;comment:标题" validate:"max=15,min=1"`
+	Title string `json:"title" gorm:"size:20;comment:标题"`
 	// 描述
-	Description string `json:"description" gorm:"comment:描述" validate:"min=10,max=100"`
+	Description string `json:"description" gorm:"comment:描述"`
 	// 内容
-	Content string `json:"content" gorm:"type:longtext;comment:内容" binding:"required"`
+	Content string `json:"content" gorm:"type:longtext;comment:内容"`
 	// 标记
-	Flag string `json:"flag" gorm:"type:varchar(10);comment:标记" binding:"required"`
+	Flag string `json:"flag" gorm:"type:varchar(10);comment:标记"`
 	// 浏览次数
 	Views uint32 `json:"views" gorm:"default:0;comment:浏览次数"`
 	// 创建时间

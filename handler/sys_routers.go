@@ -61,6 +61,8 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		lg.GET("/all", system.GetInstance().All)
 		// 添加留言
 		lg.POST("/insert", system.GetInstance().Insert)
+		// 删除留言
+		lg.DELETE("/delete", system.GetInstance().Delete)
 	}
 
 	return e
