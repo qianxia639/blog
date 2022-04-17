@@ -57,23 +57,6 @@ func (*SearchService) SearchBlog(title string, pageNum, pageSize int) (*response
 	// pageList.Total = total
 	// pageList.DataList = blogs
 
-	// query := map[string]interface{}{
-	// 	"query": map[string]interface{}{
-	// 		"multi_match": map[string]interface{}{
-	// 			"query":  title,
-	// 			"fields": []string{"title", "description"},
-	// 		},
-	// 	},
-	// 	"highlight": map[string]interface{}{
-	// 		"pre_tags":  "<span style='color:#07b9ff'>",
-	// 		"post_tags": "</span>",
-	// 		"fields": map[string]interface{}{
-	// 			"title":       map[string]interface{}{},
-	// 			"description": map[string]interface{}{},
-	// 		},
-	// 	},
-	// }
-
 	query := map[string]interface{}{
 		"query": map[string]interface{}{
 			"bool": map[string]interface{}{
@@ -182,9 +165,12 @@ func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, 
 	var blogs []response.Blog
 	var total int64
 
-	if title == "" && startDate == "" && endDate == "" {
+	if title != "" && startDate == "" && endDate == "" {
+		err = global.QX_DB.Debug().Model(&model.Blog{}).Where("title LIKE ? AND user_id = ?", "%"+title+"%", userId).Offset((pageNum - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
+	} else if title == "" && startDate != "" && endDate != "" {
+		err = global.QX_DB.Debug().Model(&model.Blog{}).Where("updated_at BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)", startDate, endDate).Offset((pageNum - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
+	} else if title == "" && startDate == "" && endDate == "" {
 		err = global.QX_DB.Debug().Model(&model.Blog{}).Where("user_id = ?", userId).Offset((pageNum - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
-
 	} else {
 		err = global.QX_DB.Debug().Model(&model.Blog{}).Scopes(func(db *gorm.DB) *gorm.DB {
 			return db.Where("title LIKE ? AND user_id = ?", "%"+title+"%", userId)
