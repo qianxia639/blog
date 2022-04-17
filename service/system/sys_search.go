@@ -2,7 +2,6 @@ package system
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
@@ -57,45 +56,47 @@ func (*SearchService) SearchBlog(title string, pageNum, pageSize int) (*response
 	// pageList.Total = total
 	// pageList.DataList = blogs
 
-	query := map[string]interface{}{
-		"query": map[string]interface{}{
-			"bool": map[string]interface{}{
-				"must": map[string]interface{}{
-					"multi_match": map[string]interface{}{
-						"query":  title,
-						"fields": []string{"title", "description"},
-					},
-				},
-				"filter": map[string]interface{}{
-					"term": map[string]interface{}{
-						"title": string([]rune(title)[0]),
-					},
-				},
-			},
-		},
-		"highlight": map[string]interface{}{
-			"pre_tags":  "<span style='color:#07b9ff'>",
-			"post_tags": "</span>",
-			"fields": map[string]interface{}{
-				"title":       map[string]interface{}{},
-				"description": map[string]interface{}{},
-			},
-		},
-		"from": (pageNum - 1) * pageSize,
-		"size": pageSize,
-		"sort": map[string]interface{}{
-			"views": map[string]interface{}{
-				"order": "desc",
-			},
-		},
-	}
-
-	// tmpl, err := utils.Loadtemplate(title, pageNum, pageSize)
-	// if err != nil {
-	// 	return nil, err
+	// query := map[string]interface{}{
+	// 	"query": map[string]interface{}{
+	// 		"bool": map[string]interface{}{
+	// 			"must": map[string]interface{}{
+	// 				"multi_match": map[string]interface{}{
+	// 					"query":  title,
+	// 					"fields": []string{"title", "description"},
+	// 				},
+	// 			},
+	// 			"filter": map[string]interface{}{
+	// 				"term": map[string]interface{}{
+	// 					"title": string([]rune(title)[0]),
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// 	"highlight": map[string]interface{}{
+	// 		"pre_tags":  "<span style='color:#07b9ff'>",
+	// 		"post_tags": "</span>",
+	// 		"fields": map[string]interface{}{
+	// 			"title":       map[string]interface{}{},
+	// 			"description": map[string]interface{}{},
+	// 		},
+	// 	},
+	// 	"from": (pageNum - 1) * pageSize,
+	// 	"size": pageSize,
+	// 	"sort": map[string]interface{}{
+	// 		"views": map[string]interface{}{
+	// 			"order": "desc",
+	// 		},
+	// 	},
 	// }
 
-	res, err := ElasticSearch.Search("blog", query)
+	tmpl, err := utils.Loadtemplate(title, pageNum, pageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := ElasticSearch.Search2("blog", tmpl)
+
+	// res, err := ElasticSearch.Search("blog", query)
 
 	if err != nil {
 		return nil, err
@@ -151,9 +152,6 @@ func (*SearchService) SearchBlog(title string, pageNum, pageSize int) (*response
 	pageList.PageNum = pageNum
 	pageList.PageSize = pageSize
 	pageList.DataList = <-ch
-
-	fmt.Printf("pageNum: %v\n", pageNum)
-	fmt.Printf("pageSize: %v\n", pageSize)
 
 	return &pageList, nil
 }

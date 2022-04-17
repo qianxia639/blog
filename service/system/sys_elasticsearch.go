@@ -1,6 +1,7 @@
 package system
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -29,12 +30,12 @@ func (e *elasticSearchService) IndicesMapping() error {
 		)
 	}
 
-	return err
+	return nil
 }
 
+// 在索引中创建一条文档
 func (e *elasticSearchService) Insert(index, id string, data interface{}) (*esapi.Response, error) {
-	// 插入数据到elasticsearch中
-	return esapi.IndexRequest{
+	return esapi.CreateRequest{
 		Index:      index,
 		DocumentID: id,
 		Body:       esutil.NewJSONReader(data),
@@ -42,6 +43,7 @@ func (e *elasticSearchService) Insert(index, id string, data interface{}) (*esap
 	}.Do(context.Background(), global.QX_ES)
 }
 
+// 在索引中删除一条文档
 func (e *elasticSearchService) Delete(index, id string) (*esapi.Response, error) {
 	return esapi.DeleteRequest{
 		Index:      index,
@@ -62,6 +64,14 @@ func (e *elasticSearchService) Search(index string, data map[string]interface{})
 	return esapi.SearchRequest{
 		Index:          []string{index},
 		Body:           esutil.NewJSONReader(&data),
+		TrackTotalHits: true,
+	}.Do(context.Background(), global.QX_ES)
+}
+
+func (e *elasticSearchService) Search2(index string, data bytes.Buffer) (*esapi.Response, error) {
+	return esapi.SearchRequest{
+		Index:          []string{index},
+		Body:           &data,
 		TrackTotalHits: true,
 	}.Do(context.Background(), global.QX_ES)
 }
