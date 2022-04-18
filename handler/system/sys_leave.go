@@ -8,7 +8,9 @@ import (
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
+	"github.com/qianxia/blog/model/request"
 	"github.com/qianxia/blog/service/system"
+	"github.com/qianxia/blog/utils"
 )
 
 type LeaveHandler struct {
@@ -28,19 +30,16 @@ func (lh *LeaveHandler) All(ctx *gin.Context) {
 
 // 新增留言记录
 func (lh *LeaveHandler) Insert(ctx *gin.Context) {
-	var l model.Leave
-	if err := ctx.ShouldBindJSON(&l); err != nil {
-		global.QX_LOG.Errorf("bind parame err: %v", err)
-		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
+	var l request.Leave
+	_ = ctx.ShouldBindJSON(&l)
+
+	if err := utils.Verify(l); err != nil {
+		global.QX_LOG.Error(err)
+		command.Failed(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if l.Content == "" {
-		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
-		return
-	}
-
-	if err := lh.leaveService.Insert(l); err != nil {
+	if err := lh.leaveService.Insert(model.Leave{Name: l.Name, Content: l.Content}); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return

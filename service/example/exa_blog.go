@@ -132,7 +132,7 @@ func (bs BlogService) PageList(pageSize, pageNum int) (pageList response.PageLis
 /**
 * 博客删除
  */
-func (bs BlogService) Delete(id int64) error {
+func (bs BlogService) Delete(id uint64) error {
 	var blog model.Blog
 
 	err := global.QX_DB.Debug().Select("id,type_id").Where("id = ?", id).Find(&blog).Error

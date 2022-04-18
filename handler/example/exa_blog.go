@@ -63,7 +63,7 @@ func (bh BlogHandler) BlogList(ctx *gin.Context) {
  */
 func (bh BlogHandler) DeleteBlog(ctx *gin.Context) {
 
-	id, _ := strconv.ParseInt(ctx.Params.ByName("id"), 10, 64)
+	id, _ := strconv.ParseUint(ctx.Params.ByName("id"), 10, 64)
 
 	err := bh.blogService.Delete(id)
 	if err != nil {

@@ -28,5 +28,4 @@ func (ch *CommentHandler) Save(ctx *gin.Context) {
 	} else {
 		command.Success(ctx, "成功", nil)
 	}
-
 }

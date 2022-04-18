@@ -10,7 +10,7 @@ type LeaveService struct{}
 // 显示所有留言记录
 func (*LeaveService) All() ([]model.Leave, error) {
 	var leaves []model.Leave
-	err := global.QX_DB.Debug().Select("id,content").Find(&leaves).Error
+	err := global.QX_DB.Debug().Select("id,name,content").Order("created_at DESC").Find(&leaves).Error
 	return leaves, err
 }
 
