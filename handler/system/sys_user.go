@@ -45,11 +45,6 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 func (uh *UserHandler) Login(ctx *gin.Context) {
 	// 绑定表单参数
 	var l request.Login
-	// if err := ctx.ShouldBindJSON(&form); err != nil {
-	// 	command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
-	// 	global.QX_LOG.Errorf("parame bind err:", err)
-	// 	return
-	// }
 
 	_ = ctx.ShouldBindJSON(&l)
 

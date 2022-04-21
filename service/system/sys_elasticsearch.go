@@ -29,7 +29,6 @@ func (e *elasticSearchService) IndicesMapping() error {
 			global.QX_ES.Indices.Create.WithBody(strings.NewReader(model.BlogMapping)),
 		)
 	}
-
 	return nil
 }
 
