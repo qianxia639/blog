@@ -1,10 +1,7 @@
 package example
 
 import (
-	"context"
-	"encoding/json"
 	"errors"
-	"time"
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
@@ -16,21 +13,7 @@ type TypeService struct{}
 // 查詢type列表，按amount降序排列
 func (ts *TypeService) ListOrderByAmountDesc() ([]model.Type, error) {
 	types := make([]model.Type, 0, 4)
-	val, err := global.QX_REDIS.Get(context.Background(), "type").Result()
-	if err != nil {
-		err = global.QX_DB.Debug().Select("id,type_name,amount").Order("amount DESC").Limit(4).Find(&types).Error
-		if err != nil {
-			return nil, err
-		}
-		by, err := json.Marshal(&types)
-		if err != nil {
-			return nil, err
-		}
-
-		err = global.QX_REDIS.Set(context.Background(), "type", by, 30*time.Second).Err()
-	}
-	json.Unmarshal([]byte(val), &types)
-	// err := global.QX_DB.Debug().Select("id,type_name,amount").Order("amount DESC").Limit(4).Find(&types).Error
+	err := global.QX_DB.Debug().Select("id,type_name,amount").Order("amount DESC").Limit(4).Find(&types).Error
 	return types, err
 }
 
