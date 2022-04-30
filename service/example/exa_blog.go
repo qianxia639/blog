@@ -75,11 +75,11 @@ func (bs BlogService) Save(post request.Post) error {
 /**
 * 个人博客列表展示
  */
-func (bs BlogService) List(id uint64, pageNum, pageSize int) (*response.PageList, error) {
+func (bs BlogService) List(id uint64, pageNo, pageSize int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
 
-	offset := (pageNum - 1) * pageSize
+	offset := (pageNo - 1) * pageSize
 	err := global.QX_DB.Debug().Select("id,title,updated_at,views").Where("user_id = ?", id).Offset(offset).Limit(pageSize).Find(&blogs).Error
 
 	global.QX_DB.Debug().Model(&model.Blog{}).Where("user_id = ?", id).Count(&total)
@@ -87,7 +87,7 @@ func (bs BlogService) List(id uint64, pageNum, pageSize int) (*response.PageList
 	var pageList response.PageList
 
 	pageList.Total = total
-	pageList.PageNum = pageNum
+	pageList.PageNo = pageNo
 	pageList.PageSize = pageSize
 
 	pageList.DataList = blogs
@@ -108,12 +108,12 @@ func (bs BlogService) LatestList() ([]model.Blog, error) {
 /**
 * 首页博客展示及分页
  */
-func (bs BlogService) PageList(pageSize, pageNum int) (pageList response.PageList, err error) {
+func (bs BlogService) PageList(pageSize, pageNo int) (pageList response.PageList, err error) {
 	var (
 		total int64
 		blogs []model.Blog
 	)
-	offset := (pageNum - 1) * pageSize
+	offset := (pageNo - 1) * pageSize
 	err = global.QX_DB.Debug().Select("id,user_id,type_id,username,type_name,title,description,updated_at").Preload("Tags").
 		Offset(offset).Limit(pageSize).Find(&blogs).Error
 
@@ -121,7 +121,7 @@ func (bs BlogService) PageList(pageSize, pageNum int) (pageList response.PageLis
 
 	// 将分页信息和dataList封装到pageList中
 	pageList.Total = total
-	pageList.PageNum = pageNum
+	pageList.PageNo = pageNo
 	pageList.PageSize = pageSize
 
 	pageList.DataList = blogs

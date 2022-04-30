@@ -34,7 +34,7 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		// 搜索所有博客
 		sg.GET("/blog", system.GetInstance().SearchBlog)
 		// 搜索个人博客列表
-		sg.GET("/priblog", system.GetInstance().SearchPriBlog)
+		sg.GET("/priblog", system.GetInstance().SearchPriBlog, middleware.Auth())
 	}
 
 	// ========== upload router group ==========

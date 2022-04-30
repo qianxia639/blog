@@ -7,7 +7,7 @@ import (
 	"github.com/qianxia/blog/global"
 )
 
-func Loadtemplate(title string, pageNum, pageSize int) (bytes.Buffer, error) {
+func Loadtemplate(title string, pageNo, pageSize int) (bytes.Buffer, error) {
 
 	tmplFile := "./source/elasticsearch/search_title.json.tmpl"
 	// var tmplFile = "D:\\project\\blog\\source\\elasticsearch\\search_title.json.tmpl"
@@ -22,7 +22,7 @@ func Loadtemplate(title string, pageNum, pageSize int) (bytes.Buffer, error) {
 		"title": title,
 		"te":    string([]rune(title)[0]),
 		"size":  pageSize,
-		"from":  (pageNum - 1) * pageSize,
+		"from":  (pageNo - 1) * pageSize,
 	})
 	return buf, err
 }

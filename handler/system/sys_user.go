@@ -17,9 +17,13 @@ type UserHandler struct {
 	userService system.UserService
 }
 
-/**
-* 注册
- */
+// @Summary      注册
+// @Tags         System/User
+// @Accept       json
+// @Produce      json
+// @Param        user body request.Register  true  "Create User"
+// @Success 	 200  {object}  string
+// @Router       /user/register [post]
 func (uh *UserHandler) Register(ctx *gin.Context) {
 	var r request.Register
 
@@ -39,9 +43,13 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 	command.Success(ctx, "注册成功", nil)
 }
 
-/**
-* 登录
- */
+// @Summary      登录
+// @Tags         System/User
+// @Accept       json
+// @Produce      json
+// @Param        user body request.Login  true  "Login"
+// @Success 	 200  {object}  string {data=token}
+// @Router       /user/login [post]
 func (uh *UserHandler) Login(ctx *gin.Context) {
 	// 绑定表单参数
 	var l request.Login
@@ -75,9 +83,13 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 
 }
 
-/**
-* 获取用户信息
- */
+// @Summary      获取用户信息
+// @Tags         System/User
+// @Accept       json
+// @Produce      json
+// @Success 	 200  {object}  response.User {data=response.User}
+// @Security 	 X-Token
+// @Router       /user/info [get]
 func (uh *UserHandler) Info(ctx *gin.Context) {
 	uuid := utils.GetUserUUID(ctx)
 	if user, err := uh.userService.GetUserInfo(uuid); err != nil {
@@ -88,9 +100,14 @@ func (uh *UserHandler) Info(ctx *gin.Context) {
 	}
 }
 
-/**
-* 修改用户名
- */
+// @Summary      修改用户名
+// @Tags         System/User
+// @Accept       json
+// @Produce      json
+// @Param        user body model.User  true  "update user"
+// @Success 	 200  {object}  string
+// @Security 	 X-Token
+// @Router       /user/updateName [put]
 func (uh *UserHandler) UpdateUsername(ctx *gin.Context) {
 
 	var user model.User

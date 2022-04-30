@@ -11,6 +11,14 @@ import (
 
 type UploadHandler struct{}
 
+// @Summary      图片上传
+// @Tags         System/Upload
+// @Accept       json
+// @Produce      json
+// @Param		 file  formData	  file  true	"图片"
+// @Success 	 200  {object}  string {data=url}
+// @Security 	 X-Token
+// @Router       /upload/mdFile [post]
 func (uh *UploadHandler) UploadMdFile(ctx *gin.Context) {
 
 	// var url []string

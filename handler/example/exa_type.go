@@ -14,7 +14,12 @@ type TypeHandler struct {
 	typeService example.TypeService
 }
 
-// 按amount降序排列
+// @Summary      分类展示(amount降序)
+// @Tags         Example/Type
+// @Accept       json
+// @Produce      json
+// @Success 	 200  {object}  []model.Type
+// @Router       /type/listOrder [get]
 func (th *TypeHandler) ListOrder(ctx *gin.Context) {
 	types, err := th.typeService.ListOrderByAmountDesc()
 	if err != nil {
@@ -25,7 +30,12 @@ func (th *TypeHandler) ListOrder(ctx *gin.Context) {
 	command.Success(ctx, "查询成功", gin.H{"type": types})
 }
 
-// 不排序只显示列表
+// @Summary      分类展示(不排序)
+// @Tags         Example/Type
+// @Accept       json
+// @Produce      json
+// @Success 	 200  {object}  []model.Type
+// @Router       /type/list [get]
 func (th *TypeHandler) List(ctx *gin.Context) {
 	types, err := th.typeService.List()
 	if err != nil {
@@ -36,14 +46,22 @@ func (th *TypeHandler) List(ctx *gin.Context) {
 	command.Success(ctx, "查询成功", gin.H{"type": types})
 }
 
-//	点击分类进行查询并分页
+// @Summary      分类查询分页
+// @Tags         Example/Type
+// @Accept       json
+// @Produce      json
+// @Param        id	  		query     int	true	"分类id"
+// @Param        pageSize	query     int	false	"每页显示的"
+// @Param        pageNo	  	query     int	false	"页码"
+// @Success 	 200  {object}  response.PageList	{data=response.PageList}
+// @Router       /type/page [get]
 func (th *TypeHandler) TypeList(ctx *gin.Context) {
 
 	id, _ := strconv.Atoi(ctx.Query("id"))
 	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "6"))
-	pageNum, _ := strconv.Atoi(ctx.DefaultQuery("pageNum", "1"))
+	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("pageNo", "1"))
 
-	typeList, err := th.typeService.TypeList(id, pageSize, pageNum)
+	typeList, err := th.typeService.TypeList(id, pageSize, pageNo)
 	if err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
@@ -52,7 +70,14 @@ func (th *TypeHandler) TypeList(ctx *gin.Context) {
 	command.Success(ctx, "查询成功", typeList)
 }
 
-// 新增分类
+// @Summary      新增分类
+// @Tags         Example/Type
+// @Accept       json
+// @Produce      json
+// @Param        blog body map[string]string  true  "Create Type"
+// @Success 	 200  {object}  string
+// @Security	 X-Token
+// @Router       /type/save [post]
 func (th *TypeHandler) CreateType(ctx *gin.Context) {
 	var m map[string]string
 	ctx.ShouldBindJSON(&m)

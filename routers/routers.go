@@ -3,8 +3,11 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 
+	_ "github.com/qianxia/blog/docs"
 	"github.com/qianxia/blog/handler"
 	"github.com/qianxia/blog/middleware"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type option func(*gin.Engine) *gin.Engine
@@ -22,6 +25,7 @@ func Router() *gin.Engine {
 	include(handler.ExampleRouters, handler.SystemRouters)
 
 	r := gin.Default()
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// gin.SetMode(gin.ReleaseMode)
 	r.Use(middleware.CORS())
 	for _, opt := range options {

@@ -19,8 +19,12 @@ type UserService struct{}
 func (us *UserService) Register(r request.Register) (*model.User, error) {
 	var u model.User
 
-	global.QX_DB.Debug().Select("email").Where("email = ?", r.Email).Find(&u)
-	if u.Email == r.Email {
+	// global.QX_DB.Debug().Select("email").Where("email = ?", r.Email).Find(&u)
+	// if u.Email == r.Email {
+	// 	return nil, errors.New("邮箱已注册")
+	// }
+
+	if !errors.Is(global.QX_DB.Debug().Where("email = ?", r.Email).First(&u).Error, gorm.ErrRecordNotFound) {
 		return nil, errors.New("邮箱已注册")
 	}
 

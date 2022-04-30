@@ -13,6 +13,12 @@ type TagHandler struct {
 	tagService example.TagService
 }
 
+// @Summary      标签列表
+// @Tags         Example/Tag
+// @Accept       json
+// @Produce      json
+// @Success 	 200  {object}  []string
+// @Router       /tag/list [get]
 func (th *TagHandler) TagList(ctx *gin.Context) {
 	tags, err := th.tagService.List()
 	if err != nil {

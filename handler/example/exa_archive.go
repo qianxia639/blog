@@ -13,9 +13,12 @@ type ArchiveHandler struct {
 	archiveService example.ArchiveService
 }
 
-/**
-* 按年份显示全部博客信息
- */
+// @Summary      按年份显示全部博客信息
+// @Tags         Example/Type
+// @Accept       json
+// @Produce      json
+// @Success 	 200  {object}  map[string]interface{}
+// @Router       /archive/list [get]
 func (ah *ArchiveHandler) ArchiveList(ctx *gin.Context) {
 
 	if m, total, err := ah.archiveService.GetArchiveGroupByYear(); err != nil {

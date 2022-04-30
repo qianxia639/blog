@@ -2,7 +2,7 @@ package response
 
 type PageList struct {
 	PageSize int   `json:"pageSize"`
-	PageNum  int   `json:"pageNum"`
+	PageNo   int   `json:"pageNo"`
 	Total    int64 `json:"total"`
 
 	DataList interface{} `json:"dataList"`
