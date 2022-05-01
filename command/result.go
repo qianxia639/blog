@@ -19,3 +19,7 @@ func Success(ctx *gin.Context, msg string, data interface{}) {
 func Failed(ctx *gin.Context, httpStatus int, msg string) {
 	resultError(ctx, httpStatus, false, msg)
 }
+
+func RFailed(ctx *gin.Context, httpStatus int, msg string) {
+	resultError(ctx, httpStatus, false, msg)
+}

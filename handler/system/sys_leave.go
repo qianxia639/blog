@@ -21,8 +21,7 @@ type LeaveHandler struct {
 func (lh *LeaveHandler) All(ctx *gin.Context) {
 	if l, err := lh.leaveService.All(); err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
-		return
+		command.RFailed(ctx, http.StatusInternalServerError, "查询失败")
 	} else {
 		command.Success(ctx, "查询成功", gin.H{"leave": l})
 	}
@@ -35,14 +34,12 @@ func (lh *LeaveHandler) Insert(ctx *gin.Context) {
 
 	if err := utils.Verify(l); err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusBadRequest, err.Error())
-		return
+		command.RFailed(ctx, http.StatusBadRequest, err.Error())
 	}
 
 	if err := lh.leaveService.Insert(model.Leave{Name: l.Name, Content: l.Content}); err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		return
+		command.RFailed(ctx, http.StatusInternalServerError, err.Error())
 	}
 
 	command.Success(ctx, "添加成功", nil)
@@ -54,8 +51,7 @@ func (lh *LeaveHandler) Delete(ctx *gin.Context) {
 	id, _ := strconv.ParseUint(ctx.Query("id"), 10, 64)
 	if err := lh.leaveService.Delete(id); err != nil {
 		global.QX_LOG.Errorf("delete leave err: %v", err)
-		command.Failed(ctx, http.StatusInternalServerError, "操作失败")
-		return
+		command.RFailed(ctx, http.StatusInternalServerError, "操作失败")
 	}
 	command.Success(ctx, "操作成功", nil)
 }

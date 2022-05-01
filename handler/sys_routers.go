@@ -24,10 +24,11 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 			ug.GET("/info", system.GetInstance().Info)
 			// 修改名称
 			ug.PUT("/updateName", system.GetInstance().UpdateUsername)
+			// 修改密码
+			ug.PUT("/updatePwd", system.GetInstance().UpdatePwd)
+			// 修改头像
+			ug.PUT("/updateAvatar", system.GetInstance().UpdateAvatar)
 		}
-
-		// 修改密码
-		// userGroup.PUT("/updatePwd", system.GetInstance().UpdatePassword)
 	}
 
 	//  ========== search router group ==========

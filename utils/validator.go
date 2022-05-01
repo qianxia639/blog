@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"regexp"
 )
@@ -10,11 +11,6 @@ func Verify(value interface{}) error {
 	tp := reflect.TypeOf(value)   // 获取类型
 	val := reflect.ValueOf(value) // 获取值
 
-	// k := val.Kind()
-	// if k != reflect.Struct {
-	// 	return errors.New("Not a Struct")
-	// }
-
 	switch val.Kind() {
 	case reflect.Struct:
 		return validatorStruct(tp, val)
@@ -22,20 +18,6 @@ func Verify(value interface{}) error {
 		return validatorMap(tp, val)
 	}
 
-	// // 遍历结构体中所有字段
-	// for i := 0; i < val.NumField(); i++ {
-	// 	tagVal := tp.Field(i)
-	// 	v := val.Field(i)
-
-	// 	if isEmpty(v) {
-	// 		return errors.New(tagVal.Name + "不能为空")
-	// 	}
-	// 	if tagVal.Name == "Email" {
-	// 		if !regexpMatch(v.String()) {
-	// 			return errors.New(tagVal.Name + "格式不匹配")
-	// 		}
-	// 	}
-	// }
 	return nil
 }
 
@@ -43,7 +25,7 @@ func validatorStruct(t reflect.Type, value reflect.Value) error {
 	for i := 0; i < value.NumField(); i++ {
 		tagVal := t.Field(i)
 		v := value.Field(i)
-
+		fmt.Printf("v: %v\n", v)
 		if isEmpty(v) {
 			return errors.New(tagVal.Name + "不能为空")
 		}

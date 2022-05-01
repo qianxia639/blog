@@ -23,8 +23,7 @@ func (th *TagHandler) TagList(ctx *gin.Context) {
 	tags, err := th.tagService.List()
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
-		return
+		command.RFailed(ctx, http.StatusInternalServerError, "查询失败")
 	}
 	command.Success(ctx, "查询成功", gin.H{"tag": tags})
 }

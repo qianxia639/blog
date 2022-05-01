@@ -19,12 +19,11 @@ func (ch *CommentHandler) Save(ctx *gin.Context) {
 	var m map[string]interface{}
 	if err := ctx.ShouldBindJSON(&m); err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, 500, err.Error())
-		return
+		command.RFailed(ctx, 500, err.Error())
 	}
 
 	if err := ch.commentService.Save(m); err != nil {
-		command.Failed(ctx, 500, err.Error())
+		command.RFailed(ctx, 500, err.Error())
 	} else {
 		command.Success(ctx, "成功", nil)
 	}

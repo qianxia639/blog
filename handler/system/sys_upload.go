@@ -25,8 +25,7 @@ func (uh *UploadHandler) UploadMdFile(ctx *gin.Context) {
 	// form, err := ctx.MultipartForm()
 	// if err != nil {
 	// 	global.QX_LOG.Errorf("get err %s", err.Error())
-	// 	command.Failed(ctx, http.StatusBadRequest, "上传失败")
-	// 	return
+	// 	command.RFailed(ctx, http.StatusBadRequest, "上传失败")
 	// }
 
 	// files := form.File["files"]
@@ -35,8 +34,7 @@ func (uh *UploadHandler) UploadMdFile(ctx *gin.Context) {
 
 	// 	if u, err := utils.UploadFile(f, file.Size); err != nil {
 	// 		global.QX_LOG.Error(err)
-	// 		command.Failed(ctx, http.StatusInternalServerError, "上传失败")
-	// 		return
+	// 		command.RFailed(ctx, http.StatusInternalServerError, "上传失败")
 	// 	} else {
 	// 		url = append(url, u)
 	// 	}
@@ -45,14 +43,12 @@ func (uh *UploadHandler) UploadMdFile(ctx *gin.Context) {
 	file, fileHeader, err := ctx.Request.FormFile("file")
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "上传失败")
-		return
+		command.RFailed(ctx, http.StatusInternalServerError, "上传失败")
 	}
 
 	if url, err := utils.UploadFile(file, fileHeader.Size); err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "上传失败")
-		return
+		command.RFailed(ctx, http.StatusInternalServerError, "上传失败")
 	} else {
 		ctx.SecureJSON(http.StatusOK, gin.H{"url": url})
 	}

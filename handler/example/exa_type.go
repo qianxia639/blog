@@ -24,8 +24,7 @@ func (th *TypeHandler) ListOrder(ctx *gin.Context) {
 	types, err := th.typeService.ListOrderByAmountDesc()
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
-		return
+		command.RFailed(ctx, http.StatusInternalServerError, "查询失败")
 	}
 	command.Success(ctx, "查询成功", gin.H{"type": types})
 }
@@ -40,8 +39,7 @@ func (th *TypeHandler) List(ctx *gin.Context) {
 	types, err := th.typeService.List()
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
-		return
+		command.RFailed(ctx, http.StatusInternalServerError, "查询失败")
 	}
 	command.Success(ctx, "查询成功", gin.H{"type": types})
 }
@@ -64,8 +62,7 @@ func (th *TypeHandler) TypeList(ctx *gin.Context) {
 	typeList, err := th.typeService.TypeList(id, pageSize, pageNo)
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
-		return
+		command.RFailed(ctx, http.StatusInternalServerError, "查询失败")
 	}
 	command.Success(ctx, "查询成功", typeList)
 }
@@ -83,8 +80,7 @@ func (th *TypeHandler) CreateType(ctx *gin.Context) {
 	ctx.ShouldBindJSON(&m)
 	if err := th.typeService.CreateType(m["typeName"]); err != nil {
 		global.QX_LOG.Errorf("insert type err: %v", err)
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		return
+		command.RFailed(ctx, http.StatusInternalServerError, err.Error())
 	}
 
 	command.Success(ctx, "添加成功", nil)

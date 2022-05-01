@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"log"
 	"os"
 
 	"github.com/qianxia/blog/global"
@@ -18,16 +19,12 @@ func Viper() {
 
 	// 读取配置文件
 	if err := viper.ReadInConfig(); err != nil {
-		panic(err)
-		// global.QX_LOG.Fatalf("Fatal error config file: %v", err)
-		// return
+		log.Fatalf("Fatal error config file: %v", err)
 	}
 
 	// 反序列化到指定结构体上
 	err := viper.Unmarshal(&global.QX_CONFIG)
 	if err != nil {
-		panic(err)
-		// global.QX_LOG.Fatalf("unable to read remote config: %v", err)
-		// return
+		log.Fatalf("unable to read remote config: %v", err)
 	}
 }

@@ -21,7 +21,7 @@ type UserHandler struct {
 // @Tags         System/User
 // @Accept       json
 // @Produce      json
-// @Param        user body request.Register  true  "Create User"
+// @Param        Register body request.Register  true  "Create User"
 // @Success 	 200  {object}  string
 // @Router       /user/register [post]
 func (uh *UserHandler) Register(ctx *gin.Context) {
@@ -29,16 +29,14 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 
 	_ = ctx.ShouldBindJSON(&r)
 	if err := utils.Verify(r); err != nil {
-		global.QX_LOG.Errorf("parame bind err:", err)
-		command.Failed(ctx, http.StatusBadRequest, err.Error())
-		return
+		global.QX_LOG.Errorf("parame bind err: %v", err)
+		command.RFailed(ctx, http.StatusBadRequest, err.Error())
 	}
 
 	_, err := uh.userService.Register(r)
 
 	if err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		return
+		command.RFailed(ctx, http.StatusInternalServerError, err.Error())
 	}
 	command.Success(ctx, "注册成功", nil)
 
@@ -61,7 +59,7 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 // @Tags         System/User
 // @Accept       json
 // @Produce      json
-// @Param        user body request.Login  true  "Login"
+// @Param        Login body request.Login  true  "Login"
 // @Success 	 200  {object}  string {data=token}
 // @Router       /user/login [post]
 func (uh *UserHandler) Login(ctx *gin.Context) {
@@ -72,14 +70,12 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 
 	if err := utils.Verify(&l); err != nil {
 		global.QX_LOG.Errorf("parame bind err:", err)
-		command.Failed(ctx, http.StatusBadRequest, err.Error())
-		return
+		command.RFailed(ctx, http.StatusBadRequest, err.Error())
 	}
 
 	user, err := uh.userService.Login(l)
 	if err != nil {
-		command.Failed(ctx, http.StatusUnauthorized, err.Error())
-		return
+		command.RFailed(ctx, http.StatusUnauthorized, err.Error())
 	} else {
 		uh.createToken(ctx, *user)
 	}
@@ -109,8 +105,7 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 	}
 	if token, err := utils.CreateToken(bc); err != nil {
 		global.QX_LOG.Error("token生成失败!", err)
-		command.Failed(ctx, http.StatusInternalServerError, "获取token失败")
-		return
+		command.RFailed(ctx, http.StatusInternalServerError, "获取token失败")
 	} else {
 		command.Success(ctx, "登录成功", gin.H{"token": token})
 	}
@@ -126,9 +121,10 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 // @Router       /user/info [get]
 func (uh *UserHandler) Info(ctx *gin.Context) {
 	uuid := utils.GetUserUUID(ctx)
-	if user, err := uh.userService.GetUserInfo(uuid); err != nil {
+	id := utils.GetUserId(ctx)
+	if user, err := uh.userService.GetUserInfo(id, uuid); err != nil {
 		global.QX_LOG.Errorf("用户信息获取失败! - {%s}", err)
-		command.Failed(ctx, http.StatusInternalServerError, "获取失败")
+		command.RFailed(ctx, http.StatusInternalServerError, "获取失败")
 	} else {
 		command.Success(ctx, "获取成功", gin.H{"user": response.ToUser(*user)})
 	}
@@ -138,22 +134,74 @@ func (uh *UserHandler) Info(ctx *gin.Context) {
 // @Tags         System/User
 // @Accept       json
 // @Produce      json
-// @Param        user body model.User  true  "update user"
+// @Param        UpdateUsername body request.UpdateUsername  true  "update user"
 // @Success 	 200  {object}  string
 // @Security 	 X-Token
 // @Router       /user/updateName [put]
 func (uh *UserHandler) UpdateUsername(ctx *gin.Context) {
 
-	var user model.User
-	if err := ctx.ShouldBindJSON(&user); err != nil {
-		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
+	var u request.UpdateUsername
+	_ = ctx.ShouldBindJSON(&u)
+
+	if err := utils.Verify(&u); err != nil {
 		global.QX_LOG.Errorf("parame bind err:", err)
-		return
+		command.RFailed(ctx, http.StatusBadRequest, err.Error())
 	}
-	user.Id = utils.GetUserId(ctx)
-	if err := uh.userService.UpdateUsername(user); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		return
+
+	uuid := utils.GetUserUUID(ctx)
+	id := utils.GetUserId(ctx)
+	if err := uh.userService.UpdateUsername(u, id, uuid); err != nil {
+		command.RFailed(ctx, http.StatusInternalServerError, err.Error())
+	}
+	command.Success(ctx, "修改成功", nil)
+}
+
+// @Summary      修改密码
+// @Tags         System/User
+// @Accept       json
+// @Produce      json
+// @Param        UpdatePwd body request.UpdatePwd  true  "update user"
+// @Success 	 200  {object}  string
+// @Security 	 X-Token
+// @Router       /user/updatePwd [put]
+func (uh *UserHandler) UpdatePwd(ctx *gin.Context) {
+	var u request.UpdatePwd
+
+	_ = ctx.ShouldBindJSON(&u)
+	if err := utils.Verify(&u); err != nil {
+		global.QX_LOG.Errorf("parame bind err:", err)
+		command.RFailed(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	uuid := utils.GetUserUUID(ctx)
+	id := utils.GetUserId(ctx)
+	if err := uh.userService.UpdatePwd(u, id, uuid); err != nil {
+		command.RFailed(ctx, http.StatusInternalServerError, err.Error())
+	}
+	command.Success(ctx, "修改成功", nil)
+}
+
+// @Summary      修改头像
+// @Tags         System/User
+// @Accept       json
+// @Produce      json
+// @Param        UpdateAvatar body request.UpdateAvatar  true  "update user"
+// @Success 	 200  {object}  string
+// @Security 	 X-Token
+// @Router       /user/updateAvatar [put]
+func (uh *UserHandler) UpdateAvatar(ctx *gin.Context) {
+	var u request.UpdateAvatar
+
+	_ = ctx.ShouldBindJSON(&u)
+	if err := utils.Verify(&u); err != nil {
+		global.QX_LOG.Errorf("parame bind err:", err)
+		command.RFailed(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	uuid := utils.GetUserUUID(ctx)
+	id := utils.GetUserId(ctx)
+	if err := uh.userService.UpdateAvatar(u, id, uuid); err != nil {
+		command.RFailed(ctx, http.StatusInternalServerError, err.Error())
 	}
 	command.Success(ctx, "修改成功", nil)
 }
