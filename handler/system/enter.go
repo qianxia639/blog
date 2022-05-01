@@ -8,6 +8,7 @@ type systemRouterGroup struct {
 	UploadHandler
 	CommentHandler
 	LeaveHandler
+	CaptchaHandler
 }
 
 var systemRouterGroups *systemRouterGroup

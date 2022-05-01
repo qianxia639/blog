@@ -1,6 +1,9 @@
 package model
 
-import uuid "github.com/satori/go.uuid"
+import (
+	"github.com/qianxia/blog/model/command"
+	uuid "github.com/satori/go.uuid"
+)
 
 type User struct {
 	// 主键
@@ -16,8 +19,8 @@ type User struct {
 	// 头像
 	Avatar string `json:"avatar" gorm:"default:https://picsum.photos/30/30/?image=41;comment:头像"`
 	// 创建时间
-	CreatedAt uint64 `json:"createdAt" gorm:"autoCreateTine:milli;comment:创建时间"`
+	CreatedAt command.Timestamp `json:"createdAt" gorm:"type:timestamp;comment:注册时间"`
 	// 更新时间
-	UpdatedAt uint64 `json:"updatedAt" gorm:"autoUpdateTine:milli;comment:更新时间"`
+	UpdatedAt command.Timestamp `json:"updatedAt" gorm:"type:timestamp;comment:更新时间"`
 	Blogs     []Blog
 }

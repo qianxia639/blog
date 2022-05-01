@@ -41,6 +41,20 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 	command.Success(ctx, "注册成功", nil)
+
+	// if store.Verify(r.CaptchaId, r.Captcha, true) {
+	// 	_, err := uh.userService.Register(r)
+
+	// 	if err != nil {
+	// 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
+	// 		return
+	// 	}
+	// 	command.Success(ctx, "注册成功", nil)
+	// } else {
+	// 	command.Failed(ctx, http.StatusUnauthorized, "验证码错误")
+	// 	return
+	// }
+
 }
 
 // @Summary      登录
@@ -56,6 +70,12 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 
 	_ = ctx.ShouldBindJSON(&l)
 
+	if err := utils.Verify(&l); err != nil {
+		global.QX_LOG.Errorf("parame bind err:", err)
+		command.Failed(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	user, err := uh.userService.Login(l)
 	if err != nil {
 		command.Failed(ctx, http.StatusUnauthorized, err.Error())
@@ -63,6 +83,20 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 	} else {
 		uh.createToken(ctx, *user)
 	}
+
+	// if store.Verify(l.CaptchaId, l.Captcha, true) {
+	// 	user, err := uh.userService.Login(l)
+	// 	if err != nil {
+	// 		command.Failed(ctx, http.StatusUnauthorized, err.Error())
+	// 		return
+	// 	} else {
+	// 		uh.createToken(ctx, *user)
+	// 	}
+	// } else {
+	// 	command.Failed(ctx, http.StatusUnauthorized, "验证码错误")
+	// 	return
+	// }
+
 }
 
 // 登录后签发token

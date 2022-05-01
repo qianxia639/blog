@@ -14,6 +14,8 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		ug.POST("/register", system.GetInstance().Register)
 		// 登录
 		ug.POST("/login", system.GetInstance().Login)
+		// 生成验证码
+		ug.POST("/captcha", system.GetInstance().Captcha)
 
 		ug = ug.Group("/")
 		ug.Use(middleware.Auth())

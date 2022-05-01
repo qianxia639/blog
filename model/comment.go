@@ -1,6 +1,6 @@
 package model
 
-import "time"
+import "github.com/qianxia/blog/model/command"
 
 type Comment struct {
 	// 主键
@@ -16,5 +16,5 @@ type Comment struct {
 	// 评论内容
 	Content string `json:"content" gorm:"comment:评论内容"`
 	// 评论时间
-	CreatedAt time.Time `json:"createdAt" gorm:"type:timestamp;comment:评论时间"`
+	CreatedAt command.Timestamp `json:"createdAt" gorm:"type:timestamp;comment:评论时间"`
 }
