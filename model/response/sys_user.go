@@ -2,14 +2,13 @@ package response
 
 import (
 	"github.com/qianxia/blog/model"
-	uuid "github.com/satori/go.uuid"
 )
 
 type User struct {
-	Id       uint64    `json:"id"`
-	UUID     uuid.UUID `json:"uuid"`
-	Username string    `json:"username"`
-	Avatar   string    `json:"avatar"`
+	Id       uint64 `json:"id"`
+	UUID     string `json:"uuid"`
+	Username string `json:"username"`
+	Avatar   string `json:"avatar"`
 }
 
 func ToUser(user model.User) *User {

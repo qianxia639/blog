@@ -22,4 +22,5 @@ func Failed(ctx *gin.Context, httpStatus int, msg string) {
 
 func RFailed(ctx *gin.Context, httpStatus int, msg string) {
 	resultError(ctx, httpStatus, false, msg)
+	return
 }

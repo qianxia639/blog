@@ -26,7 +26,7 @@ func Router() *gin.Engine {
 
 	r := gin.Default()
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	// gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 	r.Use(middleware.CORS())
 	for _, opt := range options {
 		opt(r)

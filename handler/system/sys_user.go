@@ -70,7 +70,7 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 
 	_ = ctx.ShouldBindJSON(&l)
 
-	if err := utils.Verify(&l); err != nil {
+	if err := l.Validate(); err != nil {
 		global.QX_LOG.Errorf("parame bind err:", err)
 		command.RFailed(ctx, http.StatusBadRequest, err.Error())
 	}
@@ -99,7 +99,6 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 
 // 登录后签发token
 func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
-	c := ctx.Copy()
 	bc := utils.BaseClaims{
 		Id:       user.Id,
 		UUID:     user.UUID,
@@ -108,9 +107,9 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 	}
 	if token, err := utils.CreateToken(bc); err != nil {
 		global.QX_LOG.Error("token生成失败!", err)
-		command.RFailed(c, http.StatusInternalServerError, "获取token失败")
+		command.RFailed(ctx, http.StatusInternalServerError, "获取token失败")
 	} else {
-		command.Success(c, "登录成功", gin.H{"token": token})
+		command.Success(ctx, "登录成功", gin.H{"token": token, "id": bc.UUID})
 	}
 
 }

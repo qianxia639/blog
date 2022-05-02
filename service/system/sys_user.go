@@ -27,7 +27,7 @@ func (us *UserService) Register(r request.Register) (*model.User, error) {
 	newPassword, _ := utils.Encrypt(r.Password)
 	// 创建用户
 	newUser := model.User{
-		UUID:     uuid.NewV4(),
+		UUID:     uuid.NewV4().String(),
 		Username: r.Email,
 		Email:    r.Email,
 		Password: newPassword,
@@ -60,7 +60,7 @@ func (*UserService) Login(l request.Login) (*model.User, error) {
 /**
 * 获取用户信息
  */
-func (*UserService) GetUserInfo(id uint64, uuid uuid.UUID) (*model.User, error) {
+func (*UserService) GetUserInfo(id uint64, uuid string) (*model.User, error) {
 	var user model.User
 	err := global.QX_DB.Debug().Select("id,uuid,username,avatar").Where("id = ? AND uuid = ?", id, uuid).Find(&user).Error
 
@@ -70,7 +70,7 @@ func (*UserService) GetUserInfo(id uint64, uuid uuid.UUID) (*model.User, error) 
 /**
 * 修改用户名
  */
-func (*UserService) UpdateUsername(u request.UpdateUsername, id uint64, uuid uuid.UUID) error {
+func (*UserService) UpdateUsername(u request.UpdateUsername, id uint64, uuid string) error {
 
 	if !errors.Is(global.QX_DB.Debug().Where("username = ?", u.Username).First(&model.User{}).Error, gorm.ErrRecordNotFound) {
 		return errors.New("用户名已存在")
@@ -94,7 +94,7 @@ func (*UserService) UpdateUsername(u request.UpdateUsername, id uint64, uuid uui
 /**
 *	修改密码
  */
-func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid uuid.UUID) error {
+func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error {
 
 	// 密码校验
 	var user model.User
@@ -114,6 +114,6 @@ func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid uuid.UUID) er
 /**
 *	修改头像
  */
-func (*UserService) UpdateAvatar(u request.UpdateAvatar, id uint64, uuid uuid.UUID) error {
+func (*UserService) UpdateAvatar(u request.UpdateAvatar, id uint64, uuid string) error {
 	return global.QX_DB.Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("avatar", u.Avatar).Error
 }

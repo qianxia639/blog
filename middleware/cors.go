@@ -13,7 +13,7 @@ func CORS() gin.HandlerFunc {
 		// ctx.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		ctx.Writer.Header().Set("Access-Control-Max-Age", "86400")
 		ctx.Writer.Header().Set("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS")
-		ctx.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type,X-CSRF-Token,X-Token")
+		ctx.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type,X-CSRF-Token,X-Token,Uid")
 		ctx.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		ctx.Writer.Header().Set("Content-Type", "application/json;charset=utf-8")
 		if ctx.Request.Method == http.MethodOptions {

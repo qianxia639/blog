@@ -2,14 +2,13 @@ package model
 
 import (
 	"github.com/qianxia/blog/model/command"
-	uuid "github.com/satori/go.uuid"
 )
 
 type User struct {
 	// 主键
 	Id uint64 `gorm:"primaryKey;comment:主键"`
 	// 用户UUID
-	UUID uuid.UUID `json:"uuid" gorm:"size:36;comment:用户UUID"`
+	UUID string `json:"uuid" gorm:"size:36;comment:用户UUID"`
 	// 用户名
 	Username string `json:"username" gorm:"size:20;comment:用户名(默认为邮箱号)"`
 	// 密码

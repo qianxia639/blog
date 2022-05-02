@@ -46,7 +46,7 @@ func validatorMap(t reflect.Type, value reflect.Value) error {
 func isEmpty(value reflect.Value) bool {
 	// Kind()获取到具体类型
 	switch value.Kind() {
-	case reflect.String:
+	case reflect.String, reflect.Array, reflect.Slice, reflect.Map:
 		return value.Len() == 0
 	case reflect.Bool:
 		return !value.Bool()
