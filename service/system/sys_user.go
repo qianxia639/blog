@@ -95,7 +95,6 @@ func (*UserService) UpdateUsername(u request.UpdateUsername, id uint64, uuid uui
 *	修改密码
  */
 func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid uuid.UUID) error {
-	// todo 发送验证码，进行校验之后在做密码的修改
 
 	// 密码校验
 	var user model.User

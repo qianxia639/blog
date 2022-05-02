@@ -14,7 +14,7 @@ type ArchiveHandler struct {
 }
 
 // @Summary      按年份显示全部博客信息
-// @Tags         Example/Type
+// @Tags         Example/Archive
 // @Accept       json
 // @Produce      json
 // @Success 	 200  {object}  map[string]interface{}

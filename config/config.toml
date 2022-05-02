@@ -39,4 +39,10 @@ source = "1234567890qwertyuioplkjhgfdsazxcvbnm"
     G = 0
     B = 0
     A = 0
+
+[email]
+addr = "smtp.qq.com:587"
+username = ""
+password = ""
+host = "smtp.qq.com"
     

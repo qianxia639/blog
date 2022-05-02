@@ -2,6 +2,7 @@ package system
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
@@ -15,6 +16,7 @@ import (
 
 type UserHandler struct {
 	userService system.UserService
+	wg          sync.WaitGroup
 }
 
 // @Summary      注册
@@ -97,6 +99,7 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 
 // 登录后签发token
 func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
+	c := ctx.Copy()
 	bc := utils.BaseClaims{
 		Id:       user.Id,
 		UUID:     user.UUID,
@@ -105,9 +108,9 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 	}
 	if token, err := utils.CreateToken(bc); err != nil {
 		global.QX_LOG.Error("token生成失败!", err)
-		command.RFailed(ctx, http.StatusInternalServerError, "获取token失败")
+		command.RFailed(c, http.StatusInternalServerError, "获取token失败")
 	} else {
-		command.Success(ctx, "登录成功", gin.H{"token": token})
+		command.Success(c, "登录成功", gin.H{"token": token})
 	}
 
 }
@@ -173,12 +176,31 @@ func (uh *UserHandler) UpdatePwd(ctx *gin.Context) {
 		command.RFailed(ctx, http.StatusBadRequest, err.Error())
 	}
 
+	// todo 发送邮件并进行校验
+	// uh.wg.Add(1)
+	// go uh.sendMail(ctx, u.Email)
+	// if exists, err := utils.VerifyMail(u.Email); err != nil && !exists {
+	// 	global.QX_LOG.Errorf("verify email code err:", err)
+	// 	fmt.Printf("err: %v\n", err)
+	// 	fmt.Printf("exists: %v\n", exists)
+	// 	command.RFailed(ctx, http.StatusInternalServerError, "验证码错误")
+	// }
+	// uh.wg.Wait()
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
 	if err := uh.userService.UpdatePwd(u, id, uuid); err != nil {
 		command.RFailed(ctx, http.StatusInternalServerError, err.Error())
 	}
 	command.Success(ctx, "修改成功", nil)
+}
+
+func (uh *UserHandler) sendMail(ctx *gin.Context, email string) {
+	// defer uh.wg.Done()
+	cc := ctx.Copy()
+	if err := utils.SendMail(email); err != nil {
+		global.QX_LOG.Errorf("send mail err: %v", err)
+		command.RFailed(cc, 500, "邮件发送失败")
+	}
 }
 
 // @Summary      修改头像

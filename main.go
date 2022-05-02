@@ -4,7 +4,6 @@ import (
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/initialize"
 	"github.com/qianxia/blog/server"
-	"github.com/qianxia/blog/service/system"
 	"github.com/qianxia/blog/utils"
 )
 
@@ -16,13 +15,13 @@ import (
 // @name X-Token
 // @BasePath  /
 func main() {
-	utils.Viper()                                                 // 初始化配置文件信息
-	global.QX_LOG = utils.Zap()                                   // 初始化zap日志
-	global.QX_ES = utils.ElasticSearch()                          // 初始化elasticsearch
-	if err := system.ElasticSearch.IndicesMapping(); err != nil { // 初始化索引
-		global.QX_LOG.Fatal(err)
-		return
-	}
+	utils.Viper()               // 初始化配置文件信息
+	global.QX_LOG = utils.Zap() // 初始化zap日志
+	// global.QX_ES = utils.ElasticSearch()                          // 初始化elasticsearch
+	// if err := system.ElasticSearch.IndicesMapping(); err != nil { // 初始化索引
+	// 	global.QX_LOG.Fatal(err)
+	// 	return
+	// }
 
 	global.QX_REDIS = utils.Redis() // 初始化redis
 
