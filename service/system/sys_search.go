@@ -2,6 +2,7 @@ package system
 
 import (
 	"encoding/json"
+	"sync"
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
@@ -109,46 +110,49 @@ func (*SearchService) SearchBlog(title string, pageNo, pageSize int) (*response.
 		return nil, err
 	}
 
-	resp := make([]response.Search, 0)
 	// 将total和dataList封装到pageList中
 	var pageList response.PageList
 	pageList.Total = int64(r["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64))
+	var wg sync.WaitGroup
+	resp := make([]response.Search, 0, pageList.Total)
+	// ch := make(chan []response.Search, pageList.Total)
 
-	// ch := make(chan []response.Search)
-
-	// go func() {
 	// 遍历返回信息中hits的hits
 	for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
-		var title interface{}
-		var description interface{}
+		wg.Add(1)
+		go func() {
+			var title interface{}
+			var description interface{}
 
-		if hit.(map[string]interface{})["highlight"].(map[string]interface{})["title"] == nil {
-			title = hit.(map[string]interface{})["_source"].(map[string]interface{})["title"]
-		} else {
-			title = hit.(map[string]interface{})["highlight"].(map[string]interface{})["title"].([]interface{})[0]
-		}
+			if hit.(map[string]interface{})["highlight"].(map[string]interface{})["title"] == nil {
+				title = hit.(map[string]interface{})["_source"].(map[string]interface{})["title"]
+			} else {
+				title = hit.(map[string]interface{})["highlight"].(map[string]interface{})["title"].([]interface{})[0]
+			}
 
-		if hit.(map[string]interface{})["highlight"].(map[string]interface{})["description"] == nil {
-			description = hit.(map[string]interface{})["_source"].(map[string]interface{})["description"]
-		} else {
-			description = hit.(map[string]interface{})["highlight"].(map[string]interface{})["description"].([]interface{})[0]
-		}
+			if hit.(map[string]interface{})["highlight"].(map[string]interface{})["description"] == nil {
+				description = hit.(map[string]interface{})["_source"].(map[string]interface{})["description"]
+			} else {
+				description = hit.(map[string]interface{})["highlight"].(map[string]interface{})["description"].([]interface{})[0]
+			}
 
-		resp = append(resp, response.Search{
-			Id:          hit.(map[string]interface{})["_source"].(map[string]interface{})["id"],
-			UserId:      hit.(map[string]interface{})["_source"].(map[string]interface{})["userId"],
-			TypeId:      hit.(map[string]interface{})["_source"].(map[string]interface{})["typeId"],
-			TypeName:    hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
-			Username:    hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
-			Title:       title,
-			Description: description,
-			UpdatedAt:   utils.TimestampToString(int64(hit.(map[string]interface{})["_source"].(map[string]interface{})["updatedAt"].(float64))),
-			Tags:        hit.(map[string]interface{})["_source"].(map[string]interface{})["Tags"],
-		})
+			resp = append(resp, response.Search{
+				Id:          hit.(map[string]interface{})["_source"].(map[string]interface{})["id"],
+				UserId:      hit.(map[string]interface{})["_source"].(map[string]interface{})["userId"],
+				TypeId:      hit.(map[string]interface{})["_source"].(map[string]interface{})["typeId"],
+				TypeName:    hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
+				Username:    hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
+				Title:       title,
+				Description: description,
+				UpdatedAt:   utils.TimestampToString(int64(hit.(map[string]interface{})["_source"].(map[string]interface{})["updatedAt"].(float64))),
+				Tags:        hit.(map[string]interface{})["_source"].(map[string]interface{})["Tags"],
+			})
+			// ch <- resp
+			wg.Done()
+		}()
+
 	}
-	// 	ch <- resp
-	// }()
-
+	wg.Wait()
 	pageList.PageNo = pageNo
 	pageList.PageSize = pageSize
 	pageList.DataList = resp

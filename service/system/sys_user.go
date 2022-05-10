@@ -33,9 +33,7 @@ func (us *UserService) Register(r request.Register) (*model.User, error) {
 		Password: newPassword,
 	}
 
-	if err := global.QX_DB.Debug().Create(&newUser).Error; err != nil {
-		return nil, errors.New("注册失败")
-	}
+	global.QX_DB.Debug().Create(&newUser)
 	return &newUser, nil
 }
 
@@ -108,7 +106,26 @@ func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error
 
 	pwd, _ := utils.Encrypt(u.LastPassword)
 
-	return global.QX_DB.Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("password", pwd).Error
+	global.QX_DB.Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("password", pwd)
+
+	return nil
+}
+
+/**
+*	找回密码
+ */
+func (*UserService) ForgetPwd(f request.ForgetPwd) error {
+	var user model.User
+	global.QX_DB.Debug().Where("email = ?", f.Email).Find(&user)
+
+	if err := utils.Decrypt(user.Password, f.Password); err == nil {
+		return errors.New("不能与旧密码相同")
+	}
+
+	pwd, _ := utils.Encrypt(f.Password)
+
+	global.QX_DB.Model(user).Where("email = ?", f.Email).Update("password", pwd)
+	return nil
 }
 
 /**
@@ -116,4 +133,19 @@ func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error
  */
 func (*UserService) UpdateAvatar(u request.UpdateAvatar, id uint64, uuid string) error {
 	return global.QX_DB.Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("avatar", u.Avatar).Error
+}
+
+/**
+*	修改邮箱
+ */
+func (*UserService) UpdateEmail(u request.UpdateEmail, id uint64, uuid string) error {
+
+	code, _ := utils.GetCache(u.OldEmail)
+
+	if code != u.Code {
+		return errors.New("验证码不相符")
+	}
+
+	global.QX_DB.Model(&model.User{}).Debug().Where("id = ? AND uuid = ?", id, uuid).Update("email", u.LastEmail)
+	return nil
 }

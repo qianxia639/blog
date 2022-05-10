@@ -10,26 +10,26 @@ import (
 	"github.com/qianxia/blog/global"
 )
 
-var code = CreateRandom()
-
 func SendMail(to ...string) error {
+	var code = CreateRandom()
 	e := &email.Email{
 		To:      to,
-		From:    "",
+		From:    global.QX_CONFIG.Email.Username,
 		Subject: "验证码",
-		HTML:    []byte(`<p>验证码为: ` + code + `</p>`),
+		HTML:    []byte(`<p>验证码为: ` + code + `,该验证码将在5分钟后失效</p>`),
 		Headers: textproto.MIMEHeader{},
 	}
 
 	if err := setCache(to[0], code); err != nil {
 		return err
 	} else {
-		return e.Send(global.QX_CONFIG.Email.Addr, smtp.PlainAuth("", "", "sxkfftyexmhpdcaa", global.QX_CONFIG.Email.Host))
+		// sxkfftyexmhpdcaa
+		return e.Send(global.QX_CONFIG.Email.Addr, smtp.PlainAuth("", global.QX_CONFIG.Email.Username, global.QX_CONFIG.Email.Password, global.QX_CONFIG.Email.Host))
 	}
 }
 
-func VerifyMail(to string) (bool, error) {
-	if res, err := getCache(to); err != nil {
+func VerifyMail(to, code string) (bool, error) {
+	if res, err := GetCache(to); err != nil {
 		return false, err
 	} else if res != code {
 		return false, err
@@ -42,6 +42,10 @@ func setCache(to, code string) error {
 	return global.QX_REDIS.Set(context.Background(), to, code, time.Minute*5).Err()
 }
 
-func getCache(to string) (string, error) {
-	return global.QX_REDIS.Get(Redis().Context(), to).Result()
+func GetCache(to string) (string, error) {
+	return global.QX_REDIS.Get(context.Background(), to).Result()
+}
+
+func delCache(to string) error {
+	return global.QX_REDIS.Del(context.Background(), to).Err()
 }

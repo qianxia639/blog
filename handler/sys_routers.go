@@ -7,28 +7,41 @@ import (
 )
 
 func SystemRouters(e *gin.Engine) *gin.Engine {
-	// ========== user router group ==========
-	ug := e.Group("/user")
+
+	// ========== system router group ==========
+	sysg := e.Group("/system")
 	{
 		// 注册
-		ug.POST("/register", system.GetInstance().Register)
+		sysg.POST("/register", system.GetInstance().Register)
 		// 登录
-		ug.POST("/login", system.GetInstance().Login)
+		sysg.POST("/login", system.GetInstance().Login)
 		// 生成验证码
-		ug.POST("/captcha", system.GetInstance().Captcha)
+		sysg.POST("/captcha", system.GetInstance().Captcha)
 
-		ug = ug.Group("/")
-		ug.Use(middleware.Auth())
+		sysg = sysg.Group("/")
+		sysg.Use(middleware.Auth())
 		{
-			// 用户信息
-			ug.GET("/info", system.GetInstance().Info)
-			// 修改名称
-			ug.PUT("/updateName", system.GetInstance().UpdateUsername)
-			// 修改密码
-			ug.PUT("/updatePwd", system.GetInstance().UpdatePwd)
-			// 修改头像
-			ug.PUT("/updateAvatar", system.GetInstance().UpdateAvatar)
+			// 发送邮箱验证码
+			sysg.GET("/email", system.GetInstance().SendMail)
+			// 校验邮箱验证码
+			sysg.POST("/verifyMail", system.GetInstance().VerifyMail)
 		}
+	}
+
+	// ========== user router group ==========
+	ug := e.Group("/user")
+	ug.Use(middleware.Auth())
+	{
+		// 用户信息
+		ug.GET("/info", system.GetInstance().Info)
+		// 修改名称
+		ug.PUT("/name", system.GetInstance().UpdateUsername)
+		// 修改密码
+		ug.PUT("/pwd", system.GetInstance().UpdatePwd)
+		// 修改头像
+		ug.PUT("/avatar", system.GetInstance().UpdateAvatar)
+		// 修改邮箱
+		ug.PUT("/email", system.GetInstance().UpdateEmail)
 	}
 
 	//  ========== search router group ==========
@@ -37,7 +50,7 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		// 搜索所有博客
 		sg.GET("/blog", system.GetInstance().SearchBlog)
 		// 搜索个人博客列表
-		sg.GET("/priblog", system.GetInstance().SearchPriBlog, middleware.Auth())
+		sg.GET("/priblog", middleware.Auth(), system.GetInstance().SearchPriBlog)
 	}
 
 	// ========== upload router group ==========

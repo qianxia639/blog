@@ -29,18 +29,11 @@ type Config struct {
 		ServerUrl string `mapstructure:"server_url"`
 	}
 	Captcha struct {
-		Height          int    `mapstructure:"height"`
-		Width           int    `mapstructure:"width"`
-		NoiseCount      int    `mapstructure:"noise_count"`
-		ShowLineOptions int    `mapstructure:"show_line_options"`
-		Length          int    `mapstructure:"length"`
-		Source          string `mapstructure:"source"`
-		Color           struct {
-			R uint8 `mapstructure:"R"`
-			G uint8 `mapstructure:"G"`
-			B uint8 `mapstructure:"B"`
-			A uint8 `mapstructure:"A"`
-		} `mapstructure:"color"`
+		Height   int     `mapstructure:"height"`
+		Width    int     `mapstructure:"width"`
+		Length   int     `mapstructure:"length"`
+		MaxSkew  float64 `mapstructure:"max_skew"`
+		DotCount int     `mapstructure:"dot_count"`
 	}
 	Email struct {
 		Addr     string `mapstructure:"addr"`

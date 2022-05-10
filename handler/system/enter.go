@@ -9,6 +9,7 @@ type systemRouterGroup struct {
 	CommentHandler
 	LeaveHandler
 	CaptchaHandler
+	EmailHandler
 }
 
 var systemRouterGroups *systemRouterGroup

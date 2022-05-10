@@ -3,7 +3,6 @@ module github.com/qianxia/blog
 go 1.16
 
 require (
-	github.com/BurntSushi/toml v1.1.0 // indirect
 	github.com/elastic/go-elasticsearch/v7 v7.6.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-openapi/spec v0.20.5 // indirect

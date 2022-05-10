@@ -20,16 +20,18 @@ type Register struct {
 }
 
 type Login struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	// Captcha   string `json:"captcha"`
-	// CaptchaId string `json:"captchaId"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	Captcha   string `json:"captcha"`
+	CaptchaId string `json:"captchaId"`
 }
 
 func (l Login) Validate() error {
 	return validation.ValidateStruct(&l,
 		validation.Field(&l.Email, validation.Required, is.Email),
-		validation.Field(&l.Password, validation.Required, validation.Match(regexp.MustCompile(passwordRegexp))))
+		validation.Field(&l.Password, validation.Required, validation.Match(regexp.MustCompile(passwordRegexp))),
+		validation.Field(&l.Captcha, validation.Required),
+		validation.Field(&l.CaptchaId, validation.Required))
 }
 
 type UpdateUsername struct {
@@ -56,8 +58,24 @@ func (u UpdatePwd) Validate() error {
 		validation.Field(&u.LastPassword, validation.Required, validation.Match(regexp.MustCompile(passwordRegexp))))
 }
 
+type ForgetPwd struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type UpdateAvatar struct {
 	Avatar string `json:"avater"`
+}
+
+type UpdateEmail struct {
+	OldEmail  string `json:"old_email"`
+	LastEmail string `json:"last_email"`
+	Code      string `json:"code"`
+}
+
+type VerifyMail struct {
+	Email string `json:"email"`
+	Code  string `json:"code"`
 }
 
 type Leave struct {
