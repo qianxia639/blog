@@ -1,4 +1,4 @@
-package system
+﻿package system
 
 import "sync"
 
@@ -7,7 +7,6 @@ type systemRouterGroup struct {
 	SearchHandler
 	UploadHandler
 	CommentHandler
-	LeaveHandler
 	CaptchaHandler
 	EmailHandler
 }
@@ -15,7 +14,6 @@ type systemRouterGroup struct {
 var systemRouterGroups *systemRouterGroup
 var once sync.Once
 
-// 单例对象(懒加载)
 func GetInstance() *systemRouterGroup {
 	once.Do(func() {
 		systemRouterGroups = new(systemRouterGroup)

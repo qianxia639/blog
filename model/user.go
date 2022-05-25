@@ -4,22 +4,15 @@ import (
 	"github.com/qianxia/blog/model/command"
 )
 
+// 用户表
 type User struct {
-	// 主键
-	Id uint64 `gorm:"primaryKey;comment:主键"`
-	// 用户UUID
-	UUID string `json:"uuid" gorm:"size:36;comment:用户UUID"`
-	// 用户名
-	Username string `json:"username" gorm:"size:20;comment:用户名(默认为邮箱号)"`
-	// 密码
-	Password string `json:"-" gorm:"size:80comment:密码"`
-	// 邮箱 (做登录账户)
-	Email string `json:"email" gorm:"index;size:20;comment:邮箱"`
-	// 头像
-	Avatar string `json:"avatar" gorm:"default:https://picsum.photos/30/30/?image=41;comment:头像"`
-	// 创建时间
-	CreatedAt command.Timestamp `json:"createdAt" gorm:"type:timestamp;comment:注册时间"`
-	// 更新时间
-	UpdatedAt command.Timestamp `json:"updatedAt" gorm:"type:timestamp;comment:更新时间"`
+	Id        uint64            `json:"id,omitempty" gorm:"primaryKey;comment:用户Id"`                                      // 用户Id
+	UUID      string            `json:"uuid,omitempty" gorm:"size:36;comment:用户UUID"`                                     // 用户UUID
+	Username  string            `json:"username,omitempty" gorm:"size:20;comment:用户名(默认为邮箱号)"`                            // 用户名
+	Password  string            `json:"password,omitempty" gorm:"size:80comment:密码"`                                      // 密码
+	Email     string            `json:"email,omitempty" gorm:"size:20;comment:邮箱"`                                        // 邮箱
+	Avatar    string            `json:"avatar,omitempty" gorm:"default:https://picsum.photos/30/30/?image=41;comment:头像"` // 头像
+	CreatedAt command.Timestamp `json:"createdAt,omitempty" gorm:"type:timestamp;comment:注册时间"`                           // 创建时间
+	UpdatedAt command.Timestamp `json:"updatedAt,omitempty" gorm:"type:timestamp;comment:更新时间"`                           // 更新时间
 	Blogs     []Blog
 }

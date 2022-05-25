@@ -10,12 +10,12 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-type option func(*gin.Engine) *gin.Engine
+type Option func(*gin.Engine) *gin.Engine
 
-var options = []option{}
+var options = []Option{}
 
 // 注册app的路由配置
-func include(opts ...option) {
+func include(opts ...Option) {
 	options = append(options, opts...)
 }
 

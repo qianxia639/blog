@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -14,7 +15,7 @@ func Run() {
 
 	addr := fmt.Sprintf("%s:%d", global.QX_CONFIG.Http.Host, global.QX_CONFIG.Http.Port)
 	s := server(addr, router)
-	global.QX_LOG.Infof("server run success [%s]", addr)
+	log.Printf("server run success [:%d]", global.QX_CONFIG.Http.Port)
 	global.QX_LOG.Error(s.ListenAndServe().Error())
 
 }

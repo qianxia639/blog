@@ -28,7 +28,8 @@ func (ch *CaptchaHandler) Captcha(ctx *gin.Context) {
 	captcha := base64Captcha.NewCaptcha(driver, store)
 	if id, b64s, err := captcha.Generate(); err != nil {
 		global.QX_LOG.Error("验证码获取失败!", err)
-		command.RFailed(ctx, 500, "验证码获取失败")
+		command.Failed(ctx, 500, "验证码获取失败")
+		return
 	} else {
 		command.Success(ctx, "验证码获取成功", gin.H{
 			"captchaId":   id,

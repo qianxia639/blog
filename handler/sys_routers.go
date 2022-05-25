@@ -15,6 +15,8 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		sysg.POST("/register", system.GetInstance().Register)
 		// 登录
 		sysg.POST("/login", system.GetInstance().Login)
+		// 邮箱登录
+		sysg.POST("/emailLogin", system.GetInstance().EmailLogin)
 		// 生成验证码
 		sysg.POST("/captcha", system.GetInstance().Captcha)
 
@@ -68,17 +70,6 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		cg.GET("/list", system.GetInstance().CommentList)
 		// 发布评论
 		cg.POST("/save", system.GetInstance().Save)
-	}
-
-	// ========== leave router group ==========
-	lg := e.Group("/leave")
-	{
-		// 获取所有留言记录
-		lg.GET("/all", system.GetInstance().All)
-		// 添加留言
-		lg.POST("/insert", system.GetInstance().Insert)
-		// 删除留言
-		lg.DELETE("/delete", system.GetInstance().Delete)
 	}
 
 	return e

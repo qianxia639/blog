@@ -118,9 +118,9 @@ func (*SearchService) SearchBlog(title string, pageNo, pageSize int) (*response.
 	// ch := make(chan []response.Search, pageList.Total)
 
 	// 遍历返回信息中hits的hits
-	for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
-		wg.Add(1)
-		go func() {
+	wg.Add(1)
+	go func() {
+		for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
 			var title interface{}
 			var description interface{}
 
@@ -148,10 +148,9 @@ func (*SearchService) SearchBlog(title string, pageNo, pageSize int) (*response.
 				Tags:        hit.(map[string]interface{})["_source"].(map[string]interface{})["Tags"],
 			})
 			// ch <- resp
-			wg.Done()
-		}()
-
-	}
+		}
+		wg.Done()
+	}()
 	wg.Wait()
 	pageList.PageNo = pageNo
 	pageList.PageSize = pageSize

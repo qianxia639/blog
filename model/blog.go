@@ -1,31 +1,20 @@
 package model
 
+// 博客表
 type Blog struct {
-	// 主键
-	Id uint64 `json:"id" gorm:"primaryKey"`
-	// 用户id
-	UserId uint64 `json:"userId" gorm:"comment:用户Id"`
-	// 分类id
-	TypeId uint16 `json:"typeId" gorm:"comment:分类Id"`
-	// 用户名
-	Username string `json:"username" gorm:"size:20;comment:用户名"`
-	// 分类类名
-	TypeName string `json:"typeName" gorm:"size:20;comment:分类类名"`
-	// 标题
-	Title string `json:"title" gorm:"size:20;comment:标题"`
-	// 描述
-	Description string `json:"description" gorm:"comment:描述"`
-	// 内容
-	Content string `json:"content" gorm:"type:longtext;comment:内容"`
-	// 标记
-	Flag string `json:"flag" gorm:"type:varchar(10);comment:标记"`
-	// 浏览次数
-	Views uint32 `json:"views" gorm:"default:0;comment:浏览次数"`
-	// 创建时间
-	CreatedAt int64 `json:"createdAt" gorm:"autoCreateTine:milli;comment:创建时间"`
-	// 更新时间
-	UpdatedAt int64 `json:"updatedAt" gorm:"autoUpdateTine:milli;comment:更新时间"`
-	Tags      []Tag `gorm:"many2many:blog_tag;"`
+	Id          uint64 `json:"id,omitempty" gorm:"primaryKey;comment:博客Id"`                  // 博客Id
+	UserId      uint64 `json:"userId,omitempty" gorm:"comment:用户Id"`                         // 用户id
+	TypeId      uint16 `json:"typeId,omitempty" gorm:"comment:分类Id"`                         // 分类id
+	Username    string `json:"username,omitempty" gorm:"size:20;comment:用户名"`                // 用户名
+	TypeName    string `json:"typeName,omitempty" gorm:"size:20;comment:分类类名"`               // 分类类名
+	Title       string `json:"title,omitempty" gorm:"size:20;comment:标题"`                    // 标题
+	Description string `json:"description,omitempty" gorm:"comment:描述"`                      // 描述
+	Content     string `json:"content,omitempty" gorm:"type:longtext;comment:内容"`            // 内容
+	Flag        string `json:"flag,omitempty" gorm:"type:varchar(10);comment:标记"`            // 标记
+	Views       uint32 `json:"views,omitempty" gorm:"default:0;comment:浏览次数"`                // 浏览次数
+	CreatedAt   int64  `json:"createdAt,omitempty" gorm:"autoCreateTine:milli;comment:创建时间"` // 创建时间
+	UpdatedAt   int64  `json:"updatedAt,omitempty" gorm:"autoUpdateTine:milli;comment:更新时间"` // 更新时间
+	Tags        []Tag  `gorm:"many2many:blog_tag;"`
 }
 
 var BlogMapping = `

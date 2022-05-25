@@ -7,7 +7,6 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-openapi/spec v0.20.5 // indirect
 	github.com/go-openapi/swag v0.21.1 // indirect
-	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible

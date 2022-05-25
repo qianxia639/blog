@@ -65,23 +65,30 @@ func (*UserService) GetUserInfo(id uint64, uuid string) (*model.User, error) {
 	return &user, err
 }
 
+func (*UserService) GetUser(email string) (*model.User, error) {
+	var user model.User
+	err := global.QX_DB.Debug().Select("id,uuid,username,avatar").Where("email = ?", email).Find(&user).Error
+
+	return &user, err
+}
+
 /**
 * 修改用户名
  */
-func (*UserService) UpdateUsername(u request.UpdateUsername, id uint64, uuid string) error {
+func (*UserService) UpdateUsername(username string, id uint64, uuid string) error {
 
-	if !errors.Is(global.QX_DB.Debug().Where("username = ?", u.Username).First(&model.User{}).Error, gorm.ErrRecordNotFound) {
+	if !errors.Is(global.QX_DB.Debug().Where("username = ?", username).First(&model.User{}).Error, gorm.ErrRecordNotFound) {
 		return errors.New("用户名已存在")
 	}
 
 	return global.QX_DB.Transaction(func(tx *gorm.DB) error {
 		// 修改user表中的username
-		if err := tx.Debug().Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("username", u.Username).Error; err != nil {
+		if err := tx.Debug().Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("username", username).Error; err != nil {
 			return err
 		}
 
 		// 修改blog表中的username
-		if err := tx.Debug().Model(&model.Blog{}).Where("user_id = ?", id).Update("username", u.Username).Error; err != nil {
+		if err := tx.Debug().Model(&model.Blog{}).Where("user_id = ?", id).Update("username", username).Error; err != nil {
 			return err
 		}
 

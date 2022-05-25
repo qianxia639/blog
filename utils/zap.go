@@ -51,7 +51,7 @@ func Zap() *zap.SugaredLogger {
 		// 将warn及以上写入errPath
 		zapcore.NewCore(zapcore.NewJSONEncoder(config), zapcore.AddSync(warnWriter), warnLevel),
 		// 同时将日志输入到控制台，NewJSONEncoder是结构化输出
-		// zapcore.NewCore(zapcore.NewJSONEncoder(config), zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout)), logLevel),
+		// zapcore.NewCore(zapcore.NewJSONEncoder(config), zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout)), infoLevel),
 	)
 	logger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zap.WarnLevel))
 	return logger.Sugar()
