@@ -207,12 +207,12 @@ func (bs BlogService) GetBlog(id uint64, avatar string) (map[string]interface{},
 		return nil, err
 	}
 
-	doc := map[string]interface{}{
-		"doc": map[string]interface{}{
-			"views": b.Views + 1,
-		},
-	}
-	system.ElasticSearch.Update("blog", fmt.Sprintf("%v", b.Id), doc)
+	// doc := map[string]interface{}{
+	// 	"doc": map[string]interface{}{
+	// 		"views": b.Views + 1,
+	// 	},
+	// }
+	// system.ElasticSearch.Update("blog", fmt.Sprintf("%v", b.Id), doc)
 
 	m := make(map[string]interface{}, 11)
 	m["id"] = id

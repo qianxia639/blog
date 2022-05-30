@@ -43,12 +43,14 @@ func (uh *UploadHandler) UploadMdFile(ctx *gin.Context) {
 	file, fileHeader, err := ctx.Request.FormFile("file")
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.RFailed(ctx, http.StatusInternalServerError, "上传失败")
+		command.Failed(ctx, http.StatusInternalServerError, "上传失败")
+		return
 	}
 
 	if url, err := utils.UploadFile(file, fileHeader.Size); err != nil {
 		global.QX_LOG.Error(err)
-		command.RFailed(ctx, http.StatusInternalServerError, "上传失败")
+		command.Failed(ctx, http.StatusInternalServerError, "上传失败")
+		return
 	} else {
 		ctx.SecureJSON(http.StatusOK, gin.H{"url": url})
 	}

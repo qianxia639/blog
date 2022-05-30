@@ -23,7 +23,6 @@ func SendMail(to ...string) error {
 	if err := setCache(to[0], code); err != nil {
 		return err
 	} else {
-		// sxkfftyexmhpdcaa
 		return e.Send(global.QX_CONFIG.Email.Addr, smtp.PlainAuth("", global.QX_CONFIG.Email.Username, global.QX_CONFIG.Email.Password, global.QX_CONFIG.Email.Host))
 	}
 }

@@ -17,8 +17,6 @@ type Login struct {
 type EmailLogin struct {
 	Email string `json:"email"`
 	Code  string `json:"code"`
-	// Captcha   string `json:"captcha"`
-	// CaptchaId string `json:"captchaId"`
 }
 
 type UpdateUsername struct {

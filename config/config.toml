@@ -28,11 +28,11 @@ bucket = ""
 server_url = ""
 
 [captcha]
-height = 38
-width = 180
+height = 80
+width = 240
 length = 5
-max_skew = 0.7
-dot_count = 72
+max_skew = 0.8
+dot_count = 80
 
 [email]
 addr = "smtp.qq.com:587"

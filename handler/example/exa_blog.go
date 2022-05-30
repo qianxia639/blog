@@ -28,7 +28,8 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	var post request.Post
 	if err := ctx.ShouldBindJSON(&post); err != nil {
 		global.QX_LOG.Errorf("parame bind err:", err)
-		command.RFailed(ctx, http.StatusBadRequest, "缺少必要的参数")
+		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
+		return
 	}
 	// 获取登录的用户信息
 	post.UserId = utils.GetUserId(ctx)
@@ -37,7 +38,8 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	err := bh.blogService.Save(post)
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.RFailed(ctx, http.StatusInternalServerError, "发布博客失败")
+		command.Failed(ctx, http.StatusInternalServerError, "发布博客失败")
+		return
 	}
 	command.Success(ctx, "发布博客成功", nil)
 }
@@ -61,7 +63,8 @@ func (bh BlogHandler) BlogList(ctx *gin.Context) {
 	blogs, err := bh.blogService.List(userId, pageNo, pageSize)
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.RFailed(ctx, http.StatusInternalServerError, "查询失败")
+		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
+		return
 	}
 	command.Success(ctx, "查询成功", blogs)
 }
@@ -81,7 +84,8 @@ func (bh BlogHandler) DeleteBlog(ctx *gin.Context) {
 	err := bh.blogService.Delete(id)
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.RFailed(ctx, http.StatusInternalServerError, "删除失败")
+		command.Failed(ctx, http.StatusInternalServerError, "删除失败")
+		return
 	}
 	command.Success(ctx, "删除成功", nil)
 }
@@ -102,7 +106,8 @@ func (bh *BlogHandler) UpdateBlog(ctx *gin.Context) {
 
 	if err := bh.blogService.Update(post); err != nil {
 		global.QX_LOG.Error(err)
-		command.RFailed(ctx, http.StatusInternalServerError, "修改失败")
+		command.Failed(ctx, http.StatusInternalServerError, "修改失败")
+		return
 	}
 	command.Success(ctx, "修改成功", nil)
 }
@@ -124,7 +129,8 @@ func (bh BlogHandler) BlogPageList(ctx *gin.Context) {
 
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.RFailed(ctx, http.StatusInternalServerError, "查询失败")
+		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
+		return
 	}
 
 	command.Success(ctx, "查询成功", pageList)
@@ -140,7 +146,8 @@ func (bh BlogHandler) LatestList(ctx *gin.Context) {
 	list, err := bh.blogService.LatestList()
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.RFailed(ctx, http.StatusInternalServerError, "查询失败")
+		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
+		return
 	}
 	command.Success(ctx, "查询成功", gin.H{"latestList": list})
 }
@@ -157,7 +164,8 @@ func (bh BlogHandler) GetBlog(ctx *gin.Context) {
 	avatar := utils.GetAvatar(ctx)
 	if blogs, err := bh.blogService.GetBlog(blogId, avatar); err != nil {
 		global.QX_LOG.Error(err)
-		command.RFailed(ctx, http.StatusInternalServerError, "查询失败")
+		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
+		return
 	} else {
 		command.Success(ctx, "查询成功", gin.H{"blogs": blogs})
 	}
@@ -175,7 +183,8 @@ func (bh *BlogHandler) GetUpdateBlog(ctx *gin.Context) {
 	blogId, _ := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if blogs, err := bh.blogService.GetUpdateBlog(blogId); err != nil {
 		global.QX_LOG.Error(err)
-		command.RFailed(ctx, http.StatusInternalServerError, "查询失败")
+		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
+		return
 	} else {
 		command.Success(ctx, "查询成功", gin.H{"blogs": blogs})
 	}

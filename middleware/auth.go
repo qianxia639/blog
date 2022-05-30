@@ -15,7 +15,7 @@ func Auth() gin.HandlerFunc {
 		token := ctx.Request.Header.Get("X-Token")
 
 		if token == "" {
-			global.QX_LOG.Error("未登录或非法访问")
+			global.QX_LOG.Error("token 为空")
 			command.Failed(ctx, http.StatusUnauthorized, "未登录或非法访问")
 			ctx.Abort()
 			return
@@ -31,7 +31,7 @@ func Auth() gin.HandlerFunc {
 		}
 
 		if claims.UUID == "" {
-			global.QX_LOG.Error("未登录或非法访问")
+			global.QX_LOG.Error("用户UUID为空")
 			command.Failed(ctx, http.StatusUnauthorized, "未登录或非法访问")
 			ctx.Abort()
 			return

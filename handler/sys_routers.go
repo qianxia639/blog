@@ -19,15 +19,10 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		sysg.POST("/emailLogin", system.GetInstance().EmailLogin)
 		// 生成验证码
 		sysg.POST("/captcha", system.GetInstance().Captcha)
-
-		sysg = sysg.Group("/")
-		sysg.Use(middleware.Auth())
-		{
-			// 发送邮箱验证码
-			sysg.GET("/email", system.GetInstance().SendMail)
-			// 校验邮箱验证码
-			sysg.POST("/verifyMail", system.GetInstance().VerifyMail)
-		}
+		// 发送邮箱验证码
+		sysg.GET("/email", system.GetInstance().SendMail)
+		// 校验邮箱验证码
+		sysg.POST("/verifyMail", system.GetInstance().VerifyMail)
 	}
 
 	// ========== user router group ==========
@@ -35,7 +30,7 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 	ug.Use(middleware.Auth())
 	{
 		// 用户信息
-		ug.GET("/info", system.GetInstance().Info)
+		ug.GET("/info", system.GetInstance().UserInfo)
 		// 修改名称
 		ug.PUT("/name", system.GetInstance().UpdateUsername)
 		// 修改密码

@@ -18,7 +18,6 @@ type EmailHandler struct{}
 // @Produce      json
 // @Param        email query string  true  "send mail code"
 // @Success 	 200  {object}  string
-// @Security 	 X-Token
 // @Router       /system/email 	[get]
 func (eh *EmailHandler) SendMail(ctx *gin.Context) {
 
@@ -26,7 +25,8 @@ func (eh *EmailHandler) SendMail(ctx *gin.Context) {
 
 	if err := utils.SendMail(email); err != nil {
 		global.QX_LOG.Errorf("send mail code err: %v", err)
-		command.RFailed(ctx, http.StatusInternalServerError, "验证码发送失败")
+		command.Failed(ctx, http.StatusInternalServerError, "验证码发送失败")
+		return
 	}
 	command.Success(ctx, "验证码发送成功", nil)
 }
@@ -37,7 +37,6 @@ func (eh *EmailHandler) SendMail(ctx *gin.Context) {
 // @Produce      json
 // @Param        VerifyMail body  request.VerifyMail true "verify mail code"
 // @Success 	 200  {object}  string
-// @Security 	 X-Token
 // @Router       /system/verifyMail 	[post]
 func (eh *EmailHandler) VerifyMail(ctx *gin.Context) {
 
@@ -45,11 +44,11 @@ func (eh *EmailHandler) VerifyMail(ctx *gin.Context) {
 
 	_ = ctx.ShouldBindJSON(&vm)
 
-	if exists, err := utils.VerifyMail(vm.Email, vm.Code); err == nil && exists {
+	if ok, err := utils.VerifyMail(vm.Email, vm.Code); err == nil && ok {
 		command.Success(ctx, "校验成功", nil)
 	} else {
 		global.QX_LOG.Errorf("verify mail code err: %v", err)
-		command.RFailed(ctx, http.StatusInternalServerError, "验证码不正确或已失效")
+		command.Failed(ctx, http.StatusInternalServerError, "验证码不正确或已失效")
+		return
 	}
-
 }

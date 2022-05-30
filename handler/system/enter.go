@@ -1,6 +1,8 @@
 ﻿package system
 
-import "sync"
+import (
+	"sync"
+)
 
 type systemRouterGroup struct {
 	UserHandler

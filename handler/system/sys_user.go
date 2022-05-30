@@ -9,7 +9,6 @@ import (
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/request"
-	"github.com/qianxia/blog/model/response"
 	"github.com/qianxia/blog/service/system"
 	"github.com/qianxia/blog/utils"
 )
@@ -29,23 +28,23 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 	var r request.Register
 
 	_ = ctx.ShouldBindJSON(&r)
+	// 参数校验
 	if err := utils.Verify(r); err != nil {
 		global.QX_LOG.Errorf("parame bind err: %v", err)
 		command.Failed(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	_, err := uh.userService.Register(r)
-
+	err := uh.userService.Register(r)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 	command.Success(ctx, "注册成功", nil)
 
+	// 验证码校验
 	// if store.Verify(r.CaptchaId, r.Captcha, true) {
-	// 	_, err := uh.userService.Register(r)
-
+	// 	err := uh.userService.Register(r)
 	// 	if err != nil {
 	// 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 	// 		return
@@ -70,13 +69,13 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 	var l request.Login
 
 	_ = ctx.ShouldBindJSON(&l)
-
+	// 参数校验
 	if err := utils.Verify(l); err != nil {
 		global.QX_LOG.Errorf("parame bind err:", err)
 		command.Failed(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
-
+	// 验证码校验
 	if store.Verify(l.CaptchaId, l.Captcha, true) {
 		if user, err := uh.userService.Login(l); err != nil {
 			command.Failed(ctx, http.StatusUnauthorized, err.Error())
@@ -100,8 +99,8 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 		Avatar:   user.Avatar,
 	}
 	if token, err := utils.CreateToken(bc); err != nil {
-		global.QX_LOG.Error("token生成失败!", err)
-		command.Failed(ctx, http.StatusInternalServerError, "获取token失败")
+		global.QX_LOG.Error(err)
+		command.Failed(ctx, http.StatusInternalServerError, "获取身份认证失败")
 		return
 	} else {
 		command.Success(ctx, "登录成功", gin.H{"token": token})
@@ -144,15 +143,15 @@ func (uh *UserHandler) EmailLogin(ctx *gin.Context) {
 // @Success 	 200  {object}  response.User {data=response.User}
 // @Security 	 X-Token
 // @Router       /user/info [get]
-func (uh *UserHandler) Info(ctx *gin.Context) {
+func (uh *UserHandler) UserInfo(ctx *gin.Context) {
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
 	if user, err := uh.userService.GetUserInfo(id, uuid); err != nil {
-		global.QX_LOG.Errorf("用户信息获取失败! - {%s}", err)
+		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务错误")
 		return
 	} else {
-		command.Success(ctx, "获取成功", gin.H{"user": response.ToUser(*user)})
+		command.Success(ctx, "获取成功", gin.H{"user": user})
 	}
 }
 

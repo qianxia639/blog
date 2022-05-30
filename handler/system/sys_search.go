@@ -30,7 +30,8 @@ func (sh *SearchHandler) SearchBlog(ctx *gin.Context) {
 	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("pageNo", "1"))
 	if blogs, err := sh.searchService.SearchBlog(query, pageNo, pageSize); err != nil {
 		global.QX_LOG.Error(err)
-		command.RFailed(ctx, http.StatusInternalServerError, "搜索失败")
+		command.Failed(ctx, http.StatusInternalServerError, "搜索失败")
+		return
 	} else {
 		command.Success(ctx, "搜索成功", blogs)
 	}
@@ -58,7 +59,8 @@ func (sh *SearchHandler) SearchPriBlog(ctx *gin.Context) {
 
 	if m, err := sh.searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNo, userId); err != nil {
 		global.QX_LOG.Error(err)
-		command.RFailed(ctx, http.StatusInternalServerError, "搜索失败")
+		command.Failed(ctx, http.StatusInternalServerError, "搜索失败")
+		return
 	} else {
 		command.Success(ctx, "搜索成功", m)
 	}

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"regexp"
 )
@@ -25,9 +24,8 @@ func validatorStruct(t reflect.Type, value reflect.Value) error {
 	for i := 0; i < value.NumField(); i++ {
 		tagVal := t.Field(i)
 		v := value.Field(i)
-		fmt.Printf("v: %v\n", v)
 		if isEmpty(v) {
-			return errors.New(tagVal.Name + "不能为空")
+			return errors.New(tagVal.Name + " cannot be empty")
 		}
 		if tagVal.Name == "Email" {
 			if !regexpMatch(v.String()) {

@@ -14,14 +14,14 @@ type Option func(*gin.Engine) *gin.Engine
 
 var options = []Option{}
 
-// 注册app的路由配置
+// 注册路由配置
 func include(opts ...Option) {
 	options = append(options, opts...)
 }
 
 // 初始化
 func Router() *gin.Engine {
-	// 加载app的配置路由
+	// 加载路由配置
 	include(handler.ExampleRouters, handler.SystemRouters)
 
 	r := gin.Default()
