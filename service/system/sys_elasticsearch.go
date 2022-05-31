@@ -13,11 +13,11 @@ import (
 	"github.com/qianxia/blog/model"
 )
 
-var ElasticSearch = new(elasticSearchService)
+// var ElasticSearch = new(elasticSearchService)
 
-type elasticSearchService struct{}
+type ElasticSearchService struct{}
 
-func (e *elasticSearchService) IndicesMapping() error {
+func (e *ElasticSearchService) IndicesMapping() error {
 	resp, err := global.QX_ES.Indices.Exists([]string{"blog"})
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error: Indices Exists: %s", err))
@@ -33,7 +33,7 @@ func (e *elasticSearchService) IndicesMapping() error {
 }
 
 // 在索引中创建一条文档
-func (e *elasticSearchService) Insert(index, id string, data interface{}) (*esapi.Response, error) {
+func (e *ElasticSearchService) Insert(index, id string, data interface{}) (*esapi.Response, error) {
 	return esapi.CreateRequest{
 		Index:      index,
 		DocumentID: id,
@@ -43,14 +43,14 @@ func (e *elasticSearchService) Insert(index, id string, data interface{}) (*esap
 }
 
 // 在索引中删除一条文档
-func (e *elasticSearchService) Delete(index, id string) (*esapi.Response, error) {
+func (e *ElasticSearchService) Delete(index, id string) (*esapi.Response, error) {
 	return esapi.DeleteRequest{
 		Index:      index,
 		DocumentID: id,
 	}.Do(context.Background(), global.QX_ES)
 }
 
-func (e *elasticSearchService) Update(index, id string, data map[string]interface{}) (*esapi.Response, error) {
+func (e *ElasticSearchService) Update(index, id string, data map[string]interface{}) (*esapi.Response, error) {
 	// 修改elasticsearch中对应的文档记录
 	return esapi.UpdateRequest{
 		Index:      index,
@@ -59,7 +59,7 @@ func (e *elasticSearchService) Update(index, id string, data map[string]interfac
 	}.Do(context.Background(), global.QX_ES)
 }
 
-func (e *elasticSearchService) Search(index string, data map[string]interface{}) (*esapi.Response, error) {
+func (e *ElasticSearchService) Search(index string, data map[string]interface{}) (*esapi.Response, error) {
 	return esapi.SearchRequest{
 		Index:          []string{index},
 		Body:           esutil.NewJSONReader(&data),
@@ -67,7 +67,7 @@ func (e *elasticSearchService) Search(index string, data map[string]interface{})
 	}.Do(context.Background(), global.QX_ES)
 }
 
-func (e *elasticSearchService) Search2(index string, data bytes.Buffer) (*esapi.Response, error) {
+func (e *ElasticSearchService) Search2(index string, data bytes.Buffer) (*esapi.Response, error) {
 	return esapi.SearchRequest{
 		Index:          []string{index},
 		Body:           &data,

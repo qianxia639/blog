@@ -6,12 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
-	"github.com/qianxia/blog/service/example"
 )
 
-type ArchiveHandler struct {
-	archiveService example.ArchiveService
-}
+type ArchiveHandler struct{}
 
 // @Summary      按年份显示全部博客信息
 // @Tags         Example/Archive
@@ -21,7 +18,7 @@ type ArchiveHandler struct {
 // @Router       /archive/list [get]
 func (ah *ArchiveHandler) ArchiveList(ctx *gin.Context) {
 
-	if m, total, err := ah.archiveService.GetArchiveGroupByYear(); err != nil {
+	if m, total, err := archiveService.GetArchiveGroupByYear(); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
 		return

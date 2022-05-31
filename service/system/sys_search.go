@@ -95,9 +95,9 @@ func (*SearchService) SearchBlog(title string, pageNo, pageSize int) (*response.
 		return nil, err
 	}
 
-	res, err := ElasticSearch.Search2("blog", tmpl)
+	res, err := SystemGroups.ElasticSearchService.Search2("blog", tmpl)
 
-	// res, err := ElasticSearch.Search("blog", query)
+	// res, err := SystemGroups.ElasticSearchService.Search("blog", query)
 
 	if err != nil {
 		return nil, err

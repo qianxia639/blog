@@ -1,20 +1,19 @@
 package example
 
-import "sync"
+import "github.com/qianxia/blog/service/example"
 
-type exampleRouterGroup struct {
+type ExampleRouterGroup struct {
 	BlogHandler
 	TypeHandler
 	TagHandler
 	ArchiveHandler
 }
 
-var exampleRouterGroups *exampleRouterGroup
-var once sync.Once
+var ExampleRouterGroups = new(ExampleRouterGroup)
 
-func GetInstance() *exampleRouterGroup {
-	once.Do(func() {
-		exampleRouterGroups = new(exampleRouterGroup)
-	})
-	return exampleRouterGroups
-}
+var (
+	blogService    = example.ExampleGroups.BlogService
+	typeService    = example.ExampleGroups.TypeService
+	tagService     = example.ExampleGroups.TagService
+	archiveService = example.ExampleGroups.ArchiveService
+)

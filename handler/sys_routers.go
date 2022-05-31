@@ -9,63 +9,53 @@ import (
 func SystemRouters(e *gin.Engine) *gin.Engine {
 
 	// ========== system router group ==========
+	captchaRouterApi := system.SystemRouterGroups.CaptchaHandler
+	emailRouterApi := system.SystemRouterGroups.EmailHandler
 	sysg := e.Group("/system")
 	{
-		// 注册
-		sysg.POST("/register", system.GetInstance().Register)
-		// 登录
-		sysg.POST("/login", system.GetInstance().Login)
-		// 邮箱登录
-		sysg.POST("/emailLogin", system.GetInstance().EmailLogin)
-		// 生成验证码
-		sysg.POST("/captcha", system.GetInstance().Captcha)
-		// 发送邮箱验证码
-		sysg.GET("/email", system.GetInstance().SendMail)
-		// 校验邮箱验证码
-		sysg.POST("/verifyMail", system.GetInstance().VerifyMail)
+		sysg.POST("/captcha", captchaRouterApi.Captcha)     // 生成验证码
+		sysg.GET("/email", emailRouterApi.SendMail)         // 发送邮箱验证码
+		sysg.POST("/verifyMail", emailRouterApi.VerifyMail) // 校验邮箱验证码
 	}
 
 	// ========== user router group ==========
-	ug := e.Group("/user")
-	ug.Use(middleware.Auth())
+
+	userRouterWithoutRecord := e.Group("/user")
+	userRouter := e.Group("/user").Use(middleware.Auth())
+	userRouterApi := system.SystemRouterGroups.UserHandler
 	{
-		// 用户信息
-		ug.GET("/info", system.GetInstance().UserInfo)
-		// 修改名称
-		ug.PUT("/name", system.GetInstance().UpdateUsername)
-		// 修改密码
-		ug.PUT("/pwd", system.GetInstance().UpdatePwd)
-		// 修改头像
-		ug.PUT("/avatar", system.GetInstance().UpdateAvatar)
-		// 修改邮箱
-		ug.PUT("/email", system.GetInstance().UpdateEmail)
+		userRouterWithoutRecord.POST("/register", userRouterApi.Register)     // 注册
+		userRouterWithoutRecord.POST("/login", userRouterApi.Login)           // 登录
+		userRouterWithoutRecord.POST("/emailLogin", userRouterApi.EmailLogin) // 邮箱登录
+	}
+	{
+		userRouter.GET("/info", userRouterApi.UserInfo)       // 用户信息
+		userRouter.PUT("/name", userRouterApi.UpdateUsername) // 修改名称
+		userRouter.PUT("/pwd", userRouterApi.UpdatePwd)       // 修改密码
+		userRouter.PUT("/avatar", userRouterApi.UpdateAvatar) // 修改头像
+		userRouter.PUT("/email", userRouterApi.UpdateEmail)   // 修改邮箱
 	}
 
 	//  ========== search router group ==========
-	sg := e.Group("/search")
+	searchRouterWithoutRecord := e.Group("/search")
+	searchRouter := e.Group("/search").Use(middleware.Auth())
+	searchRouterApi := system.SystemRouterGroups.SearchHandler
 	{
-		// 搜索所有博客
-		sg.GET("/blog", system.GetInstance().SearchBlog)
-		// 搜索个人博客列表
-		sg.GET("/priblog", middleware.Auth(), system.GetInstance().SearchPriBlog)
+		searchRouterWithoutRecord.GET("/blog", searchRouterApi.SearchBlog) // 搜索所有博客
+	}
+	{
+		searchRouter.GET("/priblog", searchRouterApi.SearchPriBlog) // 搜索个人博客列表
 	}
 
 	// ========== upload router group ==========
-	fg := e.Group("/upload")
-	fg.Use(middleware.Auth())
+	// uploadRouterWithoutRecord := e.Group("/upload")
+	uploadRouter := e.Group("/upload").Use(middleware.Auth())
+	uploadRouterApi := system.SystemRouterGroups.UploadHandler
 	{
-		// markdown文件上传
-		fg.POST("/mdFile", system.GetInstance().UploadMdFile)
+		uploadRouter.POST("/mdFile", uploadRouterApi.UploadMdFile) // markdown文件上传
 	}
 
 	// ========== comment router group ==========
-	cg := e.Group("/comment")
-	{
-		// 获取comment列表
-		cg.GET("/list", system.GetInstance().CommentList)
-		// 发布评论
-		cg.POST("/save", system.GetInstance().Save)
-	}
 
 	return e
 }

@@ -1,24 +1,18 @@
 ﻿package system
 
-import (
-	"sync"
-)
+import "github.com/qianxia/blog/service/system"
 
-type systemRouterGroup struct {
+type SystemRouterGroup struct {
 	UserHandler
 	SearchHandler
 	UploadHandler
-	CommentHandler
 	CaptchaHandler
 	EmailHandler
 }
 
-var systemRouterGroups *systemRouterGroup
-var once sync.Once
+var SystemRouterGroups = new(SystemRouterGroup)
 
-func GetInstance() *systemRouterGroup {
-	once.Do(func() {
-		systemRouterGroups = new(systemRouterGroup)
-	})
-	return systemRouterGroups
-}
+var (
+	userService   = system.SystemGroups.UserService
+	searchService = system.SystemGroups.SearchService
+)

@@ -7,13 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
-	"github.com/qianxia/blog/service/system"
 	"github.com/qianxia/blog/utils"
 )
 
-type SearchHandler struct {
-	searchService system.SearchService
-}
+type SearchHandler struct{}
 
 // @Summary      查询所有博客
 // @Tags         System/Search
@@ -28,7 +25,7 @@ func (sh *SearchHandler) SearchBlog(ctx *gin.Context) {
 	query := ctx.Query("query")
 	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "10"))
 	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("pageNo", "1"))
-	if blogs, err := sh.searchService.SearchBlog(query, pageNo, pageSize); err != nil {
+	if blogs, err := searchService.SearchBlog(query, pageNo, pageSize); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "搜索失败")
 		return
@@ -57,7 +54,7 @@ func (sh *SearchHandler) SearchPriBlog(ctx *gin.Context) {
 	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("pageNo", "1"))
 	userId := utils.GetUserId(ctx)
 
-	if m, err := sh.searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNo, userId); err != nil {
+	if m, err := searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNo, userId); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "搜索失败")
 		return

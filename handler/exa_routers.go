@@ -8,61 +8,48 @@ import (
 
 func ExampleRouters(e *gin.Engine) *gin.Engine {
 	//  ========== blog router group ==========
-	bg := e.Group("/blog")
+	blogRouterApi := example.ExampleRouterGroups.BlogHandler
+	blogRouterWithoutRecord := e.Group("/blog")
+	blogRouter := e.Group("/blog").Use(middleware.Auth())
 	{
-		// 博客分页列表
-		bg.GET("/pageList", example.GetInstance().BlogPageList)
-		// 最新推荐(按更新时间降序排列)
-		bg.GET("/latestList", example.GetInstance().LatestList)
-		// 获取博客信息
-		bg.GET("/:id", example.GetInstance().GetBlog)
+		blogRouterWithoutRecord.GET("/pageList", blogRouterApi.BlogPageList) // 博客分页列表
+		blogRouterWithoutRecord.GET("/latestList", blogRouterApi.LatestList) // 最新推荐(按更新时间降序排列)
+		blogRouterWithoutRecord.GET("/:id", blogRouterApi.GetBlog)           // 获取博客信息
+	}
+	{
 
-		bg = bg.Group("/")
-		bg.Use(middleware.Auth())
-		{
-			// 新增博客
-			bg.POST("/save", example.GetInstance().CreateBlog)
-			// 获取要编辑的博客的信息
-			bg.GET("/update/:id", example.GetInstance().GetUpdateBlog)
-			// 编辑博客
-			bg.PUT("/update", example.GetInstance().UpdateBlog)
-			//个人博客展示
-			bg.GET("/list", example.GetInstance().BlogList)
-			// 根据id删除博客
-			bg.DELETE("/:id", example.GetInstance().DeleteBlog)
-		}
+		blogRouter.POST("/save", blogRouterApi.CreateBlog)         // 新增博客
+		blogRouter.GET("/update/:id", blogRouterApi.GetUpdateBlog) // 获取要编辑的博客的信息
+		blogRouter.PUT("/update", blogRouterApi.UpdateBlog)        // 编辑博客
+		blogRouter.GET("/list", blogRouterApi.BlogList)            //个人博客展示
+		blogRouter.DELETE("/:id", blogRouterApi.DeleteBlog)        // 根据id删除博客
 	}
 
 	//  ========== type router group ==========
-	tg := e.Group("/type")
+	typeRouterApi := example.ExampleRouterGroups.TypeHandler
+	typeRouterWithoutRecord := e.Group("/type")
+	typeRouter := e.Group("/type").Use(middleware.Auth())
 	{
-		// 分类列表(按amount降序排列)
-		tg.GET("/listOrder", example.GetInstance().ListOrder)
-		// 分类列表(不排序)
-		tg.GET("/list", example.GetInstance().List)
-		// 点击分类进行博客的展示并分页
-		tg.GET("/page", example.GetInstance().TypeList)
-
-		tg = tg.Group("")
-		tg.Use(middleware.Auth())
-		{
-			tg.POST("/save", example.GetInstance().CreateType)
-		}
-
+		typeRouterWithoutRecord.GET("/listOrder", typeRouterApi.ListOrder) // 分类列表(按amount降序排列)
+		typeRouterWithoutRecord.GET("/list", typeRouterApi.List)           // 分类列表(不排序)
+		typeRouterWithoutRecord.GET("/page", typeRouterApi.TypeList)       // 点击分类进行博客的展示并分页
+	}
+	{
+		typeRouter.POST("/save", typeRouterApi.CreateType)
 	}
 
 	//  ========== tag router group ==========
-	tgg := e.Group("/tag")
+	tagRouterApi := example.ExampleRouterGroups.TagHandler
+	tagRouterWithoutRecord := e.Group("/tag")
 	{
-		// 标签列表(不分页)
-		tgg.GET("/list", example.GetInstance().TagList)
+		tagRouterWithoutRecord.GET("/list", tagRouterApi.TagList) // 标签列表(不分页)
 	}
 
 	// ========== archive router group ==========
-	ag := e.Group("/archive")
+	archiveRouterApi := example.ExampleRouterGroups.ArchiveHandler
+	archiveRouterWithoutRecord := e.Group("/archive")
 	{
-		// 归档列表
-		ag.GET("/list", example.GetInstance().ArchiveList)
+		archiveRouterWithoutRecord.GET("/list", archiveRouterApi.ArchiveList) // 归档列表
 	}
 	return e
 }

@@ -53,15 +53,7 @@ func (bs BlogService) Save(post request.Post) error {
 	// 提交事务
 	tx.Commit()
 
-	res, err := system.ElasticSearch.Insert("blog", fmt.Sprintf("%v", blog.Id), &blog)
-
-	// 插入数据到elasticsearch中
-	// res, err := esapi.IndexRequest{
-	// 	Index:      "blog",
-	// 	Body:       bytes.NewReader(buf.Bytes()),
-	// 	DocumentID: fmt.Sprintf("%v", blog.Id),
-	// 	Refresh:    "true",
-	// }.Do(context.Background(), global.QX_ES)
+	res, err := system.SystemGroups.ElasticSearchService.Insert("blog", fmt.Sprintf("%v", blog.Id), &blog)
 
 	if err != nil {
 		return err
@@ -153,12 +145,7 @@ func (bs BlogService) Delete(id uint64) error {
 	// 提交事务
 	tx.Commit()
 
-	// 删除elasticsearch中对应的文档记录
-	// _, err = esapi.DeleteRequest{
-	// 	Index:      "blog",
-	// 	DocumentID: fmt.Sprintf("%v", id),
-	// }.Do(context.Background(), global.QX_ES)
-	res, err := system.ElasticSearch.Delete("blog", fmt.Sprintf("%v", id))
+	res, err := system.SystemGroups.ElasticSearchService.Delete("blog", fmt.Sprintf("%v", id))
 	defer res.Body.Close()
 
 	return err
@@ -188,7 +175,7 @@ func (*BlogService) Update(post request.Post) error {
 			"flag":        post.Flag,
 		},
 	}
-	system.ElasticSearch.Update("blog", fmt.Sprintf("%v", post.Id), doc)
+	system.SystemGroups.ElasticSearchService.Update("blog", fmt.Sprintf("%v", post.Id), doc)
 
 	return err
 }
@@ -207,12 +194,12 @@ func (bs BlogService) GetBlog(id uint64, avatar string) (map[string]interface{},
 		return nil, err
 	}
 
-	// doc := map[string]interface{}{
-	// 	"doc": map[string]interface{}{
-	// 		"views": b.Views + 1,
-	// 	},
-	// }
-	// system.ElasticSearch.Update("blog", fmt.Sprintf("%v", b.Id), doc)
+	doc := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"views": b.Views + 1,
+		},
+	}
+	system.SystemGroups.ElasticSearchService.Update("blog", fmt.Sprintf("%v", b.Id), doc)
 
 	m := make(map[string]interface{}, 11)
 	m["id"] = id
@@ -234,17 +221,10 @@ func (bs BlogService) GetBlog(id uint64, avatar string) (map[string]interface{},
 /**
 * 获取要编辑的博客信息
  */
-func (*BlogService) GetUpdateBlog(id uint64) (map[string]interface{}, error) {
+func (*BlogService) GetUpdateBlog(id uint64) (model.Blog, error) {
 	var b model.Blog
 	err := global.QX_DB.Debug().Select("id,title,content,description,flag").Where("id = ?", id).Find(&b).Error
 
-	m := make(map[string]interface{}, 6)
-	m["id"] = id
-	m["description"] = b.Description
-	m["title"] = b.Title
-	m["content"] = b.Content
-	m["flag"] = b.Flag
-
 	// 返回
-	return m, err
+	return b, err
 }

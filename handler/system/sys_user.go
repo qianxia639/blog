@@ -9,13 +9,10 @@ import (
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/request"
-	"github.com/qianxia/blog/service/system"
 	"github.com/qianxia/blog/utils"
 )
 
-type UserHandler struct {
-	userService system.UserService
-}
+type UserHandler struct{}
 
 // @Summary      注册
 // @Tags         System
@@ -23,7 +20,7 @@ type UserHandler struct {
 // @Produce      json
 // @Param        Register body request.Register  true  "Create User"
 // @Success 	 200  {object}  string
-// @Router       /system/register [post]
+// @Router       /user/register [post]
 func (uh *UserHandler) Register(ctx *gin.Context) {
 	var r request.Register
 
@@ -35,7 +32,7 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	err := uh.userService.Register(r)
+	err := userService.Register(r)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -63,7 +60,7 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 // @Produce      json
 // @Param        Login body request.Login  true  "Login"
 // @Success 	 200  {object}  string {data=token}
-// @Router       /system/login [post]
+// @Router       /user/login [post]
 func (uh *UserHandler) Login(ctx *gin.Context) {
 	// 绑定表单参数
 	var l request.Login
@@ -77,7 +74,7 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 	}
 	// 验证码校验
 	if store.Verify(l.CaptchaId, l.Captcha, true) {
-		if user, err := uh.userService.Login(l); err != nil {
+		if user, err := userService.Login(l); err != nil {
 			command.Failed(ctx, http.StatusUnauthorized, err.Error())
 			return
 		} else {
@@ -114,14 +111,14 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 // @Produce      json
 // @Param        EmailLogin body request.EmailLogin  true  "EmailLogin"
 // @Success 	 200  {object}  string {data=token}
-// @Router       /system/emailLogin [post]
+// @Router       /user/emailLogin [post]
 func (uh *UserHandler) EmailLogin(ctx *gin.Context) {
 	var el request.EmailLogin
 
 	_ = ctx.ShouldBindJSON(&el)
 
 	if ok, err := utils.VerifyMail(el.Email, el.Code); err == nil && ok {
-		if user, err := uh.userService.GetUser(el.Email); err != nil {
+		if user, err := userService.GetUser(el.Email); err != nil {
 			global.QX_LOG.Error("get user err: ", err)
 			command.Failed(ctx, http.StatusUnauthorized, "服务错误")
 			return
@@ -146,7 +143,7 @@ func (uh *UserHandler) EmailLogin(ctx *gin.Context) {
 func (uh *UserHandler) UserInfo(ctx *gin.Context) {
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
-	if user, err := uh.userService.GetUserInfo(id, uuid); err != nil {
+	if user, err := userService.GetUserInfo(id, uuid); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务错误")
 		return
@@ -179,7 +176,7 @@ func (uh *UserHandler) UpdateUsername(ctx *gin.Context) {
 
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
-	if err := uh.userService.UpdateUsername(username, id, uuid); err != nil {
+	if err := userService.UpdateUsername(username, id, uuid); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -214,7 +211,7 @@ func (uh *UserHandler) UpdatePwd(ctx *gin.Context) {
 	// }
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
-	if err := uh.userService.UpdatePwd(u, id, uuid); err != nil {
+	if err := userService.UpdatePwd(u, id, uuid); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -235,7 +232,7 @@ func (uh *UserHandler) ForgetPwd(ctx *gin.Context) {
 	var f request.ForgetPwd
 	_ = ctx.ShouldBindJSON(&f)
 
-	if err := uh.userService.ForgetPwd(f); err != nil {
+	if err := userService.ForgetPwd(f); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, "")
 		return
 	}
@@ -262,7 +259,7 @@ func (uh *UserHandler) UpdateAvatar(ctx *gin.Context) {
 
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
-	if err := uh.userService.UpdateAvatar(u, id, uuid); err != nil {
+	if err := userService.UpdateAvatar(u, id, uuid); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
