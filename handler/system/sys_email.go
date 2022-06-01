@@ -1,6 +1,7 @@
 package system
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -40,15 +41,16 @@ func (eh *EmailHandler) SendMail(ctx *gin.Context) {
 // @Router       /system/verifyMail 	[post]
 func (eh *EmailHandler) VerifyMail(ctx *gin.Context) {
 
-	var vm request.VerifyMail
+	var e request.Email
 
-	_ = ctx.ShouldBindJSON(&vm)
+	_ = ctx.ShouldBindJSON(&e)
 
-	if ok, err := utils.VerifyMail(vm.Email, vm.Code); err == nil && ok {
-		command.Success(ctx, "校验成功", nil)
-	} else {
+	code, err := global.QX_REDIS.Get(context.Background(), e.Email).Result()
+
+	if err != nil || code != e.Code {
 		global.QX_LOG.Errorf("verify mail code err: %v", err)
 		command.Failed(ctx, http.StatusInternalServerError, "验证码不正确或已失效")
 		return
 	}
+	command.Success(ctx, "校验成功", nil)
 }

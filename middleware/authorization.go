@@ -9,7 +9,7 @@ import (
 	"github.com/qianxia/blog/utils"
 )
 
-func Auth() gin.HandlerFunc {
+func Authorization() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 从请求头中获取X-Token头信息
 		token := ctx.Request.Header.Get("X-Token")

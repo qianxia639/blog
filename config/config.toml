@@ -39,4 +39,3 @@ addr = "smtp.qq.com:587"
 username = ""
 password = ""
 host = "smtp.qq.com"
-    

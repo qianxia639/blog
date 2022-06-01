@@ -8,13 +8,13 @@ import (
 
 func ExampleRouters(e *gin.Engine) *gin.Engine {
 	//  ========== blog router group ==========
+	blogGroup := e.Group("/blog")
+	blogRouter := e.Group("/blog").Use(middleware.Authorization())
 	blogRouterApi := example.ExampleRouterGroups.BlogHandler
-	blogRouterWithoutRecord := e.Group("/blog")
-	blogRouter := e.Group("/blog").Use(middleware.Auth())
 	{
-		blogRouterWithoutRecord.GET("/pageList", blogRouterApi.BlogPageList) // 博客分页列表
-		blogRouterWithoutRecord.GET("/latestList", blogRouterApi.LatestList) // 最新推荐(按更新时间降序排列)
-		blogRouterWithoutRecord.GET("/:id", blogRouterApi.GetBlog)           // 获取博客信息
+		blogGroup.GET("/pageList", blogRouterApi.BlogPageList) // 博客分页列表
+		blogGroup.GET("/latestList", blogRouterApi.LatestList) // 最新推荐(按更新时间降序排列)
+		blogGroup.GET("/:id", blogRouterApi.GetBlog)           // 获取博客信息
 	}
 	{
 
@@ -26,13 +26,13 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 	}
 
 	//  ========== type router group ==========
+	typeGroup := e.Group("/type")
+	typeRouter := e.Group("/type").Use(middleware.Authorization())
 	typeRouterApi := example.ExampleRouterGroups.TypeHandler
-	typeRouterWithoutRecord := e.Group("/type")
-	typeRouter := e.Group("/type").Use(middleware.Auth())
 	{
-		typeRouterWithoutRecord.GET("/listOrder", typeRouterApi.ListOrder) // 分类列表(按amount降序排列)
-		typeRouterWithoutRecord.GET("/list", typeRouterApi.List)           // 分类列表(不排序)
-		typeRouterWithoutRecord.GET("/page", typeRouterApi.TypeList)       // 点击分类进行博客的展示并分页
+		typeGroup.GET("/listOrder", typeRouterApi.ListOrder) // 分类列表(按amount降序排列)
+		typeGroup.GET("/list", typeRouterApi.List)           // 分类列表(不排序)
+		typeGroup.GET("/page", typeRouterApi.TypeList)       // 点击分类进行博客的展示并分页
 	}
 	{
 		typeRouter.POST("/save", typeRouterApi.CreateType)

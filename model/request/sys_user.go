@@ -14,7 +14,7 @@ type Login struct {
 	CaptchaId string `json:"captchaId"`
 }
 
-type EmailLogin struct {
+type Email struct {
 	Email string `json:"email"`
 	Code  string `json:"code"`
 }
@@ -43,14 +43,4 @@ type UpdateEmail struct {
 	OldEmail  string `json:"old_email"`
 	LastEmail string `json:"last_email"`
 	Code      string `json:"code"`
-}
-
-type VerifyMail struct {
-	Email string `json:"email"`
-	Code  string `json:"code"`
-}
-
-type Leave struct {
-	Name    string `json:"name"`
-	Content string `json:"content"`
 }

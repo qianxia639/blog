@@ -1,6 +1,7 @@
 package system
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -73,17 +74,17 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 	// 验证码校验
-	if store.Verify(l.CaptchaId, l.Captcha, true) {
-		if user, err := userService.Login(l); err != nil {
-			command.Failed(ctx, http.StatusUnauthorized, err.Error())
-			return
-		} else {
-			uh.createToken(ctx, *user)
-		}
-	} else {
-		command.Failed(ctx, http.StatusUnauthorized, "验证码错误")
+	if !store.Verify(l.CaptchaId, l.Captcha, true) {
+		command.Failed(ctx, http.StatusUnauthorized, "验证码不正确或已失效")
 		return
 	}
+
+	user, err := userService.Login(l)
+	if err != nil {
+		command.Failed(ctx, http.StatusUnauthorized, err.Error())
+		return
+	}
+	uh.createToken(ctx, *user)
 
 }
 
@@ -95,14 +96,14 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 		Username: user.Username,
 		Avatar:   user.Avatar,
 	}
-	if token, err := utils.CreateToken(bc); err != nil {
+	token, err := utils.CreateToken(bc)
+	if err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "获取身份认证失败")
 		return
-	} else {
-		command.Success(ctx, "登录成功", gin.H{"token": token})
 	}
-
+	utils.DelCache(user.Email)
+	command.Success(ctx, "登录成功", gin.H{"token": token})
 }
 
 // @Summary      邮箱登录
@@ -113,24 +114,24 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 // @Success 	 200  {object}  string {data=token}
 // @Router       /user/emailLogin [post]
 func (uh *UserHandler) EmailLogin(ctx *gin.Context) {
-	var el request.EmailLogin
+	var e request.Email
 
-	_ = ctx.ShouldBindJSON(&el)
+	_ = ctx.ShouldBindJSON(&e)
 
-	if ok, err := utils.VerifyMail(el.Email, el.Code); err == nil && ok {
-		if user, err := userService.GetUser(el.Email); err != nil {
-			global.QX_LOG.Error("get user err: ", err)
-			command.Failed(ctx, http.StatusUnauthorized, "服务错误")
-			return
-		} else {
-			uh.createToken(ctx, *user)
-		}
-	} else {
-		global.QX_LOG.Error("verify mail err: ", err)
-		command.Failed(ctx, http.StatusUnauthorized, "验证码错误")
+	code, err := global.QX_REDIS.Get(context.Background(), e.Email).Result()
+	if err != nil || code != e.Code {
+		global.QX_LOG.Error("verify mail code err: ", err)
+		command.Failed(ctx, http.StatusUnauthorized, "验证码不正确或已失效")
 		return
 	}
 
+	user, err := userService.QueryUserByEmail(e.Email)
+	if err != nil {
+		global.QX_LOG.Error("get user err: ", err)
+		command.Failed(ctx, http.StatusUnauthorized, "服务错误")
+		return
+	}
+	uh.createToken(ctx, *user)
 }
 
 // @Summary      获取用户信息
@@ -143,13 +144,18 @@ func (uh *UserHandler) EmailLogin(ctx *gin.Context) {
 func (uh *UserHandler) UserInfo(ctx *gin.Context) {
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
-	if user, err := userService.GetUserInfo(id, uuid); err != nil {
+	user, err := userService.GetUserInfo(id, uuid)
+	if err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务错误")
 		return
-	} else {
-		command.Success(ctx, "获取成功", gin.H{"user": user})
 	}
+	command.Success(ctx, "获取成功", gin.H{"user": user})
+}
+
+// 登出
+func (uh *UserHandler) Logout(ctx *gin.Context) {
+	//
 }
 
 // @Summary      修改用户名
@@ -201,14 +207,6 @@ func (uh *UserHandler) UpdatePwd(ctx *gin.Context) {
 		return
 	}
 
-	// todo 发送邮件并进行校验
-	// go uh.sendMail(ctx, u.Email)
-	// if exists, err := utils.VerifyMail(u.Email); err != nil && !exists {
-	// 	global.QX_LOG.Errorf("verify email code err:", err)
-	// 	fmt.Printf("err: %v\n", err)
-	// 	fmt.Printf("exists: %v\n", exists)
-	// 	command.RFailed(ctx, http.StatusInternalServerError, "验证码错误")
-	// }
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
 	if err := userService.UpdatePwd(u, id, uuid); err != nil {
@@ -216,16 +214,6 @@ func (uh *UserHandler) UpdatePwd(ctx *gin.Context) {
 		return
 	}
 	command.Success(ctx, "修改成功", nil)
-}
-
-func (uh *UserHandler) sendMail(ctx *gin.Context, email string) {
-	// defer uh.wg.Done()
-	cc := ctx.Copy()
-	if err := utils.SendMail(email); err != nil {
-		global.QX_LOG.Errorf("send mail err: %v", err)
-		command.Failed(cc, 500, "邮件发送失败")
-		return
-	}
 }
 
 func (uh *UserHandler) ForgetPwd(ctx *gin.Context) {

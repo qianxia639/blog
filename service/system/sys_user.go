@@ -17,7 +17,6 @@ type UserService struct{}
 * 注册
  */
 func (us *UserService) Register(r request.Register) error {
-
 	err := global.QX_DB.Debug().Where("email = ?", r.Email).First(&model.User{}).Error
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New("邮箱已注册")
@@ -65,7 +64,7 @@ func (*UserService) GetUserInfo(id uint64, uuid string) (*model.User, error) {
 	return &user, err
 }
 
-func (*UserService) GetUser(email string) (*model.User, error) {
+func (*UserService) QueryUserByEmail(email string) (*model.User, error) {
 	var user model.User
 	err := global.QX_DB.Debug().Where("email = ?", email).Find(&user).Error
 
@@ -146,11 +145,11 @@ func (*UserService) UpdateAvatar(u request.UpdateAvatar, id uint64, uuid string)
  */
 func (*UserService) UpdateEmail(u request.UpdateEmail, id uint64, uuid string) error {
 
-	code, _ := utils.GetCache(u.OldEmail)
+	// code, _ := utils.GetCache(u.OldEmail)
 
-	if code != u.Code {
-		return errors.New("验证码不相符")
-	}
+	// if code != u.Code {
+	// 	return errors.New("验证码不相符")
+	// }
 
 	return global.QX_DB.Model(&model.User{}).Debug().Where("id = ? AND uuid = ?", id, uuid).Update("email", u.LastEmail).Error
 }

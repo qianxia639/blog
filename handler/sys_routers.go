@@ -11,22 +11,22 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 	// ========== system router group ==========
 	captchaRouterApi := system.SystemRouterGroups.CaptchaHandler
 	emailRouterApi := system.SystemRouterGroups.EmailHandler
-	sysg := e.Group("/system")
+	sysearchGroup := e.Group("/system")
 	{
-		sysg.POST("/captcha", captchaRouterApi.Captcha)     // 生成验证码
-		sysg.GET("/email", emailRouterApi.SendMail)         // 发送邮箱验证码
-		sysg.POST("/verifyMail", emailRouterApi.VerifyMail) // 校验邮箱验证码
+		sysearchGroup.POST("/captcha", captchaRouterApi.Captcha)     // 生成验证码
+		sysearchGroup.GET("/email", emailRouterApi.SendMail)         // 发送邮箱验证码
+		sysearchGroup.POST("/verifyMail", emailRouterApi.VerifyMail) // 校验邮箱验证码
 	}
 
 	// ========== user router group ==========
-
-	userRouterWithoutRecord := e.Group("/user")
-	userRouter := e.Group("/user").Use(middleware.Auth())
+	userGroup := e.Group("/user")
+	userRouter := e.Group("/user").Use(middleware.Authorization())
 	userRouterApi := system.SystemRouterGroups.UserHandler
 	{
-		userRouterWithoutRecord.POST("/register", userRouterApi.Register)     // 注册
-		userRouterWithoutRecord.POST("/login", userRouterApi.Login)           // 登录
-		userRouterWithoutRecord.POST("/emailLogin", userRouterApi.EmailLogin) // 邮箱登录
+		userGroup.POST("/register", userRouterApi.Register)     // 注册
+		userGroup.POST("/login", userRouterApi.Login)           // 登录
+		userGroup.POST("/emailLogin", userRouterApi.EmailLogin) // 邮箱登录
+		userGroup.GET("/logout", userRouterApi.Logout)          // 登出
 	}
 	{
 		userRouter.GET("/info", userRouterApi.UserInfo)       // 用户信息
@@ -37,19 +37,18 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 	}
 
 	//  ========== search router group ==========
-	searchRouterWithoutRecord := e.Group("/search")
-	searchRouter := e.Group("/search").Use(middleware.Auth())
+	searchGroup := e.Group("/search")
+	searchRouter := e.Group("/search").Use(middleware.Authorization())
 	searchRouterApi := system.SystemRouterGroups.SearchHandler
 	{
-		searchRouterWithoutRecord.GET("/blog", searchRouterApi.SearchBlog) // 搜索所有博客
+		searchGroup.GET("/blog", searchRouterApi.SearchBlog) // 搜索所有博客
 	}
 	{
 		searchRouter.GET("/priblog", searchRouterApi.SearchPriBlog) // 搜索个人博客列表
 	}
 
 	// ========== upload router group ==========
-	// uploadRouterWithoutRecord := e.Group("/upload")
-	uploadRouter := e.Group("/upload").Use(middleware.Auth())
+	uploadRouter := e.Group("/upload").Use(middleware.Authorization())
 	uploadRouterApi := system.SystemRouterGroups.UploadHandler
 	{
 		uploadRouter.POST("/mdFile", uploadRouterApi.UploadMdFile) // markdown文件上传

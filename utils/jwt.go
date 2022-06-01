@@ -6,7 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-var jwtKey = []byte("lyyBlog")
+var jwtKey = []byte("lyy_Blog")
 
 type CustomClaims struct {
 	BaseClaims

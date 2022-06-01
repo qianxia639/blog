@@ -24,9 +24,10 @@ func Router() *gin.Engine {
 	// 加载路由配置
 	include(handler.ExampleRouters, handler.SystemRouters)
 
-	r := gin.Default()
+	r := gin.New()
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	gin.SetMode(gin.ReleaseMode)
+	r.Use(gin.Recovery(), gin.Logger())
 	r.Use(middleware.CORS())
 	for _, opt := range options {
 		opt(r)
