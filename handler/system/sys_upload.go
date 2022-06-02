@@ -43,7 +43,7 @@ func (uh *UploadHandler) UploadMdFile(ctx *gin.Context) {
 	file, fileHeader, err := ctx.Request.FormFile("file")
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "上传失败")
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
 

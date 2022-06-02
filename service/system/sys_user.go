@@ -64,6 +64,9 @@ func (*UserService) GetUserInfo(id uint64, uuid string) (*model.User, error) {
 	return &user, err
 }
 
+/**
+*  根据邮箱查找用户信息
+ */
 func (*UserService) QueryUserByEmail(email string) (*model.User, error) {
 	var user model.User
 	err := global.QX_DB.Debug().Where("email = ?", email).Find(&user).Error
@@ -121,7 +124,10 @@ func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error
  */
 func (*UserService) ForgetPwd(f request.ForgetPwd) error {
 	var user model.User
-	global.QX_DB.Debug().Where("email = ?", f.Email).Find(&user)
+	err := global.QX_DB.Debug().Where("email = ?", f.Email).Find(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return errors.New("邮箱填写错误或不存在")
+	}
 
 	if err := utils.Decrypt(user.Password, f.Password); err == nil {
 		return errors.New("不能与旧密码相同")
@@ -136,20 +142,13 @@ func (*UserService) ForgetPwd(f request.ForgetPwd) error {
 /**
 *	修改头像
  */
-func (*UserService) UpdateAvatar(u request.UpdateAvatar, id uint64, uuid string) error {
-	return global.QX_DB.Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("avatar", u.Avatar).Error
+func (*UserService) UpdateAvatar(url, uuid string, id uint64) error {
+	return global.QX_DB.Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("avatar", url).Error
 }
 
 /**
 *	修改邮箱
  */
 func (*UserService) UpdateEmail(u request.UpdateEmail, id uint64, uuid string) error {
-
-	// code, _ := utils.GetCache(u.OldEmail)
-
-	// if code != u.Code {
-	// 	return errors.New("验证码不相符")
-	// }
-
 	return global.QX_DB.Model(&model.User{}).Debug().Where("id = ? AND uuid = ?", id, uuid).Update("email", u.LastEmail).Error
 }

@@ -36,7 +36,7 @@ func (eh *EmailHandler) SendMail(ctx *gin.Context) {
 // @Tags         System/Email
 // @Accept       json
 // @Produce      json
-// @Param        VerifyMail body  request.VerifyMail true "verify mail code"
+// @Param        Email body   request.Email true "verify mail code"
 // @Success 	 200  {object}  string
 // @Router       /system/verifyMail 	[post]
 func (eh *EmailHandler) VerifyMail(ctx *gin.Context) {

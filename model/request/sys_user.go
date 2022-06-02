@@ -1,10 +1,11 @@
 package request
 
 type Register struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	// Captcha   string `json:"captcha"`
-	// CaptchaId string `json:"captchaId"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	CheckPwd  string `json:"checkPwd"`
+	Captcha   string `json:"captcha"`
+	CaptchaId string `json:"captchaId"`
 }
 
 type Login struct {
@@ -32,6 +33,7 @@ type UpdatePwd struct {
 
 type ForgetPwd struct {
 	Email    string `json:"email"`
+	Code     string `json:"code"`
 	Password string `json:"password"`
 }
 

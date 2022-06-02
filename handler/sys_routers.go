@@ -27,6 +27,7 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		userGroup.POST("/login", userRouterApi.Login)           // 登录
 		userGroup.POST("/emailLogin", userRouterApi.EmailLogin) // 邮箱登录
 		userGroup.GET("/logout", userRouterApi.Logout)          // 登出
+		userGroup.GET("/forgetPwd", userRouterApi.ForgetPwd)    // 找回密码
 	}
 	{
 		userRouter.GET("/info", userRouterApi.UserInfo)       // 用户信息

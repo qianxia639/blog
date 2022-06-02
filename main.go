@@ -2,10 +2,15 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/initialize"
-	"github.com/qianxia/blog/server"
+	"github.com/qianxia/blog/routers"
 	"github.com/qianxia/blog/utils"
 )
 
@@ -39,6 +44,21 @@ func main() {
 	}
 	defer global.QX_LOG.Sync()
 
-	// 运行服务
-	server.Run()
+	server := &http.Server{
+		Addr:           fmt.Sprintf("%s:%d", global.QX_CONFIG.Http.Host, global.QX_CONFIG.Http.Port),
+		Handler:        routers.Router(),
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	go func() {
+		global.QX_LOG.Error(server.ListenAndServe().Error())
+	}()
+
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	global.QX_LOG.Error(server.Shutdown(ctx))
 }

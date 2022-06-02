@@ -19,7 +19,7 @@ type UserHandler struct{}
 // @Tags         System
 // @Accept       json
 // @Produce      json
-// @Param        Register body request.Register  true  "Create User"
+// @Param        Register body request.Register true "Create User"
 // @Success 	 200  {object}  string
 // @Router       /user/register [post]
 func (uh *UserHandler) Register(ctx *gin.Context) {
@@ -33,33 +33,30 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
+	if r.Password != r.CheckPwd {
+		command.Failed(ctx, http.StatusBadRequest, "两次密码不相符")
+		return
+	}
+
+	// 验证码校验
+	if !store.Verify(r.CaptchaId, r.Captcha, true) {
+		command.Failed(ctx, http.StatusBadRequest, "验证码错误")
+		return
+	}
 	err := userService.Register(r)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
+	_ = utils.DelCache(r.Email)
 	command.Success(ctx, "注册成功", nil)
-
-	// 验证码校验
-	// if store.Verify(r.CaptchaId, r.Captcha, true) {
-	// 	err := uh.userService.Register(r)
-	// 	if err != nil {
-	// 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-	// 		return
-	// 	}
-	// 	command.Success(ctx, "注册成功", nil)
-	// } else {
-	// 	command.Failed(ctx, http.StatusUnauthorized, "验证码错误")
-	// 	return
-	// }
-
 }
 
 // @Summary      登录
 // @Tags         System
 // @Accept       json
 // @Produce      json
-// @Param        Login body request.Login  true  "Login"
+// @Param        Login body request.Login true "Login"
 // @Success 	 200  {object}  string {data=token}
 // @Router       /user/login [post]
 func (uh *UserHandler) Login(ctx *gin.Context) {
@@ -102,7 +99,7 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 		command.Failed(ctx, http.StatusInternalServerError, "获取身份认证失败")
 		return
 	}
-	utils.DelCache(user.Email)
+	_ = utils.DelCache(user.Email)
 	command.Success(ctx, "登录成功", gin.H{"token": token})
 }
 
@@ -110,7 +107,7 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 // @Tags         System
 // @Accept       json
 // @Produce      json
-// @Param        EmailLogin body request.EmailLogin  true  "EmailLogin"
+// @Param        Email body request.Email true  "EmailLogin"
 // @Success 	 200  {object}  string {data=token}
 // @Router       /user/emailLogin [post]
 func (uh *UserHandler) EmailLogin(ctx *gin.Context) {
@@ -128,7 +125,7 @@ func (uh *UserHandler) EmailLogin(ctx *gin.Context) {
 	user, err := userService.QueryUserByEmail(e.Email)
 	if err != nil {
 		global.QX_LOG.Error("get user err: ", err)
-		command.Failed(ctx, http.StatusUnauthorized, "服务错误")
+		command.Failed(ctx, http.StatusUnauthorized, "服务异常")
 		return
 	}
 	uh.createToken(ctx, *user)
@@ -147,7 +144,7 @@ func (uh *UserHandler) UserInfo(ctx *gin.Context) {
 	user, err := userService.GetUserInfo(id, uuid)
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "服务错误")
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
 	command.Success(ctx, "获取成功", gin.H{"user": user})
@@ -207,6 +204,11 @@ func (uh *UserHandler) UpdatePwd(ctx *gin.Context) {
 		return
 	}
 
+	if u.OldPassword == u.LastPassword {
+		command.Failed(ctx, http.StatusBadRequest, "新旧密码不能相同")
+		return
+	}
+
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
 	if err := userService.UpdatePwd(u, id, uuid); err != nil {
@@ -220,10 +222,24 @@ func (uh *UserHandler) ForgetPwd(ctx *gin.Context) {
 	var f request.ForgetPwd
 	_ = ctx.ShouldBindJSON(&f)
 
+	// 参数校验
+	if err := utils.Verify(f); err != nil {
+		global.QX_LOG.Errorf("parame bind err:", err)
+		command.Failed(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// 验证码校验
+	code, _ := global.QX_REDIS.Get(context.Background(), f.Email).Result()
+	if code != f.Code {
+		command.Failed(ctx, http.StatusBadRequest, "验证码不正确或已失效")
+		return
+	}
 	if err := userService.ForgetPwd(f); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, "")
 		return
 	}
+	_ = utils.DelCache(f.Email)
 	command.Success(ctx, "修改成功", nil)
 }
 
@@ -231,23 +247,29 @@ func (uh *UserHandler) ForgetPwd(ctx *gin.Context) {
 // @Tags         System/User
 // @Accept       json
 // @Produce      json
-// @Param        UpdateAvatar body request.UpdateAvatar  true  "update user"
+// @Param        file formData file true  "update user"
 // @Success 	 200  {object}  string
 // @Security 	 X-Token
 // @Router       /user/avatar [put]
 func (uh *UserHandler) UpdateAvatar(ctx *gin.Context) {
-	var u request.UpdateAvatar
 
-	_ = ctx.ShouldBindJSON(&u)
-	if err := utils.Verify(&u); err != nil {
-		global.QX_LOG.Errorf("parame bind err: %v", err)
-		command.Failed(ctx, http.StatusBadRequest, err.Error())
+	file, fileHeader, err := ctx.Request.FormFile("file")
+	if err != nil {
+		global.QX_LOG.Error(err)
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
+		return
+	}
+
+	url, err := utils.UploadFile(file, fileHeader.Size)
+	if err != nil {
+		global.QX_LOG.Error(err)
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
 
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
-	if err := userService.UpdateAvatar(u, id, uuid); err != nil {
+	if err := userService.UpdateAvatar(url, uuid, id); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -263,19 +285,20 @@ func (uh *UserHandler) UpdateAvatar(ctx *gin.Context) {
 // @Security 	 X-Token
 // @Router       /user/email [put]
 func (uh *UserHandler) UpdateEmail(ctx *gin.Context) {
+
+	// 大体思路
+	// 先校验就邮箱，再校验新邮箱，然后修改邮箱
+
 	var u request.UpdateEmail
 
-	if err := ctx.ShouldBindJSON(&u); err != nil {
-		global.QX_LOG.Errorf("parame bind err: %v", err)
-		command.Failed(ctx, http.StatusBadRequest, "参数错误")
+	_ = ctx.ShouldBindJSON(&u)
+
+	uuid := utils.GetUserUUID(ctx)
+	id := utils.GetUserId(ctx)
+
+	if err := userService.UpdateEmail(u, id, uuid); err != nil {
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	// uuid := utils.GetUserUUID(ctx)
-	// id := utils.GetUserId(ctx)
-
-	// if err := uh.userService.UpdateEmail(u, id, uuid); err != nil {
-	// 	command.RFailed(ctx, http.StatusInternalServerError, err.Error())
-	// }
 	command.Success(ctx, "修改成功", nil)
 }
