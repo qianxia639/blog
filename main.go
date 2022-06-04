@@ -40,7 +40,7 @@ func main() {
 	if global.QX_DB != nil {
 		initialize.RegisterTables(global.QX_DB) // 初始化表
 		db, _ := global.QX_DB.DB()
-		defer db.Close() // 关闭连接
+		defer db.Close()
 	}
 	defer global.QX_LOG.Sync()
 
@@ -52,7 +52,7 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	go func() {
-		global.QX_LOG.Error(server.ListenAndServe().Error())
+		global.QX_LOG.Error(server.ListenAndServe())
 	}()
 
 	quit := make(chan os.Signal)

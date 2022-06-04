@@ -2,12 +2,15 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	_ "github.com/qianxia/blog/docs"
 	"github.com/qianxia/blog/handler/system"
 	"github.com/qianxia/blog/middleware"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 func SystemRouters(e *gin.Engine) *gin.Engine {
-
+	e.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// ========== system router group ==========
 	captchaRouterApi := system.SystemRouterGroups.CaptchaHandler
 	emailRouterApi := system.SystemRouterGroups.EmailHandler

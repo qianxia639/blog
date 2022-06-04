@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"net/smtp"
 	"net/textproto"
 	"time"
@@ -19,7 +20,7 @@ func SendMail(to ...string) error {
 		Headers: textproto.MIMEHeader{},
 	}
 
-	err := SetTtlCache(to[0], code, 5*time.Minute)
+	err := global.QX_REDIS.Set(context.Background(), to[0], code, 5*time.Minute).Err()
 	if err != nil {
 		return err
 	}

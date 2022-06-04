@@ -22,7 +22,7 @@ func Zap() *zap.SugaredLogger {
 		TimeKey:      "time",                      // 时间的key
 		CallerKey:    "file",                      // 打印日志的文件对应的key
 		EncodeLevel:  zapcore.CapitalLevelEncoder, // 将日志级别转换成大写(INFO,WARN,ERROR等)
-		EncodeCaller: zapcore.FullCallerEncoder,   // 采用完整文件路径编码输出 (d://.../test/main.go:14)
+		EncodeCaller: zapcore.ShortCallerEncoder,  // 采用相对路径编码输出
 		EncodeTime: func(t time.Time, pae zapcore.PrimitiveArrayEncoder) {
 			pae.AppendString(t.Format("2006-01-02 15:04:05"))
 		},

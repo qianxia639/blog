@@ -46,7 +46,6 @@ func (eh *EmailHandler) VerifyMail(ctx *gin.Context) {
 	_ = ctx.ShouldBindJSON(&e)
 
 	code, err := global.QX_REDIS.Get(context.Background(), e.Email).Result()
-
 	if err != nil || code != e.Code {
 		global.QX_LOG.Errorf("verify mail code err: %v", err)
 		command.Failed(ctx, http.StatusInternalServerError, "验证码不正确或已失效")

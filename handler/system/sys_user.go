@@ -48,7 +48,7 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-	_ = utils.DelCache(r.Email)
+	_ = global.QX_REDIS.Del(context.Background(), r.Email)
 	command.Success(ctx, "注册成功", nil)
 }
 
@@ -99,7 +99,7 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 		command.Failed(ctx, http.StatusInternalServerError, "获取身份认证失败")
 		return
 	}
-	_ = utils.DelCache(user.Email)
+	_ = global.QX_REDIS.Del(context.Background(), user.Email)
 	command.Success(ctx, "登录成功", gin.H{"token": token})
 }
 
@@ -150,9 +150,16 @@ func (uh *UserHandler) UserInfo(ctx *gin.Context) {
 	command.Success(ctx, "获取成功", gin.H{"user": user})
 }
 
-// 登出
+// @Summary      登出
+// @Tags         System/User
+// @Accept       json
+// @Produce      json
+// @Success 	 200  {object}  string
+// @Security 	 X-Token
+// @Router       /user/logout [get]
 func (uh *UserHandler) Logout(ctx *gin.Context) {
-	//
+	// 将jwt改为失效状态
+	command.Success(ctx, "登出成功", nil)
 }
 
 // @Summary      修改用户名
@@ -239,7 +246,7 @@ func (uh *UserHandler) ForgetPwd(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, "")
 		return
 	}
-	_ = utils.DelCache(f.Email)
+	_ = global.QX_REDIS.Del(context.Background(), f.Email)
 	command.Success(ctx, "修改成功", nil)
 }
 

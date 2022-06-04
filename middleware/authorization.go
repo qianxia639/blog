@@ -37,7 +37,7 @@ func Authorization() gin.HandlerFunc {
 			return
 		}
 
-		// // 将token信息写入Gin的Context中
+		// 将token信息写入Gin的Context中
 		ctx.Set("claims", claims)
 		ctx.Next()
 	}
