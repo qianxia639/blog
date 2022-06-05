@@ -33,9 +33,3 @@ width = 240
 length = 5
 max_skew = 0.8
 dot_count = 80
-
-[email]
-addr = "smtp.qq.com:587"
-username = ""
-password = ""
-host = "smtp.qq.com"

@@ -2,15 +2,14 @@
 
 import "github.com/qianxia/blog/service/system"
 
-type SystemRouterGroup struct {
+type systemRouterGroup struct {
 	UserHandler
 	SearchHandler
 	UploadHandler
 	CaptchaHandler
-	EmailHandler
 }
 
-var SystemRouterGroups = new(SystemRouterGroup)
+var SystemRouterGroups = new(systemRouterGroup)
 
 var (
 	userService   = system.SystemGroups.UserService

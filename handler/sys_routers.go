@@ -13,12 +13,9 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 	e.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// ========== system router group ==========
 	captchaRouterApi := system.SystemRouterGroups.CaptchaHandler
-	emailRouterApi := system.SystemRouterGroups.EmailHandler
 	sysearchGroup := e.Group("/system")
 	{
-		sysearchGroup.POST("/captcha", captchaRouterApi.Captcha)     // 生成验证码
-		sysearchGroup.GET("/email", emailRouterApi.SendMail)         // 发送邮箱验证码
-		sysearchGroup.POST("/verifyMail", emailRouterApi.VerifyMail) // 校验邮箱验证码
+		sysearchGroup.POST("/captcha", captchaRouterApi.Captcha) // 生成验证码
 	}
 
 	// ========== user router group ==========
@@ -26,18 +23,16 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 	userRouter := e.Group("/user").Use(middleware.Authorization())
 	userRouterApi := system.SystemRouterGroups.UserHandler
 	{
-		userGroup.POST("/register", userRouterApi.Register)     // 注册
-		userGroup.POST("/login", userRouterApi.Login)           // 登录
-		userGroup.POST("/emailLogin", userRouterApi.EmailLogin) // 邮箱登录
-		userGroup.GET("/logout", userRouterApi.Logout)          // 登出
-		userGroup.GET("/forgetPwd", userRouterApi.ForgetPwd)    // 找回密码
+		userGroup.POST("/register", userRouterApi.Register)   // 注册
+		userGroup.POST("/login", userRouterApi.Login)         // 登录
+		userGroup.GET("/logout", userRouterApi.Logout)        // 登出
+		userGroup.POST("/forgetPwd", userRouterApi.ForgetPwd) // 找回密码
 	}
 	{
 		userRouter.GET("/info", userRouterApi.UserInfo)       // 用户信息
-		userRouter.PUT("/name", userRouterApi.UpdateUsername) // 修改名称
+		userRouter.PUT("/name", userRouterApi.UpdateNickname) // 修改名称
 		userRouter.PUT("/pwd", userRouterApi.UpdatePwd)       // 修改密码
 		userRouter.PUT("/avatar", userRouterApi.UpdateAvatar) // 修改头像
-		userRouter.PUT("/email", userRouterApi.UpdateEmail)   // 修改邮箱
 	}
 
 	//  ========== search router group ==========

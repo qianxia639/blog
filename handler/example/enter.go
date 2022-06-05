@@ -2,14 +2,14 @@ package example
 
 import "github.com/qianxia/blog/service/example"
 
-type ExampleRouterGroup struct {
+type exampleRouterGroup struct {
 	BlogHandler
 	TypeHandler
 	TagHandler
 	ArchiveHandler
 }
 
-var ExampleRouterGroups = new(ExampleRouterGroup)
+var ExampleRouterGroups = new(exampleRouterGroup)
 
 var (
 	blogService    = example.ExampleGroups.BlogService

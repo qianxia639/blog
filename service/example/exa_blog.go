@@ -8,7 +8,6 @@ import (
 	"github.com/qianxia/blog/model/request"
 	"github.com/qianxia/blog/model/response"
 	"github.com/qianxia/blog/service/system"
-	"github.com/qianxia/blog/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -28,7 +27,7 @@ func (bs BlogService) Save(post request.Post) error {
 	// 构建数据
 	blog := model.Blog{
 		UserId:      post.UserId,
-		Username:    post.Username,
+		Nickname:    post.Username,
 		TypeId:      post.TypeId,
 		TypeName:    tp[0],
 		Title:       post.Title,
@@ -208,8 +207,8 @@ func (bs BlogService) GetBlog(id uint64, avatar string) (map[string]interface{},
 	m["content"] = b.Content
 	m["flag"] = b.Flag
 	m["views"] = b.Views
-	m["updatedAt"] = utils.TimestampToString(b.UpdatedAt)
-	m["username"] = b.Username
+	m["updatedAt"] = b.UpdatedAt
+	m["username"] = b.Nickname
 	m["avatar"] = avatar
 	m["typeName"] = b.TypeName
 	m["tagNames"] = b.Tags

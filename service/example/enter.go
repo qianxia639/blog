@@ -1,10 +1,10 @@
 package example
 
-type ExampleGroup struct {
+type exampleGroup struct {
 	BlogService
 	TypeService
 	TagService
 	ArchiveService
 }
 
-var ExampleGroups = new(ExampleGroup)
+var ExampleGroups = new(exampleGroup)

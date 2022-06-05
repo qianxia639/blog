@@ -27,11 +27,6 @@ func validatorStruct(t reflect.Type, value reflect.Value) error {
 		if isEmpty(v) {
 			return errors.New(tagVal.Name + " cannot be empty")
 		}
-		if tagVal.Name == "Email" {
-			if !regexpMatch(v.String()) {
-				return errors.New(tagVal.Name + "格式不匹配")
-			}
-		}
 	}
 	return nil
 }

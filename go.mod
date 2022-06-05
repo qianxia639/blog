@@ -23,6 +23,7 @@ require (
 	go.uber.org/zap v1.21.0
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd
 	golang.org/x/image v0.0.0-20220413100746-70e8d0d3baa9 // indirect
+	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/sys v0.0.0-20220429121018-84afa8d3f7b3 // indirect
 	golang.org/x/tools v0.1.10 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0

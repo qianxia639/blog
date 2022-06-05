@@ -1,8 +1,6 @@
 package system
 
 import (
-	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +14,7 @@ import (
 type UserHandler struct{}
 
 // @Summary      注册
-// @Tags         System
+// @Tags         System/User
 // @Accept       json
 // @Produce      json
 // @Param        Register body request.Register true "Create User"
@@ -38,22 +36,16 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	// 验证码校验
-	if !store.Verify(r.CaptchaId, r.Captcha, true) {
-		command.Failed(ctx, http.StatusBadRequest, "验证码错误")
-		return
-	}
-	err := userService.Register(r)
+	user, err := userService.Register(r)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-	_ = global.QX_REDIS.Del(context.Background(), r.Email)
-	command.Success(ctx, "注册成功", nil)
+	command.Success(ctx, "注册成功", gin.H{"user": user})
 }
 
 // @Summary      登录
-// @Tags         System
+// @Tags         System/User
 // @Accept       json
 // @Produce      json
 // @Param        Login body request.Login true "Login"
@@ -99,36 +91,7 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 		command.Failed(ctx, http.StatusInternalServerError, "获取身份认证失败")
 		return
 	}
-	_ = global.QX_REDIS.Del(context.Background(), user.Email)
 	command.Success(ctx, "登录成功", gin.H{"token": token})
-}
-
-// @Summary      邮箱登录
-// @Tags         System
-// @Accept       json
-// @Produce      json
-// @Param        Email body request.Email true  "EmailLogin"
-// @Success 	 200  {object}  string {data=token}
-// @Router       /user/emailLogin [post]
-func (uh *UserHandler) EmailLogin(ctx *gin.Context) {
-	var e request.Email
-
-	_ = ctx.ShouldBindJSON(&e)
-
-	code, err := global.QX_REDIS.Get(context.Background(), e.Email).Result()
-	if err != nil || code != e.Code {
-		global.QX_LOG.Error("verify mail code err: ", err)
-		command.Failed(ctx, http.StatusUnauthorized, "验证码不正确或已失效")
-		return
-	}
-
-	user, err := userService.QueryUserByEmail(e.Email)
-	if err != nil {
-		global.QX_LOG.Error("get user err: ", err)
-		command.Failed(ctx, http.StatusUnauthorized, "服务异常")
-		return
-	}
-	uh.createToken(ctx, *user)
 }
 
 // @Summary      获取用户信息
@@ -158,35 +121,28 @@ func (uh *UserHandler) UserInfo(ctx *gin.Context) {
 // @Security 	 X-Token
 // @Router       /user/logout [get]
 func (uh *UserHandler) Logout(ctx *gin.Context) {
-	// 将jwt改为失效状态
 	command.Success(ctx, "登出成功", nil)
 }
 
 // @Summary      修改用户名
 // @Tags         System/User
-// @Accept       json
+// @Accept       mpfd
 // @Produce      json
-// @Param        UpdateUsername body request.UpdateUsername  true  "update user"
+// @Param        nickname formData string true  "update nickname"
 // @Success 	 200  {object}  string
 // @Security 	 X-Token
 // @Router       /user/name [put]
-func (uh *UserHandler) UpdateUsername(ctx *gin.Context) {
-
-	// var u request.UpdateUsername
-	// _ = ctx.ShouldBindJSON(&u)
-
-	username := ctx.PostForm("username")
-	fmt.Printf("username: %v\n", username)
-
-	if err := utils.Verify(username); err != nil {
-		global.QX_LOG.Errorf("parame bind err:", err)
-		command.Failed(ctx, http.StatusBadRequest, err.Error())
+func (uh *UserHandler) UpdateNickname(ctx *gin.Context) {
+	nickname := ctx.PostForm("nickname")
+	if nickname == "" {
+		command.Failed(ctx, http.StatusBadRequest, "nickname cannot be empty")
 		return
 	}
 
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
-	if err := userService.UpdateUsername(username, id, uuid); err != nil {
+	if err := userService.UpdateNickname(nickname, id, uuid); err != nil {
+		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -225,6 +181,13 @@ func (uh *UserHandler) UpdatePwd(ctx *gin.Context) {
 	command.Success(ctx, "修改成功", nil)
 }
 
+// @Summary      找回密码
+// @Tags         System/User
+// @Accept       json
+// @Produce      json
+// @Param        ForgetPwd body request.ForgetPwd  true  "update user"
+// @Success 	 200  {object}  string
+// @Router       /user/forgetPwd [post]
 func (uh *UserHandler) ForgetPwd(ctx *gin.Context) {
 	var f request.ForgetPwd
 	_ = ctx.ShouldBindJSON(&f)
@@ -236,17 +199,11 @@ func (uh *UserHandler) ForgetPwd(ctx *gin.Context) {
 		return
 	}
 
-	// 验证码校验
-	code, _ := global.QX_REDIS.Get(context.Background(), f.Email).Result()
-	if code != f.Code {
-		command.Failed(ctx, http.StatusBadRequest, "验证码不正确或已失效")
-		return
-	}
 	if err := userService.ForgetPwd(f); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, "")
+		global.QX_LOG.Error(err)
+		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-	_ = global.QX_REDIS.Del(context.Background(), f.Email)
 	command.Success(ctx, "修改成功", nil)
 }
 
@@ -277,33 +234,6 @@ func (uh *UserHandler) UpdateAvatar(ctx *gin.Context) {
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
 	if err := userService.UpdateAvatar(url, uuid, id); err != nil {
-		command.Failed(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-	command.Success(ctx, "修改成功", nil)
-}
-
-// @Summary      修改邮箱
-// @Tags         System/User
-// @Accept       json
-// @Produce      json
-// @Param        UpdateEmail body request.UpdateEmail  true  "update user"
-// @Success 	 200  {object}  string
-// @Security 	 X-Token
-// @Router       /user/email [put]
-func (uh *UserHandler) UpdateEmail(ctx *gin.Context) {
-
-	// 大体思路
-	// 先校验就邮箱，再校验新邮箱，然后修改邮箱
-
-	var u request.UpdateEmail
-
-	_ = ctx.ShouldBindJSON(&u)
-
-	uuid := utils.GetUserUUID(ctx)
-	id := utils.GetUserId(ctx)
-
-	if err := userService.UpdateEmail(u, id, uuid); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -35,10 +35,4 @@ type Config struct {
 		MaxSkew  float64 `mapstructure:"max_skew"`
 		DotCount int     `mapstructure:"dot_count"`
 	}
-	Email struct {
-		Addr     string `mapstructure:"addr"`
-		Username string `mapstructure:"username"`
-		Password string `mapstructure:"password"`
-		Host     string `mapstructure:"host"`
-	}
 }

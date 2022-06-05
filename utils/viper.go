@@ -23,10 +23,8 @@ func Viper() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Fatal error config file: %v", err)
 	}
-
 	once.Do(func() {
 		// 反序列化到指定结构体上
-
 		err := viper.Unmarshal(&global.QX_CONFIG)
 		if err != nil {
 			log.Fatalf("unable to read remote config: %v", err)

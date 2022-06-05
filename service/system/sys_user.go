@@ -16,10 +16,10 @@ type UserService struct{}
 /**
 * 注册
  */
-func (us *UserService) Register(r request.Register) error {
-	err := global.QX_DB.Debug().Where("email = ?", r.Email).First(&model.User{}).Error
+func (us *UserService) Register(r request.Register) (*model.User, error) {
+	err := global.QX_DB.Debug().Where("username = ?", r.Username).First(&model.User{}).Error
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return errors.New("邮箱已注册")
+		return nil, errors.New("用户名已存在")
 	}
 
 	// 对明文进行加密处理
@@ -27,12 +27,14 @@ func (us *UserService) Register(r request.Register) error {
 	// 创建用户
 	newUser := model.User{
 		UUID:     uuid.NewV4().String(),
-		Username: r.Email,
-		Email:    r.Email,
+		Username: r.Username,
+		Nickname: r.Username,
 		Password: newPassword,
+		Signer:   "2274000859",
 	}
 
-	return global.QX_DB.Debug().Create(&newUser).Error
+	err = global.QX_DB.Debug().Create(&newUser).Error
+	return &newUser, err
 }
 
 /**
@@ -42,9 +44,9 @@ func (*UserService) Login(l request.Login) (*model.User, error) {
 	var u model.User
 
 	// 判断用户名是否存在
-	err := global.QX_DB.Debug().Where("email = ?", l.Email).First(&u).Error
+	err := global.QX_DB.Debug().Where("username = ?", l.Username).First(&u).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errors.New("邮箱未注册")
+		return nil, errors.New("用户名不存在")
 	}
 
 	if err := utils.Decrypt(u.Password, l.Password); err != nil {
@@ -60,38 +62,27 @@ func (*UserService) Login(l request.Login) (*model.User, error) {
 func (*UserService) GetUserInfo(id uint64, uuid string) (*model.User, error) {
 	var user model.User
 	err := global.QX_DB.Debug().Where("id = ? AND uuid = ?", id, uuid).First(&user).Error
-
-	return &user, err
-}
-
-/**
-*  根据邮箱查找用户信息
- */
-func (*UserService) QueryUserByEmail(email string) (*model.User, error) {
-	var user model.User
-	err := global.QX_DB.Debug().Where("email = ?", email).Find(&user).Error
-
 	return &user, err
 }
 
 /**
 * 修改用户名
  */
-func (*UserService) UpdateUsername(username string, id uint64, uuid string) error {
+func (*UserService) UpdateNickname(nickname string, id uint64, uuid string) error {
 
-	err := global.QX_DB.Debug().Where("username = ?", username).First(&model.User{}).Error
+	err := global.QX_DB.Debug().Where("nickname = ?", nickname).First(&model.User{}).Error
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New("用户名已存在")
 	}
 
 	return global.QX_DB.Transaction(func(tx *gorm.DB) error {
 		// 修改user表中的username
-		if err := tx.Debug().Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("username", username).Error; err != nil {
+		if err := tx.Debug().Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("nickname", nickname).Error; err != nil {
 			return err
 		}
 
 		// 修改blog表中的username
-		if err := tx.Debug().Model(&model.Blog{}).Where("user_id = ?", id).Update("username", username).Error; err != nil {
+		if err := tx.Debug().Model(&model.Blog{}).Where("user_id = ?", id).Update("nickname", nickname).Error; err != nil {
 			return err
 		}
 
@@ -104,7 +95,6 @@ func (*UserService) UpdateUsername(username string, id uint64, uuid string) erro
  */
 func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error {
 
-	// 密码校验
 	var user model.User
 	if err := global.QX_DB.Debug().Where("id = ? AND uuid = ?", id, uuid).First(&user).Error; err != nil {
 		return errors.New("数据不存在")
@@ -114,9 +104,13 @@ func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error
 		return errors.New("旧密码错误")
 	}
 
+	if u.Signer != user.Signer {
+		return errors.New("签名信息错误")
+	}
+
 	pwd, _ := utils.Encrypt(u.LastPassword)
 
-	return global.QX_DB.Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("password", pwd).Error
+	return global.QX_DB.Model(&model.User{}).Debug().Where("signer = ?", u.Signer).Update("password", pwd).Error
 }
 
 /**
@@ -124,18 +118,18 @@ func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error
  */
 func (*UserService) ForgetPwd(f request.ForgetPwd) error {
 	var user model.User
-	err := global.QX_DB.Debug().Where("email = ?", f.Email).Find(&user).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return errors.New("邮箱填写错误或不存在")
+	global.QX_DB.Debug().Where("signer = ?", f.Signer).Find(&user)
+	if user.Signer != f.Signer {
+		return errors.New("签名信息错误")
 	}
 
 	if err := utils.Decrypt(user.Password, f.Password); err == nil {
-		return errors.New("不能与旧密码相同")
+		return errors.New("新密码不能与原密码相同")
 	}
 
-	pwd, _ := utils.Encrypt(f.Password)
+	newPassword, _ := utils.Encrypt(f.Password)
 
-	global.QX_DB.Model(user).Where("email = ?", f.Email).Update("password", pwd)
+	global.QX_DB.Model(user).Debug().Where("signer = ?", f.Signer).Update("password", newPassword)
 	return nil
 }
 
@@ -144,11 +138,4 @@ func (*UserService) ForgetPwd(f request.ForgetPwd) error {
  */
 func (*UserService) UpdateAvatar(url, uuid string, id uint64) error {
 	return global.QX_DB.Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("avatar", url).Error
-}
-
-/**
-*	修改邮箱
- */
-func (*UserService) UpdateEmail(u request.UpdateEmail, id uint64, uuid string) error {
-	return global.QX_DB.Model(&model.User{}).Debug().Where("id = ? AND uuid = ?", id, uuid).Update("email", u.LastEmail).Error
 }
