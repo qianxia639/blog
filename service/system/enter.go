@@ -5,5 +5,3 @@ type SystemGroup struct {
 	SearchService
 	ElasticSearchService
 }
-
-var SystemGroups = new(SystemGroup)

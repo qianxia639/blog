@@ -15,6 +15,8 @@ import (
 
 type ElasticSearchService struct{}
 
+var ElasticSearchServices = new(ElasticSearchService)
+
 func (e *ElasticSearchService) IndicesMapping() error {
 	resp, err := global.QX_ES.Indices.Exists([]string{"blog"})
 	if err != nil {

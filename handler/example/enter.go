@@ -1,6 +1,6 @@
 package example
 
-import "github.com/qianxia/blog/service/example"
+import "github.com/qianxia/blog/service"
 
 type exampleRouterGroup struct {
 	BlogHandler
@@ -12,8 +12,8 @@ type exampleRouterGroup struct {
 var ExampleRouterGroups = new(exampleRouterGroup)
 
 var (
-	blogService    = example.ExampleGroups.BlogService
-	typeService    = example.ExampleGroups.TypeService
-	tagService     = example.ExampleGroups.TagService
-	archiveService = example.ExampleGroups.ArchiveService
+	blogService    = service.ServiceGroups.ExampleGroup.BlogService
+	typeService    = service.ServiceGroups.ExampleGroup.TypeService
+	tagService     = service.ServiceGroups.ExampleGroup.TagService
+	archiveService = service.ServiceGroups.ExampleGroup.ArchiveService
 )

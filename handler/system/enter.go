@@ -1,6 +1,6 @@
 ﻿package system
 
-import "github.com/qianxia/blog/service/system"
+import "github.com/qianxia/blog/service"
 
 type SystemRouterGroup struct {
 	UserHandler
@@ -12,6 +12,6 @@ type SystemRouterGroup struct {
 var SystemRouterGroups = new(SystemRouterGroup)
 
 var (
-	userService   = system.SystemGroups.UserService
-	searchService = system.SystemGroups.SearchService
+	userService   = service.ServiceGroups.SystemGroup.UserService
+	searchService = service.ServiceGroups.SystemGroup.SearchService
 )

@@ -98,7 +98,7 @@ func (bs BlogService) List(id uint64, pageNo, pageSize int) (*response.PageList,
  */
 func (bs BlogService) LatestList() ([]model.Blog, error) {
 	list := make([]model.Blog, 5)
-	err := global.QX_DB.Debug().Select("id,title").Order("updated_at DESC").Limit(5).Offset(-1).Find(&list).Error
+	err := global.QX_DB.Debug().Select("id,title").Order("updated_at DESC").Limit(5).Find(&list).Error
 
 	return list, err
 }
@@ -133,14 +133,12 @@ func (bs BlogService) PageList(pageSize, pageNo int) (response.PageList, error) 
  */
 func (bs BlogService) Delete(id uint64) error {
 	var blog model.Blog
-
 	if err := global.QX_DB.Debug().Where("id = ?", id).First(&blog).Error; err != nil {
 		return err
 	}
 
 	// 开启事务
 	tx := global.QX_DB.Begin()
-
 	if err := tx.Debug().Select(clause.Associations).Delete(&blog).Error; err != nil {
 		tx.Rollback() // // 事务回滚
 		return err
@@ -201,7 +199,7 @@ func (bs BlogService) GetBlogInfo(id uint64) (*response.BlogResult, error) {
 	}
 
 	var user model.User
-	if err := global.QX_DB.Debug().Where("id = ?", b.UserId).First(user).Error; err != nil {
+	if err := global.QX_DB.Debug().Where("id = ?", b.UserId).First(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -231,15 +229,4 @@ func (bs BlogService) GetBlogInfo(id uint64) (*response.BlogResult, error) {
 
 	// 返回
 	return result, nil
-}
-
-/**
-* 获取要编辑的博客信息
- */
-func (*BlogService) GetUpdateBlog(id uint64) (model.Blog, error) {
-	var b model.Blog
-	err := global.QX_DB.Debug().Select("id,title,content,description,flag").Where("id = ?", id).Find(&b).Error
-
-	// 返回
-	return b, err
 }
