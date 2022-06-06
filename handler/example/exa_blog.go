@@ -174,7 +174,7 @@ func (bh BlogHandler) GetBlogInfo(ctx *gin.Context) {
 	blogId, _ := strconv.ParseUint(ctx.Params.ByName("id"), 10, 64)
 	if blogs, err := blogService.GetBlogInfo(blogId); err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	} else {
 		command.Success(ctx, "查询成功", gin.H{"blogs": blogs})

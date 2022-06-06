@@ -13,7 +13,7 @@ import (
 type SearchService struct{}
 
 // 根据title搜索博客
-func (*SearchService) SearchBlog(title string, pageNo, pageSize int) (*response.PageList, error) {
+func (s *SearchService) SearchBlog(title string, pageNo, pageSize int) (*response.PageList, error) {
 	// var pageList response.PageList
 	// pageList.Total = total
 	// pageList.DataList = blogs
@@ -24,7 +24,7 @@ func (*SearchService) SearchBlog(title string, pageNo, pageSize int) (*response.
 	// 			"must": map[string]interface{}{
 	// 				"multi_match": map[string]interface{}{
 	// 					"query":  title,
-	// 					"fields": []string{"title", "description"},
+	// 					"fields": []string{"title", "content"},
 	// 				},
 	// 			},
 	// 			"filter": map[string]interface{}{
@@ -39,7 +39,7 @@ func (*SearchService) SearchBlog(title string, pageNo, pageSize int) (*response.
 	// 		"post_tags": "</span>",
 	// 		"fields": map[string]interface{}{
 	// 			"title":       map[string]interface{}{},
-	// 			"content": map[string]interface{}{},
+	// 			"content": 	   map[string]interface{}{},
 	// 		},
 	// 	},
 	// 	"from": (pageNo - 1) * pageSize,
@@ -75,15 +75,14 @@ func (*SearchService) SearchBlog(title string, pageNo, pageSize int) (*response.
 	}
 
 	// 将total和dataList封装到pageList中
-	var pageList response.PageList
-	pageList.Total = int64(r["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64))
+	total := int64(r["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64))
 
-	resp := make([]response.Search, 0, pageList.Total)
+	resp := make([]response.Search, 0, total)
 
 	// 遍历返回信息中hits的hits
 	for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
 		var title interface{}
-		var description interface{}
+		var content interface{}
 
 		if hit.(map[string]interface{})["highlight"].(map[string]interface{})["title"] == nil {
 			title = hit.(map[string]interface{})["_source"].(map[string]interface{})["title"]
@@ -91,30 +90,28 @@ func (*SearchService) SearchBlog(title string, pageNo, pageSize int) (*response.
 			title = hit.(map[string]interface{})["highlight"].(map[string]interface{})["title"].([]interface{})[0]
 		}
 
-		if hit.(map[string]interface{})["highlight"].(map[string]interface{})["description"] == nil {
-			description = hit.(map[string]interface{})["_source"].(map[string]interface{})["description"]
+		if hit.(map[string]interface{})["highlight"].(map[string]interface{})["content"] == nil {
+			content = hit.(map[string]interface{})["_source"].(map[string]interface{})["content"]
 		} else {
-			description = hit.(map[string]interface{})["highlight"].(map[string]interface{})["description"].([]interface{})[0]
+			content = hit.(map[string]interface{})["highlight"].(map[string]interface{})["content"].([]interface{})[0]
 		}
 
 		resp = append(resp, response.Search{
-			Id:          hit.(map[string]interface{})["_source"].(map[string]interface{})["id"],
-			UserId:      hit.(map[string]interface{})["_source"].(map[string]interface{})["userId"],
-			TypeId:      hit.(map[string]interface{})["_source"].(map[string]interface{})["typeId"],
-			TypeName:    hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
-			Username:    hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
-			Title:       title,
-			Description: description,
-			UpdatedAt:   utils.TimestampToString(int64(hit.(map[string]interface{})["_source"].(map[string]interface{})["updatedAt"].(float64))),
-			Tags:        hit.(map[string]interface{})["_source"].(map[string]interface{})["Tags"],
+			Id:        hit.(map[string]interface{})["_source"].(map[string]interface{})["id"],
+			UserId:    hit.(map[string]interface{})["_source"].(map[string]interface{})["userId"],
+			TypeId:    hit.(map[string]interface{})["_source"].(map[string]interface{})["typeId"],
+			TypeName:  hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
+			Username:  hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
+			Title:     title,
+			Content:   content,
+			UpdatedAt: hit.(map[string]interface{})["_source"].(map[string]interface{})["updatedAt"].(string),
+			Tags:      hit.(map[string]interface{})["_source"].(map[string]interface{})["Tags"],
 		})
 	}
 
-	pageList.PageNo = pageNo
-	pageList.PageSize = pageSize
-	pageList.DataList = resp
+	pageList := s.result(total, pageNo, pageSize, resp)
 
-	return &pageList, nil
+	return pageList, nil
 }
 
 /**
@@ -127,7 +124,7 @@ func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, 
 	if title != "" && startDate == "" && endDate == "" {
 		err = global.QX_DB.Debug().Model(&model.Blog{}).Where("title LIKE ? AND user_id = ?", "%"+title+"%", userId).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
 	} else if title == "" && startDate != "" && endDate != "" {
-		err = global.QX_DB.Debug().Model(&model.Blog{}).Where("updated_at BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)", startDate, endDate).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
+		err = global.QX_DB.Debug().Model(&model.Blog{}).Where("updated_at BETWEEN ? AND ?", startDate, endDate).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
 	} else if title == "" && startDate == "" && endDate == "" {
 		err = global.QX_DB.Debug().Model(&model.Blog{}).Where("user_id = ?", userId).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
 	} else {
@@ -149,4 +146,13 @@ func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, 
 	pageList.DataList = blogs
 
 	return
+}
+
+func (*SearchService) result(total int64, pageNo, pageSize int, data interface{}) *response.PageList {
+	return &response.PageList{
+		Total:    total,
+		PageNo:   pageNo,
+		PageSize: pageSize,
+		DataList: data,
+	}
 }

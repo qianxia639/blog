@@ -163,12 +163,18 @@ func (bs BlogService) Delete(id uint64) error {
  */
 func (*BlogService) Update(post request.Post) error {
 
-	err := global.QX_DB.Debug().Model(&model.Blog{Id: post.Id}).Omit("id,user_id,views").Updates(&model.Blog{
-		Title:   post.Title,
-		Content: post.Content,
-		Flag:    post.Flag,
-		TypeId:  post.TypeId,
-		Tags:    post.Tags,
+	var t model.Type
+	if err := global.QX_DB.Debug().Where("id = ?", post.TypeId).First(&t).Error; err != nil {
+		return err
+	}
+
+	err := global.QX_DB.Debug().Model(&model.Blog{}).Where("id = ?", post.Id).Omit("id,user_id,views").Updates(&model.Blog{
+		Title:    post.Title,
+		Content:  post.Content,
+		Flag:     post.Flag,
+		TypeId:   post.TypeId,
+		TypeName: t.TypeName,
+		Tags:     post.Tags,
 	}).Error
 
 	if err != nil {
@@ -185,7 +191,7 @@ func (*BlogService) Update(post request.Post) error {
 	// }
 	// system.SystemGroups.ElasticSearchService.Update("blog", fmt.Sprintf("%v", post.Id), doc)
 
-	return err
+	return nil
 }
 
 /**
