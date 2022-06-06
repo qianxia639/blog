@@ -5,7 +5,7 @@
         {
           "multi_match": {
             "query": "{{.title}}",
-            "fields": ["title","description"]
+            "fields": ["title","content"]
           }
         }
       ],
@@ -20,7 +20,7 @@
     "pre_tags": "<span style='color:#07b9ff'>",
     "post_tags": "</span>",
     "fields": {
-      "description": {},
+      "content": {},
       "title": {}
     }
   },

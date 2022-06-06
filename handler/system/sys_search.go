@@ -25,6 +25,15 @@ func (sh *SearchHandler) SearchBlog(ctx *gin.Context) {
 	query := ctx.Query("query")
 	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "10"))
 	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("pageNo", "1"))
+
+	if pageNo < 1 {
+		pageNo = 1
+	}
+
+	if pageSize < 10 || pageSize > 10 {
+		pageNo = 10
+	}
+
 	if blogs, err := searchService.SearchBlog(query, pageNo, pageSize); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
@@ -53,6 +62,14 @@ func (sh *SearchHandler) SearchPriBlog(ctx *gin.Context) {
 	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "10"))
 	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("pageNo", "1"))
 	userId := utils.GetUserId(ctx)
+
+	if pageNo < 1 {
+		pageNo = 1
+	}
+
+	if pageSize > 10 || pageSize < 10 {
+		pageSize = 10
+	}
 
 	if m, err := searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNo, userId); err != nil {
 		global.QX_LOG.Error(err)

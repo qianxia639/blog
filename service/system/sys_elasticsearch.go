@@ -13,8 +13,6 @@ import (
 	"github.com/qianxia/blog/model"
 )
 
-// var ElasticSearch = new(elasticSearchService)
-
 type ElasticSearchService struct{}
 
 func (e *ElasticSearchService) IndicesMapping() error {

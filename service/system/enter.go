@@ -1,9 +1,9 @@
 package system
 
-type systemGroup struct {
+type SystemGroup struct {
 	UserService
 	SearchService
 	ElasticSearchService
 }
 
-var SystemGroups = new(systemGroup)
+var SystemGroups = new(SystemGroup)

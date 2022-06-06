@@ -24,6 +24,11 @@ import (
 func main() {
 	utils.Viper()               // 初始化配置文件信息
 	global.QX_LOG = utils.Zap() // 初始化zap日志
+
+	if global.QX_LOG != nil {
+		defer global.QX_LOG.Sync()
+	}
+
 	// global.QX_ES = utils.ElasticSearch()                                              // 初始化elasticsearch
 	// if err := system.SystemGroups.ElasticSearchService.IndicesMapping(); err != nil { // 初始化索引
 	// 	global.QX_LOG.Fatal(err)
@@ -42,7 +47,6 @@ func main() {
 		db, _ := global.QX_DB.DB()
 		defer db.Close()
 	}
-	defer global.QX_LOG.Sync()
 
 	server := &http.Server{
 		Addr:           fmt.Sprintf("%s:%d", global.QX_CONFIG.Http.Host, global.QX_CONFIG.Http.Port),
@@ -52,7 +56,7 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	go func() {
-		global.QX_LOG.Error(server.ListenAndServe())
+		global.QX_LOG.Fatal(server.ListenAndServe())
 	}()
 
 	quit := make(chan os.Signal)
@@ -60,5 +64,5 @@ func main() {
 	<-quit
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	global.QX_LOG.Error(server.Shutdown(ctx))
+	global.QX_LOG.Fatal(server.Shutdown(ctx))
 }
