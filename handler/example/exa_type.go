@@ -18,12 +18,7 @@ type TypeHandler struct{}
 // @Success 	 200  {object}  []model.Type
 // @Router       /type/listOrder [get]
 func (th *TypeHandler) ListOrder(ctx *gin.Context) {
-	types, err := typeService.ListOrderByAmountDesc()
-	if err != nil {
-		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
-		return
-	}
+	types, _ := typeService.ListOrderByAmountDesc()
 	command.Success(ctx, "查询成功", gin.H{"type": types})
 }
 
@@ -33,17 +28,12 @@ func (th *TypeHandler) ListOrder(ctx *gin.Context) {
 // @Produce      json
 // @Success 	 200  {object}  []model.Type
 // @Router       /type/list [get]
-func (th *TypeHandler) List(ctx *gin.Context) {
-	types, err := typeService.List()
-	if err != nil {
-		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
-		return
-	}
+func (th *TypeHandler) TypeList(ctx *gin.Context) {
+	types, _ := typeService.List()
 	command.Success(ctx, "查询成功", gin.H{"type": types})
 }
 
-// @Summary      分类查询分页
+// @Summary      按分类查询博客分页
 // @Tags         Example/Type
 // @Accept       json
 // @Produce      json
@@ -52,16 +42,24 @@ func (th *TypeHandler) List(ctx *gin.Context) {
 // @Param        pageNo	  	query     int	false	"页码"
 // @Success 	 200  {object}  response.PageList	{data=response.PageList}
 // @Router       /type/page [get]
-func (th *TypeHandler) TypeList(ctx *gin.Context) {
+func (th *TypeHandler) TypePageList(ctx *gin.Context) {
 
 	id, _ := strconv.Atoi(ctx.Query("id"))
 	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "6"))
 	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("pageNo", "1"))
 
-	typeList, err := typeService.TypeList(id, pageSize, pageNo)
+	if pageNo <= 0 {
+		pageNo = 1
+	}
+
+	if pageSize <= 0 || pageSize > 6 {
+		pageSize = 6
+	}
+
+	typeList, err := typeService.TypePageList(id, pageSize, pageNo)
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
 	command.Success(ctx, "查询成功", typeList)
@@ -69,21 +67,26 @@ func (th *TypeHandler) TypeList(ctx *gin.Context) {
 
 // @Summary      新增分类
 // @Tags         Example/Type
-// @Accept       json
+// @Accept       mpfd
 // @Produce      json
-// @Param        blog body map[string]string  true  "Create Type"
+// @Param        typeName formData string true  "insert typeName"
 // @Success 	 200  {object}  string
 // @Security	 X-Token
 // @Router       /type/save [post]
 func (th *TypeHandler) CreateType(ctx *gin.Context) {
-	var m map[string]string
-	_ = ctx.ShouldBindJSON(&m)
-	if err := typeService.CreateType(m["typeName"]); err != nil {
+
+	typeName := ctx.PostForm("typeName")
+	if typeName == "" {
+		global.QX_LOG.Error("typeName cannot be empty")
+		command.Failed(ctx, http.StatusBadRequest, "typeName cannot be empty")
+		return
+	}
+
+	if err := typeService.CreateType(typeName); err != nil {
 		global.QX_LOG.Errorf("insert type err: %v", err)
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	command.Success(ctx, "添加成功", nil)
-
 }

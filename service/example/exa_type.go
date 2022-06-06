@@ -12,28 +12,29 @@ type TypeService struct{}
 
 // 查詢type列表，按amount降序排列
 func (ts *TypeService) ListOrderByAmountDesc() ([]model.Type, error) {
-	types := make([]model.Type, 0, 4)
-	err := global.QX_DB.Debug().Select("id,type_name,amount").Order("amount DESC").Limit(4).Find(&types).Error
-	return types, err
+	types := make([]model.Type, 5)
+	global.QX_DB.Debug().Order("amount DESC").Limit(5).Find(&types)
+	return types, nil
 }
 
 // 只显示分类列表不排序
 func (ts *TypeService) List() ([]model.Type, error) {
-	types := make([]model.Type, 0, 10)
-	err := global.QX_DB.Debug().Select("id,type_name,amount").Find(&types).Error
+	types := make([]model.Type, 10)
+	global.QX_DB.Debug().Find(&types)
 
-	return types, err
+	return types, nil
 }
 
-// 点击分类进行查询并分页
-func (ts *TypeService) TypeList(id, pageSize, pageNo int) (response.PageList, error) {
+// 按分类查询博客并分页
+func (ts *TypeService) TypePageList(id, pageSize, pageNo int) (response.PageList, error) {
 	var (
 		total int64
 		blogs []model.Blog
 	)
 
+	offset := (pageNo - 1) * pageSize
 	err := global.QX_DB.Debug().Select("id,user_id,type_id,username,type_name,title,description,updated_at").Preload("Tags").Where("type_id = ?", id).
-		Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
+		Offset(offset).Limit(pageSize).Find(&blogs).Count(&total).Error
 
 	// 将分页信息和dataList封装到pageList中
 	var pageList response.PageList
@@ -50,9 +51,7 @@ func (ts *TypeService) TypeList(id, pageSize, pageNo int) (response.PageList, er
 func (ts *TypeService) CreateType(typeName string) error {
 
 	var t []string
-
-	global.QX_DB.Debug().Model(&model.Type{}).Select("type_name").Where("type_name = ?", typeName).Find(&t)
-
+	global.QX_DB.Debug().Model(&model.Type{}).Select("type_name").Where("type_name = ?", typeName).First(&t)
 	if len(t) != 0 {
 		return errors.New("该分类已存在")
 	}

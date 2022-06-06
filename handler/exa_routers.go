@@ -14,15 +14,14 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 	{
 		blogGroup.GET("/pageList", blogRouterApi.BlogPageList) // 博客分页列表
 		blogGroup.GET("/latestList", blogRouterApi.LatestList) // 最新推荐(按更新时间降序排列)
-		blogGroup.GET("/:id", blogRouterApi.GetBlog)           // 获取博客信息
+		blogGroup.GET("/:id", blogRouterApi.GetBlogInfo)       // 获取博客信息
 	}
 	{
 
-		blogRouter.POST("/save", blogRouterApi.CreateBlog)         // 新增博客
-		blogRouter.GET("/update/:id", blogRouterApi.GetUpdateBlog) // 获取要编辑的博客的信息
-		blogRouter.PUT("/update", blogRouterApi.UpdateBlog)        // 编辑博客
-		blogRouter.GET("/list", blogRouterApi.BlogList)            //个人博客展示
-		blogRouter.DELETE("/:id", blogRouterApi.DeleteBlog)        // 根据id删除博客
+		blogRouter.POST("/save", blogRouterApi.CreateBlog)  // 新增博客
+		blogRouter.PUT("/update", blogRouterApi.UpdateBlog) // 编辑博客
+		blogRouter.GET("/list", blogRouterApi.BlogList)     //个人博客展示
+		blogRouter.DELETE("/:id", blogRouterApi.DeleteBlog) // 根据id删除博客
 	}
 
 	//  ========== type router group ==========
@@ -31,8 +30,8 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 	typeRouterApi := example.ExampleRouterGroups.TypeHandler
 	{
 		typeGroup.GET("/listOrder", typeRouterApi.ListOrder) // 分类列表(按amount降序排列)
-		typeGroup.GET("/list", typeRouterApi.List)           // 分类列表(不排序)
-		typeGroup.GET("/page", typeRouterApi.TypeList)       // 点击分类进行博客的展示并分页
+		typeGroup.GET("/list", typeRouterApi.TypeList)       // 分类列表(不排序)
+		typeGroup.GET("/page", typeRouterApi.TypePageList)   // 按分类进行博客的展示并分页
 	}
 	{
 		typeRouter.POST("/save", typeRouterApi.CreateType)

@@ -17,19 +17,21 @@ func (*ArchiveService) GetArchiveGroupByYear() (m map[string][]response.Archive,
 
 	var years []string
 	m = make(map[string][]response.Archive)
-	if err = global.QX_DB.Debug().Raw("SELECT FROM_UNIXTIME(updated_at, '%Y') AS year FROM qx_blog GROUP By year ORDER BY year DESC").Scan(&years).Error; err != nil {
-		return
+	sql := `SELECT YEAR(updated_at, '%Y') AS year FROM qx_blog GROUP By year ORDER BY year DESC`
+	if err = global.QX_DB.Debug().Raw(sql).Scan(&years).Error; err != nil {
+		return nil, 0, nil
 	}
 
 	for _, year := range years {
-		if err = global.QX_DB.Debug().Raw("SELECT id,title,updated_at,flag FROM qx_blog WHERE FROM_UNIXTIME(updated_at, '%Y') = ?", year).Scan(&archives).Error; err != nil {
-			return
+		sql := `SELECT id,title,updated_at,flag FROM qx_blog WHERE YEAR(updated_at, '%Y') = ?`
+		if err = global.QX_DB.Debug().Raw(sql, year).Scan(&archives).Error; err != nil {
+			return nil, 0, nil
 		}
 		m[year] = archives
 	}
 
 	if err = global.QX_DB.Debug().Model(&model.Blog{}).Count(&total).Error; err != nil {
-		return
+		return nil, 0, nil
 	}
 
 	return m, total, nil

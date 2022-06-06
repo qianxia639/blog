@@ -135,6 +135,7 @@ func (uh *UserHandler) Logout(ctx *gin.Context) {
 func (uh *UserHandler) UpdateNickname(ctx *gin.Context) {
 	nickname := ctx.PostForm("nickname")
 	if nickname == "" {
+		global.QX_LOG.Error("nickname cannot be empty")
 		command.Failed(ctx, http.StatusBadRequest, "nickname cannot be empty")
 		return
 	}

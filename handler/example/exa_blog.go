@@ -30,7 +30,6 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	}
 	// 获取登录的用户信息
 	post.UserId = utils.GetUserId(ctx)
-	post.Username = utils.GetUsername(ctx)
 
 	err := blogService.Save(post)
 	if err != nil {
@@ -53,14 +52,21 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 func (bh BlogHandler) BlogList(ctx *gin.Context) {
 	// 获取登录的用户信息
 	userId := utils.GetUserId(ctx)
-
 	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "10"))
 	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("pageNo", "1"))
+
+	if pageNo < 1 {
+		pageNo = 1
+	}
+
+	if pageSize < 10 || pageSize > 10 {
+		pageSize = 10
+	}
 
 	blogs, err := blogService.List(userId, pageNo, pageSize)
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
 	command.Success(ctx, "查询成功", blogs)
@@ -99,7 +105,7 @@ func (bh *BlogHandler) UpdateBlog(ctx *gin.Context) {
 
 	var post request.Post
 
-	ctx.ShouldBindJSON(&post)
+	_ = ctx.ShouldBindJSON(&post)
 
 	if err := blogService.Update(post); err != nil {
 		global.QX_LOG.Error(err)
@@ -109,7 +115,7 @@ func (bh *BlogHandler) UpdateBlog(ctx *gin.Context) {
 	command.Success(ctx, "修改成功", nil)
 }
 
-// @Summary      博客展示
+// @Summary      首页博客展示
 // @Tags         Example/Blog
 // @Accept       json
 // @Produce      json
@@ -119,14 +125,22 @@ func (bh *BlogHandler) UpdateBlog(ctx *gin.Context) {
 // @Router       /blog/pageList [get]
 func (bh BlogHandler) BlogPageList(ctx *gin.Context) {
 
-	pageSize, _ := strconv.Atoi(ctx.Query("pageSize"))
-	pageNo, _ := strconv.Atoi(ctx.Query("pageNo"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "6"))
+	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("pageNo", "1"))
+
+	if pageNo < 1 {
+		pageNo = 1
+	}
+
+	if pageSize < 6 || pageSize > 6 {
+		pageSize = 6
+	}
 
 	pageList, err := blogService.PageList(pageSize, pageNo)
 
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
 
@@ -143,7 +157,7 @@ func (bh BlogHandler) LatestList(ctx *gin.Context) {
 	list, err := blogService.LatestList()
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
 	command.Success(ctx, "查询成功", gin.H{"latestList": list})
@@ -154,31 +168,11 @@ func (bh BlogHandler) LatestList(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param		 id	  path  int   true    "根据id获取博客信息"
-// @Success 	 200  {object}  map[string]interface{}
+// @Success 	 200  {object}  response.BlogResult
 // @Router       /blog/{id} [get]
-func (bh BlogHandler) GetBlog(ctx *gin.Context) {
+func (bh BlogHandler) GetBlogInfo(ctx *gin.Context) {
 	blogId, _ := strconv.ParseUint(ctx.Params.ByName("id"), 10, 64)
-	avatar := utils.GetAvatar(ctx)
-	if blogs, err := blogService.GetBlog(blogId, avatar); err != nil {
-		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
-		return
-	} else {
-		command.Success(ctx, "查询成功", gin.H{"blogs": blogs})
-	}
-}
-
-// @Summary      获取编辑的博客信息
-// @Tags         Example/Blog
-// @Accept       json
-// @Produce      json
-// @Param		 id	  path  int   true    "根据id获取博客信息"
-// @Success 	 200  {object} model.Blog
-// @security	 X-Token
-// @Router       /blog/update/{id} [get]
-func (bh *BlogHandler) GetUpdateBlog(ctx *gin.Context) {
-	blogId, _ := strconv.ParseUint(ctx.Param("id"), 10, 64)
-	if blogs, err := blogService.GetUpdateBlog(blogId); err != nil {
+	if blogs, err := blogService.GetBlogInfo(blogId); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
 		return

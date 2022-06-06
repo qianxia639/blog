@@ -1,13 +1,14 @@
 package request
 
+import "github.com/qianxia/blog/model"
+
 type Post struct {
-	Id          uint64 `json:"id"`
-	TypeId      uint16 `json:"typeId"`
-	UserId      uint64 `json:"userId"`
-	Username    string `json:"username"`
-	Description string `json:"description"`
-	Title       string `json:"title"`
-	Content     string `json:"content"`
-	Flag        string `json:"flag"`
-	Tags        []string
+	Id       uint64
+	TypeId   uint16
+	UserId   uint64
+	Nickname string
+	Title    string
+	Content  string
+	Flag     string
+	Tags     []model.Tag
 }

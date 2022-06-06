@@ -7,15 +7,9 @@ import (
 
 type TagService struct{}
 
-func (ts *TagService) List() ([]string, error) {
-	tags := make([]model.Tag, 0, 10)
-	var tagNames []string
+func (ts *TagService) List() ([]model.Tag, error) {
+	tags := make([]model.Tag, 10)
 
-	err := global.QX_DB.Debug().Select("id,tag_name").Find(&tags).Error
-
-	for _, v := range tags {
-		tagNames = append(tagNames, v.TagName)
-	}
-
-	return tagNames, err
+	global.QX_DB.Debug().Find(&tags)
+	return tags, nil
 }

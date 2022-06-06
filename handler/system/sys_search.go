@@ -27,7 +27,7 @@ func (sh *SearchHandler) SearchBlog(ctx *gin.Context) {
 	pageNo, _ := strconv.Atoi(ctx.DefaultQuery("pageNo", "1"))
 	if blogs, err := searchService.SearchBlog(query, pageNo, pageSize); err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "搜索失败")
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	} else {
 		command.Success(ctx, "搜索成功", blogs)

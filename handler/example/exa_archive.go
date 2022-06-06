@@ -20,7 +20,7 @@ func (ah *ArchiveHandler) ArchiveList(ctx *gin.Context) {
 
 	if m, total, err := archiveService.GetArchiveGroupByYear(); err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "查询失败")
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	} else {
 		command.Success(ctx, "查询成功", gin.H{
