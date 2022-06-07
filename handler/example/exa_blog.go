@@ -17,27 +17,30 @@ type BlogHandler struct{}
 // @Tags         Example/Blog
 // @Accept       json
 // @Produce      json
-// @Param        blog body request.Post  true  "Create Blog"
+// @Param        blog body request.SaveBlog  true  "Create Blog"
 // @Success 	 200  {object}  string
 // @Security	 X-Token
 // @Router       /blog/save [post]
 func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
-	var post request.Post
-	if err := ctx.ShouldBindJSON(&post); err != nil {
+	var saveBlog request.SaveBlog
+	_ = ctx.ShouldBindJSON(&saveBlog)
+
+	err := utils.Verify(saveBlog)
+	if err != nil {
 		global.QX_LOG.Errorf("parame bind err:", err)
 		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
 		return
 	}
 	// 获取登录的用户信息
-	post.UserId = utils.GetUserId(ctx)
+	userId := utils.GetUserId(ctx)
 
-	err := blogService.Save(post)
+	err = blogService.Save(saveBlog, userId)
 	if err != nil {
 		global.QX_LOG.Error(err)
-		command.Failed(ctx, http.StatusInternalServerError, "发布博客失败")
+		command.Failed(ctx, http.StatusInternalServerError, "博客发布失败")
 		return
 	}
-	command.Success(ctx, "发布博客成功", nil)
+	command.Success(ctx, "博客发布成功", nil)
 }
 
 // @Summary      个人博客展示
@@ -97,17 +100,23 @@ func (bh BlogHandler) DeleteBlog(ctx *gin.Context) {
 // @Tags         Example/Blog
 // @Accept       json
 // @Produce      json
-// @Param        blog	body	request.Post	true	"Update Blog"
+// @Param        blog	body	request.UpdateBlog	true	"Update Blog"
 // @Success 	 200  {object}  string
 // @Security	 X-Token
 // @Router       /blog/update [put]
 func (bh *BlogHandler) UpdateBlog(ctx *gin.Context) {
 
-	var post request.Post
+	var ub request.UpdateBlog
 
-	_ = ctx.ShouldBindJSON(&post)
+	_ = ctx.ShouldBindJSON(&ub)
 
-	if err := blogService.Update(post); err != nil {
+	if err := utils.Verify(ub); err != nil {
+		global.QX_LOG.Errorf("parame bind err:", err)
+		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
+		return
+	}
+
+	if err := blogService.Update(ub); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "修改失败")
 		return
@@ -179,4 +188,21 @@ func (bh BlogHandler) GetBlogInfo(ctx *gin.Context) {
 	} else {
 		command.Success(ctx, "查询成功", gin.H{"blogs": blogs})
 	}
+}
+
+// @Summary      增加浏览数
+// @Tags         Example/Blog
+// @Accept       json
+// @Produce      json
+// @Param		 id	  path  int   true    "根据id获取博客信息"
+// @Success 	 200  {object}	string
+// @Router       /blog/incrViews [get]
+func (bh *BlogHandler) IncrViews(ctx *gin.Context) {
+	blogId, _ := strconv.ParseUint(ctx.Params.ByName("id"), 10, 64)
+	if err := blogService.IncrViews(blogId); err != nil {
+		global.QX_LOG.Error(err)
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
+		return
+	}
+	command.Success(ctx, "操作成功", nil)
 }

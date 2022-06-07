@@ -1,10 +1,14 @@
 package example
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/request"
 	"github.com/qianxia/blog/model/response"
+	"github.com/qianxia/blog/service/system"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -14,33 +18,33 @@ type BlogService struct{}
 /**
 * 新增博客
  */
-func (bs BlogService) Save(post request.Post) error {
+func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) error {
 
 	// 根据userId查询用户信息
 	var user model.User
-	if err := global.QX_DB.Debug().Where("id = ?", post.UserId).First(&user).Error; err != nil {
+	if err := global.QX_DB.Debug().Where("id = ?", userId).First(&user).Error; err != nil {
 		return err
 	}
 	// 根据post.tags[]的值查询对应的id
 	tags := make([]model.Tag, 3)
-	if err := global.QX_DB.Debug().Where("tag_name in (?)", post.Tags).Find(&tags).Error; err != nil {
+	if err := global.QX_DB.Debug().Where("tag_name in (?)", saveBlog.Tags).Find(&tags).Error; err != nil {
 		return err
 	}
 	// 根据typeId查询
 	var tp model.Type
-	if err := global.QX_DB.Debug().Model(&model.Type{}).Where("id = ?", post.TypeId).First(&tp).Error; err != nil {
+	if err := global.QX_DB.Debug().Model(&model.Type{}).Where("id = ?", saveBlog.TypeId).First(&tp).Error; err != nil {
 		return err
 	}
 
 	// 构建数据
 	blog := model.Blog{
-		UserId:   post.UserId,
+		UserId:   userId,
 		Nickname: user.Nickname,
-		TypeId:   post.TypeId,
+		TypeId:   saveBlog.TypeId,
 		TypeName: tp.TypeName,
-		Title:    post.Title,
-		Content:  post.Content,
-		Flag:     post.Flag,
+		Title:    saveBlog.Title,
+		Content:  saveBlog.Content,
+		Flag:     saveBlog.Flag,
 		Tags:     tags,
 	}
 
@@ -59,13 +63,14 @@ func (bs BlogService) Save(post request.Post) error {
 	// 提交事务
 	tx.Commit()
 
-	// res, err := system.SystemGroups.ElasticSearchService.Insert("blog", fmt.Sprintf("%v", blog.Id), &blog)
+	res, err := system.ElasticSearchServices.Insert("blog", fmt.Sprintf("%v", blog.Id), &blog)
+	if res != nil {
+		defer res.Body.Close()
+	}
 
-	// if err != nil {
-	// 	return err
-	// }
-
-	// defer res.Body.Close()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -73,7 +78,7 @@ func (bs BlogService) Save(post request.Post) error {
 /**
 * 个人博客列表展示
  */
-func (bs BlogService) List(id uint64, pageNo, pageSize int) (*response.PageList, error) {
+func (bs *BlogService) List(id uint64, pageNo, pageSize int) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
 
@@ -96,7 +101,7 @@ func (bs BlogService) List(id uint64, pageNo, pageSize int) (*response.PageList,
 /**
 * 最新推荐展示
  */
-func (bs BlogService) LatestList() ([]model.Blog, error) {
+func (bs *BlogService) LatestList() ([]model.Blog, error) {
 	list := make([]model.Blog, 5)
 	err := global.QX_DB.Debug().Select("id,title").Order("updated_at DESC").Limit(5).Find(&list).Error
 
@@ -106,7 +111,7 @@ func (bs BlogService) LatestList() ([]model.Blog, error) {
 /**
 * 首页博客展示及分页
  */
-func (bs BlogService) PageList(pageSize, pageNo int) (response.PageList, error) {
+func (bs *BlogService) PageList(pageSize, pageNo int) (response.PageList, error) {
 	var (
 		total int64
 		blogs []model.Blog
@@ -131,7 +136,7 @@ func (bs BlogService) PageList(pageSize, pageNo int) (response.PageList, error) 
 /**
 * 博客删除
  */
-func (bs BlogService) Delete(id uint64) error {
+func (bs *BlogService) Delete(id uint64) error {
 	var blog model.Blog
 	if err := global.QX_DB.Debug().Where("id = ?", id).First(&blog).Error; err != nil {
 		return err
@@ -152,8 +157,14 @@ func (bs BlogService) Delete(id uint64) error {
 	// 提交事务
 	tx.Commit()
 
-	// res, err := system.SystemGroups.ElasticSearchService.Delete("blog", fmt.Sprintf("%v", id))
-	// defer res.Body.Close()
+	res, err := system.ElasticSearchServices.Delete("blog", fmt.Sprintf("%v", id))
+	if res != nil {
+		defer res.Body.Close()
+	}
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -161,35 +172,44 @@ func (bs BlogService) Delete(id uint64) error {
 /**
 * 修改博客
  */
-func (*BlogService) Update(post request.Post) error {
+func (*BlogService) Update(ub request.UpdateBlog) error {
 
-	var t model.Type
-	if err := global.QX_DB.Debug().Where("id = ?", post.TypeId).First(&t).Error; err != nil {
+	var tp model.Type
+	if err := global.QX_DB.Debug().Where("id = ?", ub.TypeId).First(&tp).Error; err != nil {
 		return err
 	}
 
-	err := global.QX_DB.Debug().Model(&model.Blog{}).Where("id = ?", post.Id).Omit("id,user_id,views").Updates(&model.Blog{
-		Title:    post.Title,
-		Content:  post.Content,
-		Flag:     post.Flag,
-		TypeId:   post.TypeId,
-		TypeName: t.TypeName,
-		Tags:     post.Tags,
+	err := global.QX_DB.Debug().Model(&model.Blog{}).Where("id = ?", ub.Id).Omit("id,user_id,views").Updates(&model.Blog{
+		Title:    ub.Title,
+		Content:  ub.Content,
+		Flag:     ub.Flag,
+		TypeId:   ub.TypeId,
+		TypeName: tp.TypeName,
+		Tags:     ub.Tags,
 	}).Error
 
 	if err != nil {
 		return err
 	}
 
-	// doc := map[string]interface{}{
-	// 	"doc": map[string]interface{}{
-	// 		"title":   post.Title,
-	// 		"content": post.Content,
-	// 		"flag":    post.Flag,
-	//		"typeId":  post.TypeId,
-	// 	},
-	// }
-	// system.SystemGroups.ElasticSearchService.Update("blog", fmt.Sprintf("%v", post.Id), doc)
+	doc := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"title":    ub.Title,
+			"content":  ub.Content,
+			"flag":     ub.Flag,
+			"typeId":   ub.TypeId,
+			"typeName": tp.TypeName,
+			"Tags":     ub.Tags,
+		},
+	}
+	res, err := system.ElasticSearchServices.Update("blog", fmt.Sprintf("%v", ub.Id), doc)
+	if res != nil {
+		defer res.Body.Close()
+	}
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -197,7 +217,7 @@ func (*BlogService) Update(post request.Post) error {
 /**
 * 获取博客信息
  */
-func (bs BlogService) GetBlogInfo(id uint64) (*response.BlogResult, error) {
+func (bs *BlogService) GetBlogInfo(id uint64) (*response.BlogResult, error) {
 
 	var b model.Blog
 	if err := global.QX_DB.Debug().Preload("Tags").Where("id = ?", id).First(&b).Error; err != nil {
@@ -208,17 +228,6 @@ func (bs BlogService) GetBlogInfo(id uint64) (*response.BlogResult, error) {
 	if err := global.QX_DB.Debug().Where("id = ?", b.UserId).First(&user).Error; err != nil {
 		return nil, err
 	}
-
-	if err := global.QX_DB.Debug().Model(&model.Blog{Id: id}).UpdateColumn("views", gorm.Expr("views + 1")).Error; err != nil {
-		return nil, err
-	}
-
-	// doc := map[string]interface{}{
-	// 	"doc": map[string]interface{}{
-	// 		"views": b.Views + 1,
-	// 	},
-	// }
-	// system.SystemGroups.ElasticSearchService.Update("blog", fmt.Sprintf("%v", b.Id), doc)
 
 	result := &response.BlogResult{
 		Id:        id,
@@ -235,4 +244,33 @@ func (bs BlogService) GetBlogInfo(id uint64) (*response.BlogResult, error) {
 
 	// 返回
 	return result, nil
+}
+
+func (bs *BlogService) IncrViews(id uint64) error {
+
+	var blog = new(model.Blog)
+	err := global.QX_DB.Debug().Where("id = ?", id).First(blog).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
+	if err := global.QX_DB.Debug().Model(blog).UpdateColumn("views", gorm.Expr("views + 1")).Error; err != nil {
+		return err
+	}
+
+	doc := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"views": blog.Views + 1,
+		},
+	}
+	res, err := system.ElasticSearchServices.Update("blog", fmt.Sprintf("%v", id), doc)
+
+	if res != nil {
+		defer res.Body.Close()
+	}
+
+	if err != nil {
+		return err
+	}
+	return nil
 }

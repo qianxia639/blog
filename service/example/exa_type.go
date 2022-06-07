@@ -50,11 +50,12 @@ func (ts *TypeService) TypePageList(id, pageSize, pageNo int) (response.PageList
 // 新增分类
 func (ts *TypeService) CreateType(typeName string) error {
 
-	var t []string
-	global.QX_DB.Debug().Model(&model.Type{}).Select("type_name").Where("type_name = ?", typeName).First(&t)
-	if len(t) != 0 {
+	var tp model.Type
+	global.QX_DB.Debug().Where("type_name = ?", typeName).First(&tp)
+	if tp.TypeName == typeName {
 		return errors.New("该分类已存在")
 	}
 
-	return global.QX_DB.Debug().Model(&model.Type{}).Create(&model.Type{TypeName: typeName}).Error
+	tp.TypeName = typeName
+	return global.QX_DB.Debug().Create(&tp).Error
 }

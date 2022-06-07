@@ -15,6 +15,7 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 		blogGroup.GET("/pageList", blogRouterApi.BlogPageList) // 博客分页列表
 		blogGroup.GET("/latestList", blogRouterApi.LatestList) // 最新推荐(按更新时间降序排列)
 		blogGroup.GET("/:id", blogRouterApi.GetBlogInfo)       // 获取博客信息
+		blogGroup.GET("/incrViews", blogRouterApi.IncrViews)   // 增加浏览数
 	}
 	{
 
@@ -38,17 +39,21 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 	}
 
 	//  ========== tag router group ==========
+	tagGroup := e.Group("/tag")
+	tagRouter := e.Group("/tag").Use(middleware.Authorization())
 	tagRouterApi := example.ExampleRouterGroups.TagHandler
-	tagRouterWithoutRecord := e.Group("/tag")
 	{
-		tagRouterWithoutRecord.GET("/list", tagRouterApi.TagList) // 标签列表(不分页)
+		tagGroup.GET("/list", tagRouterApi.TagList) // 标签列表(不分页)
+	}
+	{
+		tagRouter.POST("/save", tagRouterApi.CreateTag) // 添加标签
 	}
 
 	// ========== archive router group ==========
+	archiveGroup := e.Group("/archive")
 	archiveRouterApi := example.ExampleRouterGroups.ArchiveHandler
-	archiveRouterWithoutRecord := e.Group("/archive")
 	{
-		archiveRouterWithoutRecord.GET("/list", archiveRouterApi.ArchiveList) // 归档列表
+		archiveGroup.GET("/list", archiveRouterApi.ArchiveList) // 归档列表
 	}
 	return e
 }
