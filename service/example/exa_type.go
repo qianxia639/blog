@@ -27,13 +27,12 @@ func (ts *TypeService) List() ([]model.Type, error) {
 
 // 按分类查询博客并分页
 func (ts *TypeService) TypePageList(id, pageSize, pageNo int) (response.PageList, error) {
-	var (
-		total int64
-		blogs []model.Blog
-	)
+
+	var total int64
+	var blogs []model.Blog
 
 	offset := (pageNo - 1) * pageSize
-	err := global.QX_DB.Debug().Select("id,user_id,type_id,username,type_name,title,description,updated_at").Preload("Tags").Where("type_id = ?", id).
+	err := global.QX_DB.Debug().Select("id,user_id,type_id,nickname,type_name,title,updated_at").Preload("Tags").Where("type_id = ?", id).
 		Offset(offset).Limit(pageSize).Find(&blogs).Count(&total).Error
 
 	// 将分页信息和dataList封装到pageList中

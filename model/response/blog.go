@@ -7,10 +7,10 @@ import (
 )
 
 type Blog struct {
-	Id        uint64 `json:"id,omitempty"`
-	Title     string `json:"title,omitempty"`
-	Views     uint32 `json:"views,omitempty"`
-	UpdatedAt int64  `json:"updatedAt,omitempty"`
+	Id        uint64    `json:"id,omitempty"`
+	Title     string    `json:"title,omitempty"`
+	Views     uint32    `json:"views"`
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 }
 
 type BlogResult struct {
