@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"text/template"
 
+	"github.com/qianxia/blog/config"
 	"github.com/qianxia/blog/global"
 )
 
 func Loadtemplate(title string, pageNo, pageSize int) (bytes.Buffer, error) {
 
-	tmplFile := "./source/elasticsearch/search_title.json.tmpl"
+	tmplFile := config.Path("elasticsearch/search_title.json.tmpl")
 	t, err := template.ParseGlob(tmplFile)
 	if err != nil {
 		global.QX_LOG.Errorf("create template failed, err: %v", err)

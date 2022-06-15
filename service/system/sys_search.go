@@ -2,6 +2,7 @@ package system
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
@@ -56,6 +57,8 @@ func (s *SearchService) SearchBlog(title string, pageNo, pageSize int) (*respons
 		return nil, err
 	}
 
+	data := string(tmpl.Bytes())
+	log.Printf("data = %v\n", data)
 	res, err := ElasticSearchServices.Search2("blog", tmpl)
 	// res, err := SystemGroups.ElasticSearchService.Search2("blog", tmpl)
 
@@ -104,7 +107,7 @@ func (s *SearchService) SearchBlog(title string, pageNo, pageSize int) (*respons
 			Username:  hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
 			Title:     title,
 			Content:   content,
-			UpdatedAt: hit.(map[string]interface{})["_source"].(map[string]interface{})["updatedAt"].(string),
+			UpdatedAt: hit.(map[string]interface{})["_source"].(map[string]interface{})["updatedAt"],
 			Tags:      hit.(map[string]interface{})["_source"].(map[string]interface{})["Tags"],
 		})
 	}

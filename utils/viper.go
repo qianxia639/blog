@@ -17,8 +17,8 @@ func Viper() {
 	// 指定配置文件的扩展名
 	viper.SetConfigType("toml")
 	// 设置配置文件路径
-	workDir, _ := os.Getwd()
-	viper.AddConfigPath(workDir + "/config")
+	dir, _ := os.Getwd()
+	viper.AddConfigPath(dir + "/config")
 	// 读取配置文件
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Fatal error config file: %v", err)

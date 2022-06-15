@@ -8,6 +8,6 @@ type Search struct {
 	Username  string      `json:"username"`
 	Title     interface{} `json:"title"`
 	Content   interface{} `json:"content"`
-	UpdatedAt string      `json:"updatedAt"`
+	UpdatedAt interface{} `json:"updatedAt"`
 	Tags      interface{} `json:"tags"`
 }
