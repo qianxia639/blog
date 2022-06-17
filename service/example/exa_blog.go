@@ -60,8 +60,6 @@ func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) error {
 		tx.Rollback()
 		return err
 	}
-	// 提交事务
-	tx.Commit()
 
 	res, err := system.ElasticSearchServices.Insert("blog", fmt.Sprintf("%v", blog.Id), &blog)
 	if res != nil {
@@ -71,6 +69,9 @@ func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) error {
 	if err != nil {
 		return err
 	}
+
+	// 提交事务
+	tx.Commit()
 
 	return nil
 }
@@ -84,8 +85,6 @@ func (bs *BlogService) List(id uint64, pageNo, pageSize int) (*response.PageList
 
 	offset := (pageNo - 1) * pageSize
 	err := global.QX_DB.Debug().Model(&model.Blog{}).Where("user_id = ?", id).Offset(offset).Limit(pageSize).Find(&blogs).Count(&total).Error
-
-	// global.QX_DB.Debug().Model(&model.Blog{}).Where("user_id = ?", id).Count(&total)
 
 	var pageList response.PageList
 
@@ -117,10 +116,7 @@ func (bs *BlogService) PageList(pageSize, pageNo int) (response.PageList, error)
 		blogs []model.Blog
 	)
 	offset := (pageNo - 1) * pageSize
-	err := global.QX_DB.Debug().Select("id,user_id,type_id,nickname,type_name,title,updated_at").Preload("Tags").
-		Offset(offset).Limit(pageSize).Find(&blogs).Count(&total).Error
-
-	// global.QX_DB.Model(&model.Blog{}).Count(&total)
+	err := global.QX_DB.Debug().Preload("Tags").Offset(offset).Limit(pageSize).Find(&blogs).Count(&total).Error
 
 	// 将分页信息和dataList封装到pageList中
 	var pageList response.PageList
@@ -154,9 +150,6 @@ func (bs *BlogService) Delete(id uint64) error {
 		return err
 	}
 
-	// 提交事务
-	tx.Commit()
-
 	res, err := system.ElasticSearchServices.Delete("blog", fmt.Sprintf("%v", id))
 	if res != nil {
 		defer res.Body.Close()
@@ -166,6 +159,9 @@ func (bs *BlogService) Delete(id uint64) error {
 		return err
 	}
 
+	// 提交事务
+	tx.Commit()
+
 	return nil
 }
 
@@ -174,32 +170,17 @@ func (bs *BlogService) Delete(id uint64) error {
  */
 func (*BlogService) Update(ub request.UpdateBlog) error {
 
-	var tp model.Type
-	if err := global.QX_DB.Debug().Where("id = ?", ub.TypeId).First(&tp).Error; err != nil {
-		return err
-	}
-
-	err := global.QX_DB.Debug().Model(&model.Blog{}).Where("id = ?", ub.Id).Omit("id,user_id,views").Updates(&model.Blog{
-		Title:    ub.Title,
-		Content:  ub.Content,
-		Flag:     ub.Flag,
-		TypeId:   ub.TypeId,
-		TypeName: tp.TypeName,
-		Tags:     ub.Tags,
-	}).Error
-
+	sql := `UPDATE qx_blog SET title = ?,content = ?,flag = ? WHERE id = ?`
+	err := global.QX_DB.Debug().Exec(sql, ub.Title, ub.Content, ub.Flag, ub.Id).Error
 	if err != nil {
 		return err
 	}
 
 	doc := map[string]interface{}{
 		"doc": map[string]interface{}{
-			"title":    ub.Title,
-			"content":  ub.Content,
-			"flag":     ub.Flag,
-			"typeId":   ub.TypeId,
-			"typeName": tp.TypeName,
-			"Tags":     ub.Tags,
+			"title":   ub.Title,
+			"content": ub.Content,
+			"flag":    ub.Flag,
 		},
 	}
 	res, err := system.ElasticSearchServices.Update("blog", fmt.Sprintf("%v", ub.Id), doc)
@@ -246,6 +227,7 @@ func (bs *BlogService) GetBlogInfo(id uint64) (*response.BlogResult, error) {
 	return result, nil
 }
 
+// 增加 博客的浏览次数
 func (bs *BlogService) IncrViews(id uint64) error {
 
 	var blog = new(model.Blog)

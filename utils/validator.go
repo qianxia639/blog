@@ -3,7 +3,6 @@ package utils
 import (
 	"errors"
 	"reflect"
-	"regexp"
 )
 
 func Verify(value interface{}) error {
@@ -53,9 +52,4 @@ func isEmpty(value reflect.Value) bool {
 		return value.IsNil()
 	}
 	return reflect.DeepEqual(value.Interface(), reflect.Zero(value.Type()).Interface())
-}
-
-// 正则校验
-func regexpMatch(matchStr string) bool {
-	return regexp.MustCompile(`[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-z0-9]+`).MatchString(matchStr)
 }

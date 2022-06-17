@@ -2,12 +2,10 @@ package system
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/response"
-	"github.com/qianxia/blog/utils"
 	"gorm.io/gorm"
 )
 
@@ -52,14 +50,12 @@ func (s *SearchService) SearchBlog(title string, pageNo, pageSize int) (*respons
 	// 	},
 	// }
 
-	tmpl, err := utils.Loadtemplate(title, pageNo, pageSize)
+	buf, err := TemplateServices.SearchBlogByTitle(title, pageNo, pageSize)
 	if err != nil {
 		return nil, err
 	}
 
-	data := string(tmpl.Bytes())
-	log.Printf("data = %v\n", data)
-	res, err := ElasticSearchServices.Search2("blog", tmpl)
+	res, err := ElasticSearchServices.Search2("blog", buf)
 	// res, err := SystemGroups.ElasticSearchService.Search2("blog", tmpl)
 
 	// res, err := SystemGroups.ElasticSearchService.Search("blog", query)
@@ -120,9 +116,10 @@ func (s *SearchService) SearchBlog(title string, pageNo, pageSize int) (*respons
 /**
 * 根据title和时间进行搜索
  */
-func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, pageNo int, userId uint64) (pageList response.PageList, err error) {
+func (s *SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, pageNo int, userId uint64) (*response.PageList, error) {
 	var blogs []response.Blog
 	var total int64
+	var err error
 
 	if title != "" && startDate == "" && endDate == "" {
 		err = global.QX_DB.Debug().Model(&model.Blog{}).Where("title LIKE ? AND user_id = ?", "%"+title+"%", userId).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
@@ -138,17 +135,9 @@ func (*SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, 
 		}).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
 	}
 
-	// global.QX_DB.Model(&model.Blog{}).Where("title LIKE ?", "%"+title+"%").Count(&total)
+	pageList := s.result(total, pageNo, pageSize, blogs)
 
-	// var pageList response.PageList
-
-	pageList.Total = total
-	pageList.PageNo = pageNo
-	pageList.PageSize = pageSize
-
-	pageList.DataList = blogs
-
-	return
+	return pageList, err
 }
 
 func (*SearchService) result(total int64, pageNo, pageSize int, data interface{}) *response.PageList {

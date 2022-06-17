@@ -194,11 +194,11 @@ func (bh BlogHandler) GetBlogInfo(ctx *gin.Context) {
 // @Tags         Example/Blog
 // @Accept       json
 // @Produce      json
-// @Param		 id	  path  int   true    "根据id获取博客信息"
+// @Param		 id	  query  int   true    "根据id获取博客信息"
 // @Success 	 200  {object}	string
 // @Router       /blog/incrViews [get]
 func (bh *BlogHandler) IncrViews(ctx *gin.Context) {
-	blogId, _ := strconv.ParseUint(ctx.Params.ByName("id"), 10, 64)
+	blogId, _ := strconv.ParseUint(ctx.Query("id"), 10, 64)
 	if err := blogService.IncrViews(blogId); err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")

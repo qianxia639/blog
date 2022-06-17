@@ -50,8 +50,8 @@ func (e *ElasticSearchService) Delete(index, id string) (*esapi.Response, error)
 	}.Do(context.Background(), global.QX_ES)
 }
 
+// 修改elasticsearch中对应的文档记录
 func (e *ElasticSearchService) Update(index, id string, data map[string]interface{}) (*esapi.Response, error) {
-	// 修改elasticsearch中对应的文档记录
 	return esapi.UpdateRequest{
 		Index:      index,
 		DocumentID: id,
