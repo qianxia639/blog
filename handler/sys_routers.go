@@ -57,8 +57,7 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 	commentGroup := e.Group("/comment")
 	commentRouterApi := system.SystemRouterGroups.CommentHandler
 	{
-		commentGroup.POST("/parent", commentRouterApi.ParentComment)         // 添加父级评论
-		commentGroup.POST("/child", commentRouterApi.ChildComment)           // 添加子级评论
+		commentGroup.POST("/save", commentRouterApi.SaveComment)             // 添加评论
 		commentGroup.DELETE("/parent", commentRouterApi.DeleteParentComment) // 删除父级评论
 		commentGroup.DELETE("/child", commentRouterApi.DeleteChildComment)   // 删除子级平论
 	}

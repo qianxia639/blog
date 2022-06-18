@@ -1,14 +1,8 @@
 package request
 
-type ParentConment struct {
-	BlogId   uint64
-	Nickname string `json:"nickname" default:"匿名用户"`
-	Content  string
-}
-
-type ChildComment struct {
-	BlogId   uint64
+type Comment struct {
+	BlogId   uint64 `binding:"required"`
 	ParentId uint64
-	Nickname string `json:"nickname" default:"匿名用户"`
-	Content  string
+	Nickname string `default:"匿名用户" binding:"required"`
+	Content  string `binding:"required"`
 }
