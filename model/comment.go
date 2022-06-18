@@ -14,3 +14,7 @@ type Comment struct {
 	Content   string    `json:"content,omitempty" gorm:"comment:评论内容"`                  // 评论内容
 	CreatedAt time.Time `json:"createdAt,omitempty" gorm:"type:timestamp;comment:评论时间"` // 评论时间
 }
+
+func (c *Comment) TableName() string {
+	return "t_comment"
+}

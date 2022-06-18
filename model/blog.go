@@ -16,7 +16,11 @@ type Blog struct {
 	CreatedAt time.Time `json:"createdAt,omitempty" gorm:"type:timestamp;comment:创建时间"`     // 创建时间
 	UpdatedAt time.Time `json:"updatedAt,omitempty" gorm:"type:timestamp;comment:更新时间"`     // 更新时间
 	Comments  []Comment `json:"Comments,omitempty"`
-	Tags      []Tag     `json:"Tags,omitempty" gorm:"many2many:blog_tag;"`
+	Tags      []Tag     `json:"Tags,omitempty" gorm:"many2many:t_blog_tag;"`
+}
+
+func (b *Blog) TableName() string {
+	return "t_blog"
 }
 
 var BlogMapping = `

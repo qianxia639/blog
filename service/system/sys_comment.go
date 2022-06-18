@@ -27,8 +27,8 @@ func (*CommentService) Save(comment request.Comment) (*model.Comment, error) {
 
 // 删除父级评论
 func (*CommentService) DeleteParentComment(commentId uint64) error {
-	sql := `DELETE FROM qx_comment WHERE id = ?`
-	sql1 := `DELETE FROM qx_comment WHERE parent_id = ?`
+	sql := `DELETE FROM t_comment WHERE id = ?`
+	sql1 := `DELETE FROM t_comment WHERE parent_id = ?`
 	return global.QX_DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Debug().Exec(sql, commentId).Error; err != nil {
 			return err
@@ -43,6 +43,6 @@ func (*CommentService) DeleteParentComment(commentId uint64) error {
 
 // 删除子级评论
 func (*CommentService) DeleteChildComment(id uint64) error {
-	sql := `DELETE FROM qx_comment WHERE id = ?`
+	sql := `DELETE FROM t_comment WHERE id = ?`
 	return global.QX_DB.Debug().Exec(sql, id).Error
 }

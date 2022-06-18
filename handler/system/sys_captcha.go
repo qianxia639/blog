@@ -26,14 +26,15 @@ func (ch *CaptchaHandler) Captcha(ctx *gin.Context) {
 		global.QX_CONFIG.Captcha.MaxSkew,
 		global.QX_CONFIG.Captcha.DotCount)
 	captcha := base64Captcha.NewCaptcha(driver, store)
-	if id, b64s, err := captcha.Generate(); err != nil {
+	id, b64s, err := captcha.Generate()
+	if err != nil {
 		global.QX_LOG.Error("验证码获取失败!", err)
 		command.Failed(ctx, 500, "验证码获取失败")
 		return
-	} else {
-		command.Success(ctx, "验证码获取成功", gin.H{
-			"captchaId":   id,
-			"captchaData": b64s,
-		})
 	}
+	command.Success(ctx, "验证码获取成功", gin.H{
+		"captchaId":   id,
+		"captchaData": b64s,
+	})
+
 }

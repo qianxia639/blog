@@ -34,7 +34,7 @@ func (*CommentHandler) SaveComment(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
-	command.Success(ctx, "评论成功", c)
+	command.Success(ctx, "评论成功", gin.H{"comment": c})
 }
 
 // @Summary      删除父级评论

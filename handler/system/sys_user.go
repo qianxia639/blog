@@ -91,7 +91,7 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 		command.Failed(ctx, http.StatusInternalServerError, "获取身份认证失败")
 		return
 	}
-	command.Success(ctx, "登录成功", token)
+	command.Success(ctx, "登录成功", gin.H{"token": token})
 }
 
 // @Summary      获取用户信息
@@ -110,7 +110,7 @@ func (uh *UserHandler) UserInfo(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
-	command.Success(ctx, "获取成功", user)
+	command.Success(ctx, "获取成功", gin.H{"user": user})
 }
 
 // @Summary      登出

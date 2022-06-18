@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/qianxia/blog/global"
-	"github.com/qianxia/blog/initialize"
 	"github.com/qianxia/blog/routers"
 	"github.com/qianxia/blog/utils"
 )
@@ -42,7 +41,6 @@ func main() {
 
 	global.QX_DB = utils.Mysql(global.QX_CONFIG) // 初始化mysql
 	if global.QX_DB != nil {
-		initialize.RegisterTables(global.QX_DB) // 初始化表
 		db, _ := global.QX_DB.DB()
 		defer db.Close()
 	}

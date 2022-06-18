@@ -18,7 +18,7 @@ type TagHandler struct{}
 // @Router       /tag/list [get]
 func (th *TagHandler) TagList(ctx *gin.Context) {
 	tags, _ := tagService.List()
-	command.Success(ctx, "查询成功", tags)
+	command.Success(ctx, "查询成功", gin.H{"tags": tags})
 }
 
 // @Summary      新增标签

@@ -5,6 +5,7 @@ import (
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
+	"gorm.io/gorm"
 )
 
 type TagService struct{}
@@ -17,8 +18,8 @@ func (ts *TagService) List() ([]model.Tag, error) {
 
 func (ts *TagService) CreateTag(tagName string) error {
 	var tag model.Tag
-	global.QX_DB.Debug().Where("tag_name = ?", tagName).First(&tag)
-	if tag.TagName == tagName {
+	err := global.QX_DB.Debug().Where("tag_name = ?", tagName).First(&tag).Error
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New("该标签已存在")
 	}
 

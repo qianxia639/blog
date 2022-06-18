@@ -40,7 +40,7 @@ func (sh *SearchHandler) SearchBlog(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
-	command.Success(ctx, "搜索成功", blogs)
+	command.Success(ctx, "搜索成功", gin.H{"pageList": blogs})
 }
 
 // @Summary      查询个人博客
@@ -71,12 +71,12 @@ func (sh *SearchHandler) SearchPriBlog(ctx *gin.Context) {
 		pageSize = 10
 	}
 
-	m, err := searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNo, userId)
+	blogs, err := searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNo, userId)
 	if err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "搜索失败")
 		return
 	}
-	command.Success(ctx, "搜索成功", m)
+	command.Success(ctx, "搜索成功", gin.H{"pageList": blogs})
 
 }

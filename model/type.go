@@ -7,3 +7,7 @@ type Type struct {
 	Amount   uint32 `json:"amount,omitempty" gorm:"default:0;comment:分类对应的博客数量"`           // 分类对应的博客数量
 	Blogs    []Blog `json:"Blogs,omitempty"`
 }
+
+func (u *Type) TableName() string {
+	return "t_type"
+}

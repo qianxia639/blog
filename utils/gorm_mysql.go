@@ -29,7 +29,6 @@ func Mysql(y *config.Config) *gorm.DB {
 	}), &gorm.Config{
 		Logger: logger.Default,
 		NamingStrategy: schema.NamingStrategy{
-			TablePrefix:   "qx_",
 			SingularTable: true,
 		},
 		DisableForeignKeyConstraintWhenMigrating: true,

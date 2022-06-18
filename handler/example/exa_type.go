@@ -19,7 +19,7 @@ type TypeHandler struct{}
 // @Router       /type/listOrder [get]
 func (th *TypeHandler) ListOrder(ctx *gin.Context) {
 	types, _ := typeService.ListOrderByAmountDesc()
-	command.Success(ctx, "查询成功", types)
+	command.Success(ctx, "查询成功", gin.H{"types": types})
 }
 
 // @Summary      分类展示(不排序)
@@ -30,7 +30,7 @@ func (th *TypeHandler) ListOrder(ctx *gin.Context) {
 // @Router       /type/list [get]
 func (th *TypeHandler) TypeList(ctx *gin.Context) {
 	types, _ := typeService.List()
-	command.Success(ctx, "查询成功", types)
+	command.Success(ctx, "查询成功", gin.H{"types": types})
 }
 
 // @Summary      按分类查询博客分页
@@ -62,7 +62,7 @@ func (th *TypeHandler) TypePageList(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
-	command.Success(ctx, "查询成功", typeList)
+	command.Success(ctx, "查询成功", gin.H{"typeList": typeList})
 }
 
 // @Summary      新增分类

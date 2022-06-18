@@ -6,6 +6,7 @@ import (
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/response"
+	"gorm.io/gorm"
 )
 
 type TypeService struct{}
@@ -50,8 +51,8 @@ func (ts *TypeService) TypePageList(id, pageSize, pageNo int) (response.PageList
 func (ts *TypeService) CreateType(typeName string) error {
 
 	var tp model.Type
-	global.QX_DB.Debug().Where("type_name = ?", typeName).First(&tp)
-	if tp.TypeName == typeName {
+	err := global.QX_DB.Debug().Where("type_name = ?", typeName).First(&tp).Error
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New("该分类已存在")
 	}
 

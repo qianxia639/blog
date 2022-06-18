@@ -72,7 +72,7 @@ func (bh BlogHandler) BlogList(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
-	command.Success(ctx, "查询成功", blogs)
+	command.Success(ctx, "查询成功", gin.H{"blogs": blogs})
 }
 
 // @Summary      个人博客删除
@@ -153,7 +153,7 @@ func (bh BlogHandler) BlogPageList(ctx *gin.Context) {
 		return
 	}
 
-	command.Success(ctx, "查询成功", pageList)
+	command.Success(ctx, "查询成功", gin.H{"pageList": pageList})
 }
 
 // @Summary      最新推荐
@@ -169,7 +169,7 @@ func (bh BlogHandler) LatestList(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
-	command.Success(ctx, "查询成功", list)
+	command.Success(ctx, "查询成功", gin.H{"latestList": list})
 }
 
 // @Summary      获取博客信息
@@ -186,7 +186,7 @@ func (bh BlogHandler) GetBlogInfo(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	} else {
-		command.Success(ctx, "查询成功", blogs)
+		command.Success(ctx, "查询成功", gin.H{"blogs": blogs})
 	}
 }
 
