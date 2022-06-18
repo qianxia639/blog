@@ -169,7 +169,7 @@ func (bh BlogHandler) LatestList(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
-	command.Success(ctx, "查询成功", gin.H{"latestList": list})
+	command.Success(ctx, "查询成功", list)
 }
 
 // @Summary      获取博客信息
@@ -186,7 +186,7 @@ func (bh BlogHandler) GetBlogInfo(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	} else {
-		command.Success(ctx, "查询成功", gin.H{"blogs": blogs})
+		command.Success(ctx, "查询成功", blogs)
 	}
 }
 

@@ -59,15 +59,7 @@ func (e *ElasticSearchService) Update(index, id string, data map[string]interfac
 	}.Do(context.Background(), global.QX_ES)
 }
 
-func (e *ElasticSearchService) Search(index string, data map[string]interface{}) (*esapi.Response, error) {
-	return esapi.SearchRequest{
-		Index:          []string{index},
-		Body:           esutil.NewJSONReader(&data),
-		TrackTotalHits: true,
-	}.Do(context.Background(), global.QX_ES)
-}
-
-func (e *ElasticSearchService) Search2(index string, data bytes.Buffer) (*esapi.Response, error) {
+func (e *ElasticSearchService) Search(index string, data bytes.Buffer) (*esapi.Response, error) {
 	return esapi.SearchRequest{
 		Index:          []string{index},
 		Body:           &data,

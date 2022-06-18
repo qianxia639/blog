@@ -34,13 +34,13 @@ func (sh *SearchHandler) SearchBlog(ctx *gin.Context) {
 		pageNo = 10
 	}
 
-	if blogs, err := searchService.SearchBlog(query, pageNo, pageSize); err != nil {
+	blogs, err := searchService.SearchBlog(query, pageNo, pageSize)
+	if err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
-	} else {
-		command.Success(ctx, "搜索成功", blogs)
 	}
+	command.Success(ctx, "搜索成功", blogs)
 }
 
 // @Summary      查询个人博客
@@ -71,11 +71,12 @@ func (sh *SearchHandler) SearchPriBlog(ctx *gin.Context) {
 		pageSize = 10
 	}
 
-	if m, err := searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNo, userId); err != nil {
+	m, err := searchService.SearchPriBlog(title, startDate, endDate, pageSize, pageNo, userId)
+	if err != nil {
 		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "搜索失败")
 		return
-	} else {
-		command.Success(ctx, "搜索成功", m)
 	}
+	command.Success(ctx, "搜索成功", m)
+
 }

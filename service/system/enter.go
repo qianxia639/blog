@@ -4,4 +4,5 @@ type SystemGroup struct {
 	UserService
 	SearchService
 	ElasticSearchService
+	CommentService
 }

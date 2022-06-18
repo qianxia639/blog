@@ -26,7 +26,6 @@ func (*TemplateService) loadtemplate(tmplFile string) *template.Template {
 
 // 根据title进行搜索
 func (t *TemplateService) SearchBlogByTitle(title string, pageNo, pageSize int) (bytes.Buffer, error) {
-
 	tmpl := t.loadtemplate(config.Path("elasticsearch/search_title.json.tmpl"))
 	err := tmpl.Execute(&t.buf, map[string]interface{}{
 		"title": title,

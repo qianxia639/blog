@@ -7,11 +7,13 @@ type SystemRouterGroup struct {
 	SearchHandler
 	UploadHandler
 	CaptchaHandler
+	CommentHandler
 }
 
 var SystemRouterGroups = new(SystemRouterGroup)
 
 var (
-	userService   = service.ServiceGroups.SystemGroup.UserService
-	searchService = service.ServiceGroups.SystemGroup.SearchService
+	userService    = service.ServiceGroups.SystemGroup.UserService
+	searchService  = service.ServiceGroups.SystemGroup.SearchService
+	commentService = service.ServiceGroups.SystemGroup.CommentService
 )

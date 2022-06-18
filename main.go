@@ -11,7 +11,6 @@ import (
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/initialize"
 	"github.com/qianxia/blog/routers"
-	"github.com/qianxia/blog/service"
 	"github.com/qianxia/blog/utils"
 )
 
@@ -30,10 +29,10 @@ func main() {
 		defer global.QX_LOG.Sync()
 	}
 
-	global.QX_ES = utils.ElasticSearch()                                                            // 初始化elasticsearch
-	if err := service.ServiceGroups.SystemGroup.ElasticSearchService.IndicesMapping(); err != nil { // 初始化索引
-		global.QX_LOG.Fatal(err)
-	}
+	// global.QX_ES = utils.ElasticSearch()                                                            // 初始化elasticsearch
+	// if err := service.ServiceGroups.SystemGroup.ElasticSearchService.IndicesMapping(); err != nil { // 初始化索引
+	// 	global.QX_LOG.Fatal(err)
+	// }
 
 	global.QX_REDIS = utils.Redis() // 初始化redis
 

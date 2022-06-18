@@ -52,6 +52,6 @@ func (uh *UploadHandler) UploadMdFile(ctx *gin.Context) {
 		command.Failed(ctx, http.StatusInternalServerError, "上传失败")
 		return
 	} else {
-		ctx.SecureJSON(http.StatusOK, gin.H{"url": url})
+		ctx.SecureJSON(http.StatusOK, url)
 	}
 }
