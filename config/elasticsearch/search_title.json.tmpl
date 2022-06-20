@@ -1,19 +1,8 @@
 {
   "query": {
-    "bool": {
-      "must": [
-        {
-          "multi_match": {
-            "query": "{{.title}}",
-            "fields": ["title","content"]
-          }
-        }
-      ],
-      "filter": {
-        "term": {
-          "title": "{{.te}}"
-        }
-      }
+    "multi_match": {
+      "query": "{{.title}}",
+      "fields": ["title","content"]
     }
   },
   "highlight": {

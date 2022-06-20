@@ -2,11 +2,13 @@ package example
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/request"
 	"github.com/qianxia/blog/model/response"
+	"github.com/qianxia/blog/service/system"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -59,14 +61,11 @@ func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) error {
 		return err
 	}
 
-	// res, err := system.ElasticSearchServices.Insert("blog", fmt.Sprintf("%v", blog.Id), &blog)
-	// if res != nil {
-	// 	defer res.Body.Close()
-	// }
-
-	// if err != nil {
-	// 	return err
-	// }
+	res, err := system.ElasticSearchServices.Insert("blog", fmt.Sprintf("%v", blog.Id), &blog)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
 
 	// 提交事务
 	return tx.Commit().Error
@@ -146,15 +145,11 @@ func (bs *BlogService) Delete(id uint64) error {
 		return err
 	}
 
-	// res, err := system.ElasticSearchServices.Delete("blog", fmt.Sprintf("%v", id))
-	// if res != nil {
-	// 	defer res.Body.Close()
-	// }
-
-	// if err != nil {
-	// 	return err
-	// }
-
+	res, err := system.ElasticSearchServices.Delete("blog", fmt.Sprintf("%v", id))
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
 	// 提交事务
 	return tx.Commit().Error
 }
@@ -175,22 +170,18 @@ func (*BlogService) Update(ub request.UpdateBlog) error {
 		return err
 	}
 
-	// doc := map[string]interface{}{
-	// 	"doc": map[string]interface{}{
-	// 		"title":   ub.Title,
-	// 		"content": ub.Content,
-	// 		"flag":    ub.Flag,
-	// 	},
-	// }
-	// res, err := system.ElasticSearchServices.Update("blog", fmt.Sprintf("%v", ub.Id), doc)
-	// if res != nil {
-	// 	defer res.Body.Close()
-	// }
-
-	// if err != nil {
-	// 	return err
-	// }
-
+	doc := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"title":   ub.Title,
+			"content": ub.Content,
+			"flag":    ub.Flag,
+		},
+	}
+	res, err := system.ElasticSearchServices.Update("blog", fmt.Sprintf("%v", ub.Id), doc)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
 	return nil
 }
 
@@ -239,19 +230,15 @@ func (bs *BlogService) IncrViews(id uint64) error {
 		return err
 	}
 
-	// doc := map[string]interface{}{
-	// 	"doc": map[string]interface{}{
-	// 		"views": blog.Views + 1,
-	// 	},
-	// }
-	// res, err := system.ElasticSearchServices.Update("blog", fmt.Sprintf("%v", id), doc)
-
-	// if res != nil {
-	// 	defer res.Body.Close()
-	// }
-
-	// if err != nil {
-	// 	return err
-	// }
+	doc := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"views": blog.Views + 1,
+		},
+	}
+	res, err := system.ElasticSearchServices.Update("blog", fmt.Sprintf("%v", id), doc)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
 	return nil
 }

@@ -63,10 +63,10 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 	// 验证码校验
-	if !store.Verify(l.CaptchaId, l.Captcha, true) {
-		command.Failed(ctx, http.StatusUnauthorized, "验证码不正确或已失效")
-		return
-	}
+	// if !store.Verify(l.CaptchaId, l.Captcha, true) {
+	// 	command.Failed(ctx, http.StatusUnauthorized, "验证码不正确或已失效")
+	// 	return
+	// }
 
 	user, err := userService.Login(l)
 	if err != nil {

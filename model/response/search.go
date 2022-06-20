@@ -5,7 +5,7 @@ type Search struct {
 	UserId    interface{} `json:"userId"`
 	TypeId    interface{} `json:"typeId"`
 	TypeName  string      `json:"typeName"`
-	Username  string      `json:"username"`
+	Nickname  string      `json:"nickname"`
 	Title     interface{} `json:"title"`
 	Content   interface{} `json:"content"`
 	UpdatedAt interface{} `json:"updatedAt"`

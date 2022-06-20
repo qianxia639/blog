@@ -7,10 +7,10 @@ type Register struct {
 }
 
 type Login struct {
-	Username  string
-	Password  string
-	Captcha   string
-	CaptchaId string
+	Username string
+	Password string
+	// Captcha   string
+	// CaptchaId string
 }
 
 type UpdateUsername struct {

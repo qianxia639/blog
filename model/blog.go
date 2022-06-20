@@ -36,7 +36,7 @@ var BlogMapping = `
 		"typeId": {
 		  "type": "integer"
 		},
-		"username": {
+		"nickname": {
 		  "type": "keyword"
 		},
 		"typeName": {

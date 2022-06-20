@@ -29,7 +29,6 @@ func (t *TemplateService) SearchBlogByTitle(title string, pageNo, pageSize int) 
 	tmpl := t.loadtemplate(config.Path("elasticsearch/search_title.json.tmpl"))
 	err := tmpl.Execute(&t.buf, map[string]interface{}{
 		"title": title,
-		"te":    string([]rune(title)[0]),
 		"size":  pageSize,
 		"from":  (pageNo - 1) * pageSize,
 	})

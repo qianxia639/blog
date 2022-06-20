@@ -36,7 +36,6 @@ func (sh *SearchHandler) SearchBlog(ctx *gin.Context) {
 
 	blogs, err := searchService.SearchBlog(query, pageNo, pageSize)
 	if err != nil {
-		global.QX_LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}

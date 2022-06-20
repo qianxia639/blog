@@ -54,12 +54,11 @@ func (s *SearchService) SearchBlog(title string, pageNo, pageSize int) (*respons
 
 	buf, err := TemplateServices.SearchBlogByTitle(title, pageNo, pageSize)
 	if err != nil {
-		global.QX_LOG.Errorf("Error getting response: %s", err)
+		global.QX_LOG.Errorf("Error read template file: %s", err)
 		return nil, err
 	}
 
 	res, err := ElasticSearchServices.Search("blog", buf)
-
 	if err != nil {
 		global.QX_LOG.Errorf("Error getting response: %s", err)
 		return nil, err
@@ -115,6 +114,7 @@ func (s *SearchService) SearchBlog(title string, pageNo, pageSize int) (*respons
 
 	resp, err := s.eachHits(total, elasticsearchConfig.Hits.Hits)
 	if err != nil {
+		global.QX_LOG.Errorf("Error each Hits: %s", err)
 		return nil, err
 	}
 
@@ -148,17 +148,20 @@ func (s *SearchService) SearchPriBlog(title, startDate, endDate string, pageSize
 	if title != "" && startDate != "" && endDate != "" {
 		s.buf, err = TemplateServices.SearchBlogByTitleAndTime(title, startDate, endDate, pageSize, pageNo, userId)
 		if err != nil {
+			global.QX_LOG.Errorf("Error read template file: %s", err)
 			return nil, err
 		}
 	} else {
 		s.buf, err = TemplateServices.SearchBlogByTitleOrTime(title, startDate, endDate, pageSize, pageNo, userId)
 		if err != nil {
+			global.QX_LOG.Errorf("Error read template file: %s", err)
 			return nil, err
 		}
 	}
 
 	res, err := ElasticSearchServices.Search("blog", s.buf)
 	if err != nil {
+		global.QX_LOG.Errorf("Error search: %s", err)
 		return nil, err
 	}
 	defer res.Body.Close()
@@ -173,6 +176,7 @@ func (s *SearchService) SearchPriBlog(title, startDate, endDate string, pageSize
 
 	resp, err := s.eachHits(total, elasticsearchConfig.Hits.Hits)
 	if err != nil {
+		global.QX_LOG.Errorf("Error each Hits: %s", err)
 		return nil, err
 	}
 
@@ -198,24 +202,24 @@ func (s *SearchService) eachHits(total int64, hits []command.Hit) ([]response.Se
 
 		if hit.Highlight["content"] == nil {
 			content = hit.Source["content"]
+		} else {
+			content = hit.Highlight["content"]
 		}
-		content = hit.Highlight["content"]
 
 		if hit.Highlight["title"] == nil {
 			title = hit.Source["title"]
+		} else {
+			title = hit.Highlight["title"]
 		}
-		title = hit.Highlight["title"]
 
 		err := json.NewEncoder(&s.buf).Encode(hit.Source)
 		if err != nil {
-			global.QX_LOG.Errorf("Error parsing the response body: %s", err)
 			return nil, err
 		}
 
 		var blog response.Search
-		err = json.Unmarshal(s.buf.Bytes(), &blog)
+		err = json.NewDecoder(&s.buf).Decode(&blog)
 		if err != nil {
-			global.QX_LOG.Errorf("Error parsing the response body: %s", err)
 			return nil, err
 		}
 		resp = append(resp, response.Search{
@@ -224,7 +228,7 @@ func (s *SearchService) eachHits(total int64, hits []command.Hit) ([]response.Se
 			TypeId:    blog.TypeId,
 			Title:     title,
 			Content:   content,
-			Username:  blog.Username,
+			Nickname:  blog.Nickname,
 			TypeName:  blog.TypeName,
 			UpdatedAt: blog.UpdatedAt,
 			Tags:      blog.Tags,
