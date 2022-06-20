@@ -72,3 +72,21 @@ func (*CommentHandler) DeleteChildComment(ctx *gin.Context) {
 	}
 	command.Success(ctx, "评论删除成功", nil)
 }
+
+// @Summary      评论列表
+// @Tags         System/Comment
+// @Accept       json
+// @Produce      json
+// @Param        id query int true "Get Comment List"
+// @Success 	 200  {object}  []model.Comment
+// @Router       /comment/list [get]
+func (*CommentHandler) CommentList(ctx *gin.Context) {
+	id, _ := strconv.ParseUint(ctx.Query("id"), 10, 64)
+	comments, err := commentService.List(id)
+	if err != nil {
+		global.QX_LOG.Error(err)
+		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
+		return
+	}
+	command.Success(ctx, "查询成功", gin.H{"comments": comments})
+}

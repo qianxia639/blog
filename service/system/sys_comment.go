@@ -46,3 +46,9 @@ func (*CommentService) DeleteChildComment(id uint64) error {
 	sql := `DELETE FROM t_comment WHERE id = ?`
 	return global.QX_DB.Debug().Exec(sql, id).Error
 }
+
+func (*CommentService) List(id uint64) ([]model.Comment, error) {
+	var c []model.Comment
+	err := global.QX_DB.Debug().Where("blog_id = ?", id).Find(&c).Error
+	return c, err
+}

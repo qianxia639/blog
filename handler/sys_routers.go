@@ -60,6 +60,7 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		commentGroup.POST("/save", commentRouterApi.SaveComment)             // 添加评论
 		commentGroup.DELETE("/parent", commentRouterApi.DeleteParentComment) // 删除父级评论
 		commentGroup.DELETE("/child", commentRouterApi.DeleteChildComment)   // 删除子级平论
+		commentGroup.GET("/list", commentRouterApi.CommentList)              // 评论列表
 	}
 
 	return e

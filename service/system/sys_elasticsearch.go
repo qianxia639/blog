@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/elastic/go-elasticsearch/v7/esapi"
@@ -23,7 +24,7 @@ func (e *ElasticSearchService) IndicesMapping() error {
 		return errors.New(fmt.Sprintf("Error: Indices Exists: %s", err))
 	}
 
-	if resp.StatusCode == 404 {
+	if resp.StatusCode == http.StatusNotFound {
 		global.QX_ES.Indices.Create(
 			"blog",
 			global.QX_ES.Indices.Create.WithBody(strings.NewReader(model.BlogMapping)),
