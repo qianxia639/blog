@@ -66,49 +66,11 @@ func (s *SearchService) SearchBlog(title string, pageNo, pageSize int) (*respons
 
 	defer res.Body.Close()
 
-	// var r map[string]interface{}
 	var elasticsearchConfig command.ElasticsearchConfig
 	if err := json.NewDecoder(res.Body).Decode(&elasticsearchConfig); err != nil {
 		global.QX_LOG.Errorf("Error parsing the response body: %s", err)
 		return nil, err
 	}
-
-	// log.Printf("elasticsearch resposne %v\n", es)
-
-	// 将total和dataList封装到pageList中
-	// total := int64(r["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64))
-
-	// resp := make([]response.Search, 0, total)
-
-	// // 遍历返回信息中hits的hits
-	// for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
-	// 	var title interface{}
-	// 	var content interface{}
-
-	// 	if hit.(map[string]interface{})["highlight"].(map[string]interface{})["title"] == nil {
-	// 		title = hit.(map[string]interface{})["_source"].(map[string]interface{})["title"]
-	// 	} else {
-	// 		title = hit.(map[string]interface{})["highlight"].(map[string]interface{})["title"].([]interface{})[0]
-	// 	}
-
-	// 	if hit.(map[string]interface{})["highlight"].(map[string]interface{})["content"] == nil {
-	// 		content = hit.(map[string]interface{})["_source"].(map[string]interface{})["content"]
-	// 	} else {
-	// 		content = hit.(map[string]interface{})["highlight"].(map[string]interface{})["content"].([]interface{})[0]
-	// 	}
-
-	// 	resp = append(resp, response.Search{
-	// 		Id:        hit.(map[string]interface{})["_source"].(map[string]interface{})["id"],
-	// 		UserId:    hit.(map[string]interface{})["_source"].(map[string]interface{})["userId"],
-	// 		TypeId:    hit.(map[string]interface{})["_source"].(map[string]interface{})["typeId"],
-	// 		TypeName:  hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
-	// 		Username:  hit.(map[string]interface{})["_source"].(map[string]interface{})["typeName"].(string),
-	// 		Title:     title,
-	// 		Content:   content,
-	// 		UpdatedAt: hit.(map[string]interface{})["_source"].(map[string]interface{})["updatedAt"],
-	// 		Tags:      hit.(map[string]interface{})["_source"].(map[string]interface{})["Tags"],
-	// 	})
-	// }
 
 	total := elasticsearchConfig.Hits.Total.Value
 
@@ -181,7 +143,6 @@ func (s *SearchService) SearchPriBlog(title, startDate, endDate string, pageSize
 	}
 
 	pageList := s.result(total, pageNo, pageSize, resp)
-
 	return pageList, err
 }
 
