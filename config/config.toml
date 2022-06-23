@@ -21,6 +21,11 @@ port = 6379
 db = 0
 password = ""
 
+[elasticsearch]
+addr = [
+    "localhost:9200"
+]
+
 [qiniu]
 access_key = ""
 secret_key = ""

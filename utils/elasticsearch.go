@@ -6,7 +6,10 @@ import (
 )
 
 func ElasticSearch() *elasticsearch.Client {
-	client, err := elasticsearch.NewDefaultClient()
+
+	client, err := elasticsearch.NewClient(elasticsearch.Config{
+		Addresses: global.QX_CONFIG.ElasticSearch.Addr,
+	})
 	if err != nil {
 		global.QX_LOG.Fatalf("ElasticSearch Connection Error: %v", err)
 		return nil

@@ -22,6 +22,9 @@ type Config struct {
 		Host     string `mapstructure:"host"`
 		Password string `mapstructure:"password"`
 	}
+	ElasticSearch struct {
+		Addr []string `mapstructure:"addr"`
+	}
 	Qiniu struct {
 		AccessKey string `mapstructure:"access_key"`
 		SecretKey string `mapstructure:"secret_key"`
