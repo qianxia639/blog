@@ -9,17 +9,16 @@ import (
 
 type Option func(*gin.Engine) *gin.Engine
 
-var options = []Option{}
-
 // 注册路由配置
-func include(opts ...Option) {
+func include(opts ...Option) (options []Option) {
 	options = append(options, opts...)
+	return
 }
 
 // 初始化
 func Router() *gin.Engine {
 	// 加载路由配置
-	include(handler.ExampleRouters, handler.SystemRouters)
+	options := include(handler.ExampleRouters, handler.SystemRouters)
 
 	r := gin.Default()
 	gin.SetMode(gin.ReleaseMode)

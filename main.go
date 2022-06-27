@@ -53,8 +53,11 @@ func main() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
+
 	go func() {
-		global.QX_LOG.Fatal(server.ListenAndServe())
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			global.QX_LOG.Fatalf("Error Listen Server: %v\n", err)
+		}
 	}()
 
 	quit := make(chan os.Signal)
@@ -62,5 +65,8 @@ func main() {
 	<-quit
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	global.QX_LOG.Fatal(server.Shutdown(ctx))
+	if err := server.Shutdown(ctx); err != nil {
+		global.QX_LOG.Fatalf("Error Server Shutdown: %v\n", err)
+	}
+
 }

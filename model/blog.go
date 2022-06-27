@@ -1,7 +1,5 @@
 package model
 
-import "time"
-
 // 博客表
 type Blog struct {
 	Id        uint64    `json:"id,omitempty" gorm:"primaryKey;comment:博客Id"`                // 博客Id
@@ -13,8 +11,8 @@ type Blog struct {
 	Content   string    `json:"content,omitempty" gorm:"type:longtext;not null;comment:内容"` // 内容
 	Flag      string    `json:"flag,omitempty" gorm:"type:varchar(10);not null;comment:标记"` // 标记
 	Views     uint32    `json:"views,omitempty" gorm:"default:0;comment:浏览次数"`              // 浏览次数
-	CreatedAt time.Time `json:"createdAt,omitempty" gorm:"type:timestamp;comment:创建时间"`     // 创建时间
-	UpdatedAt time.Time `json:"updatedAt,omitempty" gorm:"type:timestamp;comment:更新时间"`     // 更新时间
+	CreatedAt int64     `json:"createdAt,omitempty" gorm:"autoCreateTime,comment:创建时间"`     // 创建时间
+	UpdatedAt int64     `json:"updatedAt,omitempty" gorm:"autoCreateTime,comment:更新时间"`     // 更新时间
 	Comments  []Comment `json:"Comments,omitempty"`
 	Tags      []Tag     `json:"Tags,omitempty" gorm:"many2many:t_blog_tag;"`
 }
@@ -57,10 +55,10 @@ var BlogMapping = `
 		  "type": "integer"
 		},
 		"createdAt": {
-		  "type": "date"
+		  "type": "integer"
 		},
 		"updatedAt": {
-		  "type": "date"
+		  "type": "integer"
 		}
 	  }
 	}

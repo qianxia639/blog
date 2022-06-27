@@ -1,16 +1,14 @@
 package response
 
 import (
-	"time"
-
 	"github.com/qianxia/blog/model"
 )
 
 type Blog struct {
-	Id        uint64    `json:"id,omitempty"`
-	Title     string    `json:"title,omitempty"`
-	Views     uint32    `json:"views"`
-	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	Id        uint64 `json:"id,omitempty"`
+	Title     string `json:"title,omitempty"`
+	Views     uint32 `json:"views"`
+	UpdatedAt int64  `json:"updatedAt,omitempty"`
 }
 
 type BlogResult struct {
@@ -22,6 +20,6 @@ type BlogResult struct {
 	Title     string      `json:"title,omitempty"`
 	Avatar    string      `json:"avatar,omitempty"`
 	Flag      string      `json:"flag,omitempty"`
-	UpdatedAt time.Time   `json:"updatedAt,omitempty"`
+	UpdatedAt int64       `json:"updatedAt,omitempty"`
 	Tags      []model.Tag `json:"Tags,omitempty"`
 }
