@@ -39,13 +39,9 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 
 	//  ========== search router group ==========
 	searchGroup := e.Group("/search")
-	searchRouter := e.Group("/search").Use(middleware.Authorization())
 	searchRouterApi := system.SystemRouterGroups.SearchHandler
 	{
 		searchGroup.GET("/blog", searchRouterApi.SearchBlog) // 搜索所有博客
-	}
-	{
-		searchRouter.GET("/priblog", searchRouterApi.SearchPriBlog) // 搜索个人博客列表
 	}
 
 	// ========== upload router group ==========

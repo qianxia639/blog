@@ -15,43 +15,6 @@ type SearchService struct {
 
 // 根据title搜索博客
 func (s *SearchService) SearchBlog(title string, pageNo, pageSize int) (*response.PageList, error) {
-	// var pageList response.PageList
-	// pageList.Total = total
-	// pageList.DataList = blogs
-
-	// query := map[string]interface{}{
-	// 	"query": map[string]interface{}{
-	// 		"bool": map[string]interface{}{
-	// 			"must": map[string]interface{}{
-	// 				"multi_match": map[string]interface{}{
-	// 					"query":  title,
-	// 					"fields": []string{"title", "content"},
-	// 				},
-	// 			},
-	// 			"filter": map[string]interface{}{
-	// 				"term": map[string]interface{}{
-	// 					"title": string([]rune(title)[0]),
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// 	"highlight": map[string]interface{}{
-	// 		"pre_tags":  "<span style='color:#07b9ff'>",
-	// 		"post_tags": "</span>",
-	// 		"fields": map[string]interface{}{
-	// 			"title":       map[string]interface{}{},
-	// 			"content": 	   map[string]interface{}{},
-	// 		},
-	// 	},
-	// 	"from": (pageNo - 1) * pageSize,
-	// 	"size": pageSize,
-	// 	"sort": map[string]interface{}{
-	// 		"views": map[string]interface{}{
-	// 			"order": "desc",
-	// 		},
-	// 	},
-	// }
-
 	buf, err := TemplateServices.SearchBlogByTitle(title, pageNo, pageSize)
 	if err != nil {
 		global.QX_LOG.Errorf("Error read template file: %s", err)
@@ -83,67 +46,6 @@ func (s *SearchService) SearchBlog(title string, pageNo, pageSize int) (*respons
 	pageList := s.result(total, pageNo, pageSize, resp)
 
 	return pageList, nil
-}
-
-/**
-* 根据title和时间进行搜索
- */
-func (s *SearchService) SearchPriBlog(title, startDate, endDate string, pageSize, pageNo int, userId uint64) (*response.PageList, error) {
-	// var blogs []response.Blog
-	// var total int64
-	var err error
-
-	// if title != "" && startDate == "" && endDate == "" {
-	// 	err = global.QX_DB.Debug().Model(&model.Blog{}).Where("title LIKE ? AND user_id = ?", "%"+title+"%", userId).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
-	// } else if title == "" && startDate != "" && endDate != "" {
-	// 	err = global.QX_DB.Debug().Model(&model.Blog{}).Where("updated_at BETWEEN ? AND ?", startDate, endDate).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
-	// } else if title == "" && startDate == "" && endDate == "" {
-	// 	err = global.QX_DB.Debug().Model(&model.Blog{}).Where("user_id = ?", userId).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
-	// } else {
-	// 	err = global.QX_DB.Debug().Model(&model.Blog{}).Scopes(func(db *gorm.DB) *gorm.DB {
-	// 		return db.Where("title LIKE ? AND user_id = ?", "%"+title+"%", userId)
-	// 	}, func(db *gorm.DB) *gorm.DB {
-	// 		return db.Where("updated_at BETWEEN ? AND ?", startDate, endDate)
-	// 	}).Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&blogs).Count(&total).Error
-	// }
-
-	if title != "" && startDate != "" && endDate != "" {
-		s.buf, err = TemplateServices.SearchBlogByTitleAndTime(title, startDate, endDate, pageSize, pageNo, userId)
-		if err != nil {
-			global.QX_LOG.Errorf("Error read template file: %s", err)
-			return nil, err
-		}
-	} else {
-		s.buf, err = TemplateServices.SearchBlogByTitleOrTime(title, startDate, endDate, pageSize, pageNo, userId)
-		if err != nil {
-			global.QX_LOG.Errorf("Error read template file: %s", err)
-			return nil, err
-		}
-	}
-
-	res, err := ElasticSearchServices.Search("blog", s.buf)
-	if err != nil {
-		global.QX_LOG.Errorf("Error search: %s", err)
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	var elasticsearchConfig command.ElasticsearchConfig
-	if err := json.NewDecoder(res.Body).Decode(&elasticsearchConfig); err != nil {
-		global.QX_LOG.Errorf("Error parsing the response body: %s", err)
-		return nil, err
-	}
-
-	total := elasticsearchConfig.Hits.Total.Value
-
-	resp, err := s.eachHits(total, elasticsearchConfig.Hits.Hits)
-	if err != nil {
-		global.QX_LOG.Errorf("Error each Hits: %s", err)
-		return nil, err
-	}
-
-	pageList := s.result(total, pageNo, pageSize, resp)
-	return pageList, err
 }
 
 func (*SearchService) result(total int64, pageNo, pageSize int, data interface{}) *response.PageList {

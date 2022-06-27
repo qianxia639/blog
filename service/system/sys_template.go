@@ -34,31 +34,3 @@ func (t *TemplateService) SearchBlogByTitle(title string, pageNo, pageSize int) 
 	})
 	return t.buf, err
 }
-
-// 根据title OR time进行过搜索
-func (t *TemplateService) SearchBlogByTitleOrTime(title, startDate, endDate string, pageSize, pageNo int, userId uint64) (bytes.Buffer, error) {
-	tmpl := t.loadtemplate(config.Path("elasticsearch/search_title_time.json.tmpl"))
-	err := tmpl.Execute(&t.buf, map[string]interface{}{
-		"userId":    userId,
-		"title":     title,
-		"startDate": startDate,
-		"endDate":   endDate,
-		"size":      pageSize,
-		"from":      (pageNo - 1) * pageSize,
-	})
-	return t.buf, err
-}
-
-// 根据title AND time进行过搜索
-func (t *TemplateService) SearchBlogByTitleAndTime(title, startDate, endDate string, pageSize, pageNo int, userId uint64) (bytes.Buffer, error) {
-	tmpl := t.loadtemplate(config.Path("elasticsearch/search_title_time_all.json.tmpl"))
-	err := tmpl.Execute(&t.buf, map[string]interface{}{
-		"userId":    userId,
-		"title":     title,
-		"startDate": startDate,
-		"endDate":   endDate,
-		"size":      pageSize,
-		"from":      (pageNo - 1) * pageSize,
-	})
-	return t.buf, err
-}
