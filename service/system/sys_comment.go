@@ -22,14 +22,14 @@ func (*CommentService) Save(comment request.Comment) (*model.Comment, error) {
 		c.ParentId = comment.ParentId
 	}
 
-	return c, global.QX_DB.Debug().Create(c).Error
+	return c, global.DB.Debug().Create(c).Error
 }
 
 // 删除父级评论
 func (*CommentService) DeleteParentComment(commentId uint64) error {
 	sql := `DELETE FROM t_comment WHERE id = ?`
 	sql1 := `DELETE FROM t_comment WHERE parent_id = ?`
-	return global.QX_DB.Transaction(func(tx *gorm.DB) error {
+	return global.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Debug().Exec(sql, commentId).Error; err != nil {
 			return err
 		}
@@ -44,11 +44,11 @@ func (*CommentService) DeleteParentComment(commentId uint64) error {
 // 删除子级评论
 func (*CommentService) DeleteChildComment(id uint64) error {
 	sql := `DELETE FROM t_comment WHERE id = ?`
-	return global.QX_DB.Debug().Exec(sql, id).Error
+	return global.DB.Debug().Exec(sql, id).Error
 }
 
 func (*CommentService) List(id uint64) ([]model.Comment, error) {
 	var c []model.Comment
-	err := global.QX_DB.Debug().Where("blog_id = ?", id).Find(&c).Error
+	err := global.DB.Debug().Where("blog_id = ?", id).Find(&c).Error
 	return c, err
 }

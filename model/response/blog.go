@@ -4,13 +4,6 @@ import (
 	"github.com/qianxia/blog/model"
 )
 
-type Blog struct {
-	Id        uint64 `json:"id,omitempty"`
-	Title     string `json:"title,omitempty"`
-	Views     uint32 `json:"views"`
-	UpdatedAt int64  `json:"updatedAt,omitempty"`
-}
-
 type BlogResult struct {
 	Id        uint64      `json:"id,omitempty"`
 	Views     uint32      `json:"views,omitempty"`

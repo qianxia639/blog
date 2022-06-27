@@ -26,7 +26,7 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 	_ = ctx.ShouldBindJSON(&r)
 	// 参数校验
 	if err := utils.Verify(r); err != nil {
-		global.QX_LOG.Errorf("parame bind err: %v", err)
+		global.LOG.Errorf("parame bind err: %v", err)
 		command.Failed(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -58,7 +58,7 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 	_ = ctx.ShouldBindJSON(&l)
 	// 参数校验
 	if err := utils.Verify(l); err != nil {
-		global.QX_LOG.Errorf("parame bind err:", err)
+		global.LOG.Errorf("parame bind err:", err)
 		command.Failed(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -87,7 +87,7 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 	}
 	token, err := utils.CreateToken(bc)
 	if err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "获取身份认证失败")
 		return
 	}
@@ -106,7 +106,7 @@ func (uh *UserHandler) UserInfo(ctx *gin.Context) {
 	id := utils.GetUserId(ctx)
 	user, err := userService.GetUserInfo(id, uuid)
 	if err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
@@ -135,7 +135,7 @@ func (uh *UserHandler) Logout(ctx *gin.Context) {
 func (uh *UserHandler) UpdateNickname(ctx *gin.Context) {
 	nickname := ctx.PostForm("nickname")
 	if nickname == "" {
-		global.QX_LOG.Error("nickname cannot be empty")
+		global.LOG.Error("nickname cannot be empty")
 		command.Failed(ctx, http.StatusBadRequest, "nickname cannot be empty")
 		return
 	}
@@ -143,7 +143,7 @@ func (uh *UserHandler) UpdateNickname(ctx *gin.Context) {
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
 	if err := userService.UpdateNickname(nickname, id, uuid); err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -163,7 +163,7 @@ func (uh *UserHandler) UpdatePwd(ctx *gin.Context) {
 
 	_ = ctx.ShouldBindJSON(&u)
 	if err := utils.Verify(&u); err != nil {
-		global.QX_LOG.Errorf("parame bind err:", err)
+		global.LOG.Errorf("parame bind err:", err)
 		command.Failed(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -195,13 +195,13 @@ func (uh *UserHandler) ForgetPwd(ctx *gin.Context) {
 
 	// 参数校验
 	if err := utils.Verify(f); err != nil {
-		global.QX_LOG.Errorf("parame bind err:", err)
+		global.LOG.Errorf("parame bind err:", err)
 		command.Failed(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := userService.ForgetPwd(f); err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -220,14 +220,14 @@ func (uh *UserHandler) UpdateAvatar(ctx *gin.Context) {
 
 	file, fileHeader, err := ctx.Request.FormFile("file")
 	if err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
 
 	url, err := utils.UploadFile(file, fileHeader.Size)
 	if err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}

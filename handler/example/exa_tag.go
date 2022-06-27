@@ -33,13 +33,13 @@ func (th *TagHandler) CreateTag(ctx *gin.Context) {
 
 	tagName := ctx.PostForm("tagName")
 	if tagName == "" {
-		global.QX_LOG.Error("tagName cannot be empty")
+		global.LOG.Error("tagName cannot be empty")
 		command.Failed(ctx, http.StatusBadRequest, "tagName cannot be empty")
 		return
 	}
 
 	if err := tagService.CreateTag(tagName); err != nil {
-		global.QX_LOG.Errorf("insert tag err: %v", err)
+		global.LOG.Errorf("insert tag err: %v", err)
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}

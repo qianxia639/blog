@@ -9,8 +9,8 @@ import (
 
 func Redis() *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%v", global.QX_CONFIG.Redis.Host, global.QX_CONFIG.Redis.Port),
-		Password: global.QX_CONFIG.Redis.Password,
-		DB:       global.QX_CONFIG.Redis.DB,
+		Addr:     fmt.Sprintf("%s:%v", global.CONFIG.Redis.Host, global.CONFIG.Redis.Port),
+		Password: global.CONFIG.Redis.Password,
+		DB:       global.CONFIG.Redis.DB,
 	})
 }

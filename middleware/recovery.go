@@ -28,14 +28,14 @@ func Recovery() gin.HandlerFunc {
 
 				httpRequest, _ := httputil.DumpRequest(ctx.Request, false)
 				if brokenPipe {
-					global.QX_LOG.Error(ctx.Request.URL.Path,
+					global.LOG.Error(ctx.Request.URL.Path,
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)))
 					_ = ctx.Error(err.(error))
 					ctx.Abort()
 					return
 				} else {
-					global.QX_LOG.Errorf("[Recovery] %s panic recovered:%v%v",
+					global.LOG.Errorf("[Recovery] %s panic recovered:%v%v",
 						timeFormat(time.Now()), zap.Any("error", err), zap.String("request", string(httpRequest)))
 				}
 				ctx.AbortWithStatus(http.StatusInternalServerError)

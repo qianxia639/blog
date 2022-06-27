@@ -58,7 +58,7 @@ func (th *TypeHandler) TypePageList(ctx *gin.Context) {
 
 	typeList, err := typeService.TypePageList(id, pageSize, pageNo)
 	if err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
@@ -77,13 +77,13 @@ func (th *TypeHandler) CreateType(ctx *gin.Context) {
 
 	typeName := ctx.PostForm("typeName")
 	if typeName == "" {
-		global.QX_LOG.Error("typeName cannot be empty")
+		global.LOG.Error("typeName cannot be empty")
 		command.Failed(ctx, http.StatusBadRequest, "typeName cannot be empty")
 		return
 	}
 
 	if err := typeService.CreateType(typeName); err != nil {
-		global.QX_LOG.Errorf("insert type err: %v", err)
+		global.LOG.Errorf("insert type err: %v", err)
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}

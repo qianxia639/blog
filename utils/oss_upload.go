@@ -11,9 +11,9 @@ import (
 
 // 文件上传(七牛云存储)
 func UploadFile(file multipart.File, fileSize int64) (string, error) {
-	mac := qbox.NewMac(global.QX_CONFIG.Qiniu.AccessKey, global.QX_CONFIG.Qiniu.SecretKey)
+	mac := qbox.NewMac(global.CONFIG.Qiniu.AccessKey, global.CONFIG.Qiniu.SecretKey)
 	putPolicy := storage.PutPolicy{
-		Scope: global.QX_CONFIG.Qiniu.Bucket,
+		Scope: global.CONFIG.Qiniu.Bucket,
 	}
 
 	upToken := putPolicy.UploadToken(mac)
@@ -32,6 +32,6 @@ func UploadFile(file multipart.File, fileSize int64) (string, error) {
 	if err := formUpload.PutWithoutKey(context.Background(), &ret, upToken, file, fileSize, nil); err != nil {
 		return "", err
 	} else {
-		return global.QX_CONFIG.Qiniu.ServerUrl + "/" + ret.Key, nil
+		return global.CONFIG.Qiniu.ServerUrl + "/" + ret.Key, nil
 	}
 }

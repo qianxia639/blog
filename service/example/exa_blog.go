@@ -2,13 +2,11 @@ package example
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/request"
 	"github.com/qianxia/blog/model/response"
-	"github.com/qianxia/blog/service/system"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -22,17 +20,17 @@ func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) error {
 
 	// 根据userId查询用户信息
 	var user model.User
-	if err := global.QX_DB.Debug().Where("id = ?", userId).First(&user).Error; err != nil {
+	if err := global.DB.Debug().Where("id = ?", userId).First(&user).Error; err != nil {
 		return err
 	}
 	// 根据post.tags[]的值查询对应的id
 	tags := make([]model.Tag, 3)
-	if err := global.QX_DB.Debug().Where("tag_name in (?)", saveBlog.Tags).Find(&tags).Error; err != nil {
+	if err := global.DB.Debug().Where("tag_name in (?)", saveBlog.Tags).Find(&tags).Error; err != nil {
 		return err
 	}
 	// 根据typeId查询
 	var tp model.Type
-	if err := global.QX_DB.Debug().Model(&model.Type{}).Where("id = ?", saveBlog.TypeId).First(&tp).Error; err != nil {
+	if err := global.DB.Debug().Model(&model.Type{}).Where("id = ?", saveBlog.TypeId).First(&tp).Error; err != nil {
 		return err
 	}
 
@@ -49,7 +47,7 @@ func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) error {
 	}
 
 	// 开启事务
-	tx := global.QX_DB.Begin()
+	tx := global.DB.Begin()
 	// 插入博客表数据以及博客标签中间表数据
 	if err := tx.Debug().Create(&blog).Error; err != nil {
 		tx.Rollback()
@@ -61,12 +59,6 @@ func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) error {
 		return err
 	}
 
-	res, err := system.ElasticSearchServices.Insert("blog", fmt.Sprintf("%v", blog.Id), &blog)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
 	// 提交事务
 	return tx.Commit().Error
 }
@@ -75,11 +67,11 @@ func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) error {
 * 个人博客列表展示
  */
 func (bs *BlogService) List(id uint64, pageNo, pageSize int) (*response.PageList, error) {
-	var blogs []response.Blog
+	var blogs []model.Blog
 	var total int64
 
 	offset := (pageNo - 1) * pageSize
-	err := global.QX_DB.Debug().Model(&model.Blog{}).Where("user_id = ?", id).Offset(offset).Limit(pageSize).Find(&blogs).Count(&total).Error
+	err := global.DB.Debug().Where("user_id = ?", id).Offset(offset).Limit(pageSize).Find(&blogs).Count(&total).Error
 
 	var pageList response.PageList
 
@@ -97,7 +89,7 @@ func (bs *BlogService) List(id uint64, pageNo, pageSize int) (*response.PageList
  */
 func (bs *BlogService) LatestList() ([]model.Blog, error) {
 	list := make([]model.Blog, 5)
-	err := global.QX_DB.Debug().Select("id,title").Order("updated_at DESC").Limit(5).Find(&list).Error
+	err := global.DB.Debug().Select("id,title").Order("updated_at DESC").Limit(5).Find(&list).Error
 
 	return list, err
 }
@@ -111,7 +103,7 @@ func (bs *BlogService) PageList(pageSize, pageNo int) (response.PageList, error)
 		blogs []model.Blog
 	)
 	offset := (pageNo - 1) * pageSize
-	err := global.QX_DB.Debug().Preload("Tags").Offset(offset).Limit(pageSize).Find(&blogs).Count(&total).Error
+	err := global.DB.Debug().Preload("Tags").Offset(offset).Limit(pageSize).Find(&blogs).Count(&total).Error
 
 	// 将分页信息和dataList封装到pageList中
 	var pageList response.PageList
@@ -129,12 +121,12 @@ func (bs *BlogService) PageList(pageSize, pageNo int) (response.PageList, error)
  */
 func (bs *BlogService) Delete(id uint64) error {
 	var blog model.Blog
-	if err := global.QX_DB.Debug().Where("id = ?", id).First(&blog).Error; err != nil {
+	if err := global.DB.Debug().Where("id = ?", id).First(&blog).Error; err != nil {
 		return err
 	}
 
 	// 开启事务
-	tx := global.QX_DB.Begin()
+	tx := global.DB.Begin()
 	if err := tx.Debug().Select(clause.Associations).Delete(&blog).Error; err != nil {
 		tx.Rollback() // // 事务回滚
 		return err
@@ -145,11 +137,6 @@ func (bs *BlogService) Delete(id uint64) error {
 		return err
 	}
 
-	res, err := system.ElasticSearchServices.Delete("blog", fmt.Sprintf("%v", id))
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
 	// 提交事务
 	return tx.Commit().Error
 }
@@ -165,23 +152,10 @@ func (*BlogService) Update(ub request.UpdateBlog) error {
 		Flag:    ub.Flag,
 	}
 
-	err := global.QX_DB.Debug().Where("id = ?", ub.Id).Updates(blog).Error
+	err := global.DB.Debug().Where("id = ?", ub.Id).Updates(blog).Error
 	if err != nil {
 		return err
 	}
-
-	doc := map[string]interface{}{
-		"doc": map[string]interface{}{
-			"title":   ub.Title,
-			"content": ub.Content,
-			"flag":    ub.Flag,
-		},
-	}
-	res, err := system.ElasticSearchServices.Update("blog", fmt.Sprintf("%v", ub.Id), doc)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
 	return nil
 }
 
@@ -191,12 +165,12 @@ func (*BlogService) Update(ub request.UpdateBlog) error {
 func (bs *BlogService) GetBlogInfo(id uint64) (*response.BlogResult, error) {
 
 	var b model.Blog
-	if err := global.QX_DB.Debug().Preload("Tags").Where("id = ?", id).First(&b).Error; err != nil {
+	if err := global.DB.Debug().Preload("Tags").Where("id = ?", id).First(&b).Error; err != nil {
 		return nil, err
 	}
 
 	var user model.User
-	if err := global.QX_DB.Debug().Where("id = ?", b.UserId).First(&user).Error; err != nil {
+	if err := global.DB.Debug().Where("id = ?", b.UserId).First(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -221,24 +195,13 @@ func (bs *BlogService) GetBlogInfo(id uint64) (*response.BlogResult, error) {
 func (bs *BlogService) IncrViews(id uint64) error {
 
 	var blog = new(model.Blog)
-	err := global.QX_DB.Debug().Where("id = ?", id).First(blog).Error
+	err := global.DB.Debug().Where("id = ?", id).First(blog).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 
-	if err := global.QX_DB.Debug().Model(blog).UpdateColumn("views", gorm.Expr("views + 1")).Error; err != nil {
+	if err := global.DB.Debug().Model(blog).UpdateColumn("views", gorm.Expr("views + 1")).Error; err != nil {
 		return err
 	}
-
-	doc := map[string]interface{}{
-		"doc": map[string]interface{}{
-			"views": blog.Views + 1,
-		},
-	}
-	res, err := system.ElasticSearchServices.Update("blog", fmt.Sprintf("%v", id), doc)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
 	return nil
 }

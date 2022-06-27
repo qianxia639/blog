@@ -13,11 +13,6 @@ type Login struct {
 	// CaptchaId string
 }
 
-type UpdateUsername struct {
-	Email    string
-	Username string
-}
-
 type UpdatePwd struct {
 	Signer       string
 	OldPassword  string

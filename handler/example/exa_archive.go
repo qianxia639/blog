@@ -19,7 +19,7 @@ type ArchiveHandler struct{}
 func (ah *ArchiveHandler) ArchiveList(ctx *gin.Context) {
 
 	if m, total, err := archiveService.GetArchiveGroupByYear(); err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	} else {

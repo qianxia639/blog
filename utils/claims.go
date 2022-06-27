@@ -10,7 +10,7 @@ func GetClaims(ctx *gin.Context) (*CustomClaims, error) {
 	token := ctx.Request.Header.Get("X-Token")
 	claims, err := ParseToken(token)
 	if err != nil {
-		global.QX_LOG.Error("解析jwt信息失败,请检查请求头是否存在X-Token")
+		global.LOG.Error("解析jwt信息失败,请检查请求头是否存在X-Token")
 		command.Failed(ctx, 401, err.Error())
 		return nil, err
 	}

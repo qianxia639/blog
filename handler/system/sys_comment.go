@@ -24,13 +24,13 @@ func (*CommentHandler) SaveComment(ctx *gin.Context) {
 	var comment request.Comment
 	err := ctx.ShouldBindJSON(&comment)
 	if err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusBadRequest, "缺少必要的参数")
 		return
 	}
 	c, err := commentService.Save(comment)
 	if err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
@@ -48,7 +48,7 @@ func (*CommentHandler) DeleteParentComment(ctx *gin.Context) {
 	commentId, _ := strconv.ParseUint(ctx.Query("id"), 10, 64)
 	err := commentService.DeleteParentComment(commentId)
 	if err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
@@ -66,7 +66,7 @@ func (*CommentHandler) DeleteChildComment(ctx *gin.Context) {
 	id, _ := strconv.ParseUint(ctx.Query("id"), 10, 64)
 	err := commentService.DeleteChildComment(id)
 	if err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}
@@ -84,7 +84,7 @@ func (*CommentHandler) CommentList(ctx *gin.Context) {
 	id, _ := strconv.ParseUint(ctx.Query("id"), 10, 64)
 	comments, err := commentService.List(id)
 	if err != nil {
-		global.QX_LOG.Error(err)
+		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
 		return
 	}

@@ -20,15 +20,15 @@ var store = base64Captcha.DefaultMemStore
 func (ch *CaptchaHandler) Captcha(ctx *gin.Context) {
 	// 配置生成字符验证码
 	driver := base64Captcha.NewDriverDigit(
-		global.QX_CONFIG.Captcha.Height,
-		global.QX_CONFIG.Captcha.Width,
-		global.QX_CONFIG.Captcha.Length,
-		global.QX_CONFIG.Captcha.MaxSkew,
-		global.QX_CONFIG.Captcha.DotCount)
+		global.CONFIG.Captcha.Height,
+		global.CONFIG.Captcha.Width,
+		global.CONFIG.Captcha.Length,
+		global.CONFIG.Captcha.MaxSkew,
+		global.CONFIG.Captcha.DotCount)
 	captcha := base64Captcha.NewCaptcha(driver, store)
 	id, b64s, err := captcha.Generate()
 	if err != nil {
-		global.QX_LOG.Error("验证码获取失败!", err)
+		global.LOG.Error("验证码获取失败!", err)
 		command.Failed(ctx, 500, "验证码获取失败")
 		return
 	}
