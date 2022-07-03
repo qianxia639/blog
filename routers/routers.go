@@ -2,7 +2,6 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-
 	"github.com/qianxia/blog/handler"
 	"github.com/qianxia/blog/middleware"
 )
@@ -21,9 +20,11 @@ func Router() *gin.Engine {
 	options := include(handler.ExampleRouters, handler.SystemRouters)
 
 	r := gin.Default()
+
 	gin.SetMode(gin.ReleaseMode)
 	// r.Use(middleware.Recovery())
 	r.Use(middleware.CORS())
+	// r.Use(middleware.Authorization(system.CasbinServices.Casbin()))
 	for _, opt := range options {
 		opt(r)
 	}

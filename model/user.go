@@ -13,8 +13,10 @@ type User struct {
 	Nickname  string    `json:"nickname,omitempty" gorm:"type:varchar(20);not null;comment:昵称"`  // 昵称
 	Password  string    `json:"-" gorm:"type:varchar(80);not null;comment:密码"`                   // 密码
 	Avatar    string    `json:"avatar,omitempty" gorm:"comment:头像"`                              // 头像
+	RoleId    uint32    `json:"roleId,omitempty" gorm:"not null;comment:角色Id"`                   // 角色Id
 	CreatedAt time.Time `json:"createdAt,omitempty" gorm:"type:timestamp;comment:注册时间"`          // 创建时间
 	UpdatedAt time.Time `json:"updatedAt,omitempty" gorm:"type:timestamp;comment:更新时间"`          // 更新时间
+	Role      []Role    `gorm:"many2many:t_user_role"`
 	Blogs     []Blog    `json:"Blogs,omitempty"`
 }
 

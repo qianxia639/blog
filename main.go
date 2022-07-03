@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"time"
 
+	gormadapter "github.com/casbin/gorm-adapter/v3"
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/routers"
@@ -37,7 +38,7 @@ func main() {
 
 	global.DB = utils.Mysql(global.CONFIG) // 初始化mysql
 	if global.DB != nil {
-		err := global.DB.AutoMigrate(&model.User{}, &model.Type{}, &model.Comment{}, &model.Blog{}, &model.Tag{})
+		err := global.DB.AutoMigrate(&model.User{}, &model.Role{}, &model.Type{}, &model.Comment{}, &model.Blog{}, &model.Tag{}, &gormadapter.CasbinRule{})
 		if err != nil {
 			global.LOG.Fatalf("Error AutoMigrate Table: %v\n", err)
 		}

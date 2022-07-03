@@ -81,8 +81,10 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 	bc := utils.BaseClaims{
 		Id:       user.Id,
+		RoleId:   user.RoleId,
 		UUID:     user.UUID,
 		Username: user.Username,
+		Nickname: user.Nickname,
 		Avatar:   user.Avatar,
 	}
 	token, err := utils.CreateToken(bc)

@@ -1,44 +1,35 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
+	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
-	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/utils"
 )
 
-func Authorization() gin.HandlerFunc {
+func Authorization(e *casbin.Enforcer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// 从请求头中获取X-Token头信息
-		token := ctx.Request.Header.Get("X-Token")
+		// 获取请求PATH
+		obj := ctx.Request.URL.Path
+		// 获取请求方式
+		act := ctx.Request.Method
 
-		if token == "" {
-			global.LOG.Error("token 为空")
-			command.Failed(ctx, http.StatusUnauthorized, "未登录或非法访问")
+		claims, _ := utils.GetClaims(ctx)
+		// 获取用户角色
+		sub := strconv.Itoa(int(claims.RoleId))
+		fmt.Printf("obj = [%s], act = [%s], sub = [%s]\n", obj, act, sub)
+		// 校验策略
+		success, _ := e.Enforce(sub, obj, act)
+		fmt.Printf("success: %v\n", success)
+		if !success {
+			command.Failed(ctx, http.StatusForbidden, "权限不足")
 			ctx.Abort()
 			return
 		}
-
-		// 解析token
-		claims, err := utils.ParseToken(token)
-		if err != nil {
-			global.LOG.Error(err)
-			command.Failed(ctx, http.StatusUnauthorized, err.Error())
-			ctx.Abort()
-			return
-		}
-
-		if claims.UUID == "" {
-			global.LOG.Error("用户UUID为空")
-			command.Failed(ctx, http.StatusUnauthorized, "未登录或非法访问")
-			ctx.Abort()
-			return
-		}
-
-		// 将token信息写入Gin的Context中
-		ctx.Set("claims", claims)
 		ctx.Next()
 	}
 }

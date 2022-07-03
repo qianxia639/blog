@@ -30,6 +30,7 @@ func (us *UserService) Register(r request.Register) (*model.User, error) {
 		Username: r.Username,
 		Nickname: r.Username,
 		Password: newPassword,
+		RoleId:   2,
 	}
 
 	err = global.DB.Debug().Create(&newUser).Error

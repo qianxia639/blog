@@ -3,6 +3,8 @@ module github.com/qianxia/blog
 go 1.16
 
 require (
+	github.com/casbin/casbin/v2 v2.49.0
+	github.com/casbin/gorm-adapter/v3 v3.7.2
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-openapi/swag v0.21.1 // indirect
 	github.com/go-redis/redis/v8 v8.11.5

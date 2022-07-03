@@ -5,6 +5,7 @@ import (
 	_ "github.com/qianxia/blog/docs"
 	"github.com/qianxia/blog/handler/system"
 	"github.com/qianxia/blog/middleware"
+	service "github.com/qianxia/blog/service/system"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -22,7 +23,7 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 
 	// ========== user router group ==========
 	userGroup := e.Group("/user")
-	userRouter := e.Group("/user").Use(middleware.Authorization())
+	userRouter := e.Group("/user").Use(middleware.Authentication()).Use(middleware.Authorization(service.CasbinServices.Casbin()))
 	userRouterApi := system.SystemRouterGroups.UserHandler
 	{
 		userGroup.POST("/register", userRouterApi.Register)   // 注册
@@ -45,7 +46,7 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 	}
 
 	// ========== upload router group ==========
-	uploadRouter := e.Group("/upload").Use(middleware.Authorization())
+	uploadRouter := e.Group("/upload").Use(middleware.Authentication()).Use(middleware.Authorization(service.CasbinServices.Casbin()))
 	uploadRouterApi := system.SystemRouterGroups.UploadHandler
 	{
 		uploadRouter.POST("/mdFile", uploadRouterApi.UploadMdFile) // markdown文件上传

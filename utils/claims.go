@@ -42,3 +42,15 @@ func GetUserUUID(ctx *gin.Context) string {
 		return claims.(*CustomClaims).UUID
 	}
 }
+
+func GetUserRoleId(ctx *gin.Context) uint32 {
+	if claims, exists := ctx.Get("claims"); !exists {
+		if cl, err := GetClaims(ctx); err != nil {
+			return 0
+		} else {
+			return cl.RoleId
+		}
+	} else {
+		return claims.(*CustomClaims).RoleId
+	}
+}

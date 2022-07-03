@@ -4,12 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/handler/example"
 	"github.com/qianxia/blog/middleware"
+	service "github.com/qianxia/blog/service/system"
 )
 
 func ExampleRouters(e *gin.Engine) *gin.Engine {
 	//  ========== blog router group ==========
 	blogGroup := e.Group("/blog")
-	blogRouter := e.Group("/blog").Use(middleware.Authorization())
+	blogRouter := e.Group("/blog").Use(middleware.Authentication()).Use(middleware.Authorization(service.CasbinServices.Casbin()))
 	blogRouterApi := example.ExampleRouterGroups.BlogHandler
 	{
 		blogGroup.GET("/pageList", blogRouterApi.BlogPageList) // 博客分页列表
@@ -27,7 +28,7 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 
 	//  ========== type router group ==========
 	typeGroup := e.Group("/type")
-	typeRouter := e.Group("/type").Use(middleware.Authorization())
+	typeRouter := e.Group("/type").Use(middleware.Authentication()).Use(middleware.Authorization(service.CasbinServices.Casbin()))
 	typeRouterApi := example.ExampleRouterGroups.TypeHandler
 	{
 		typeGroup.GET("/listOrder", typeRouterApi.ListOrder) // 分类列表(按amount降序排列)
@@ -40,7 +41,7 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 
 	//  ========== tag router group ==========
 	tagGroup := e.Group("/tag")
-	tagRouter := e.Group("/tag").Use(middleware.Authorization())
+	tagRouter := e.Group("/tag").Use(middleware.Authentication()).Use(middleware.Authorization(service.CasbinServices.Casbin()))
 	tagRouterApi := example.ExampleRouterGroups.TagHandler
 	{
 		tagGroup.GET("/list", tagRouterApi.TagList) // 标签列表(不分页)
