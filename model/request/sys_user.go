@@ -14,12 +14,10 @@ type Login struct {
 }
 
 type UpdatePwd struct {
-	Signer       string
 	OldPassword  string
 	LastPassword string
 }
 
 type ForgetPwd struct {
-	Signer   string
 	Password string
 }

@@ -34,13 +34,13 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	// 获取登录的用户信息
 	userId := utils.GetUserId(ctx)
 
-	err = blogService.Save(saveBlog, userId)
+	blog, err := blogService.Save(saveBlog, userId)
 	if err != nil {
 		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "博客发布失败")
 		return
 	}
-	command.Success(ctx, "博客发布成功", nil)
+	command.Success(ctx, "博客发布成功", gin.H{"blo": blog})
 }
 
 // @Summary      个人博客展示
@@ -89,7 +89,7 @@ func (bh BlogHandler) DeleteBlog(ctx *gin.Context) {
 
 	err := blogService.Delete(id)
 	if err != nil {
-		global.LOG.Error(err)
+		global.LOG.Errorf("要删除的博客不存在或已删除: ", err)
 		command.Failed(ctx, http.StatusInternalServerError, "删除失败")
 		return
 	}

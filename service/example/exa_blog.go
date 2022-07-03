@@ -16,51 +16,51 @@ type BlogService struct{}
 /**
 * 新增博客
  */
-func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) error {
+func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) (*model.Blog, error) {
 
 	// 根据userId查询用户信息
 	var user model.User
 	if err := global.DB.Debug().Where("id = ?", userId).First(&user).Error; err != nil {
-		return err
+		return nil, err
 	}
 	// 根据post.tags[]的值查询对应的id
 	tags := make([]model.Tag, 3)
 	if err := global.DB.Debug().Where("tag_name in (?)", saveBlog.Tags).Find(&tags).Error; err != nil {
-		return err
+		return nil, err
 	}
 	// 根据typeId查询
 	var tp model.Type
 	if err := global.DB.Debug().Model(&model.Type{}).Where("id = ?", saveBlog.TypeId).First(&tp).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	// 构建数据
-	// blog := model.Blog{
-	// 	UserId:   userId,
-	// 	Nickname: user.Nickname,
-	// 	TypeId:   saveBlog.TypeId,
-	// 	TypeName: tp.TypeName,
-	// 	Title:    saveBlog.Title,
-	// 	Content:  saveBlog.Content,
-	// 	Flag:     saveBlog.Flag,
-	// 	Tags:     tags,
-	// }
+	blog := model.Blog{
+		UserId:   userId,
+		User:     user,
+		TypeId:   saveBlog.TypeId,
+		TypeName: tp.TypeName,
+		Title:    saveBlog.Title,
+		Content:  saveBlog.Content,
+		Flag:     saveBlog.Flag,
+		Tags:     tags,
+	}
 
 	// 开启事务
 	tx := global.DB.Begin()
 	// 插入博客表数据以及博客标签中间表数据
-	// if err := tx.Debug().Create(&blog).Error; err != nil {
-	// 	tx.Rollback()
-	// 	return err
-	// }
-	// // 更新分类表中amount字段的值
-	// if err := tx.Model(&model.Type{Id: blog.TypeId}).Debug().Update("amount", gorm.Expr("amount + ?", 1)).Error; err != nil {
-	// 	tx.Rollback()
-	// 	return err
-	// }
+	if err := tx.Debug().Create(&blog).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	// 更新分类表中amount字段的值
+	if err := tx.Model(&model.Type{Id: blog.TypeId}).Debug().Update("amount", gorm.Expr("amount + ?", 1)).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
 	// 提交事务
-	return tx.Commit().Error
+	return &blog, tx.Commit().Error
 }
 
 /**
@@ -103,7 +103,7 @@ func (bs *BlogService) PageList(pageSize, pageNo int) (response.PageList, error)
 		blogs []model.Blog
 	)
 	offset := (pageNo - 1) * pageSize
-	err := global.DB.Debug().Preload("Tags").Offset(offset).Limit(pageSize).Find(&blogs).Count(&total).Error
+	err := global.DB.Debug().Preload("Tags").Preload("User").Offset(offset).Limit(pageSize).Find(&blogs).Count(&total).Error
 
 	// 将分页信息和dataList封装到pageList中
 	var pageList response.PageList
@@ -121,7 +121,8 @@ func (bs *BlogService) PageList(pageSize, pageNo int) (response.PageList, error)
  */
 func (bs *BlogService) Delete(id uint64) error {
 	var blog model.Blog
-	if err := global.DB.Debug().Where("id = ?", id).First(&blog).Error; err != nil {
+	err := global.DB.Debug().Where("id = ?", id).First(&blog).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 
@@ -162,33 +163,10 @@ func (*BlogService) Update(ub request.UpdateBlog) error {
 /**
 * 获取博客信息
  */
-func (bs *BlogService) GetBlogInfo(id uint64) (*model.Blog, error) {
-
-	var b model.Blog
-	if err := global.DB.Debug().Preload("Tags").Where("id = ?", id).First(&b).Error; err != nil {
-		return nil, err
-	}
-
-	// var user model.User
-	// if err := global.DB.Debug().Where("id = ?", b.UserId).First(&user).Error; err != nil {
-	// 	return nil, err
-	// }
-
-	// result := &response.BlogResult{
-	// 	Id:        id,
-	// 	Views:     b.Views,
-	// 	Flag:      b.Flag,
-	// 	Nickname:  b.Nickname,
-	// 	Avatar:    user.Avatar,
-	// 	TypeName:  b.TypeName,
-	// 	Title:     b.Title,
-	// 	Content:   b.Content,
-	// 	UpdatedAt: b.UpdatedAt,
-	// 	Tags:      b.Tags,
-	// }
-
+func (bs *BlogService) GetBlogInfo(id uint64) (blog model.Blog, err error) {
+	err = global.DB.Debug().Preload("Tags").Preload("User").Where("id = ?", id).First(&blog).Error
 	// 返回
-	return &b, nil
+	return
 }
 
 // 增加 博客的浏览次数

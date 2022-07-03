@@ -30,7 +30,6 @@ func (us *UserService) Register(r request.Register) (*model.User, error) {
 		Username: r.Username,
 		Nickname: r.Username,
 		Password: newPassword,
-		Signer:   "2274000859",
 	}
 
 	err = global.DB.Debug().Create(&newUser).Error
@@ -104,13 +103,10 @@ func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error
 		return errors.New("旧密码错误")
 	}
 
-	if u.Signer != user.Signer {
-		return errors.New("签名信息错误")
-	}
+	// pwd, _ := utils.Encrypt(u.LastPassword)
 
-	pwd, _ := utils.Encrypt(u.LastPassword)
-
-	return global.DB.Model(&model.User{}).Debug().Where("signer = ?", u.Signer).Update("password", pwd).Error
+	// return global.DB.Model(&model.User{}).Debug().Where("signer = ?", u.Signer).Update("password", pwd).Error
+	return nil
 }
 
 /**
@@ -118,18 +114,14 @@ func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error
  */
 func (*UserService) ForgetPwd(f request.ForgetPwd) error {
 	var user model.User
-	global.DB.Debug().Where("signer = ?", f.Signer).Find(&user)
-	if user.Signer != f.Signer {
-		return errors.New("签名信息错误")
-	}
 
 	if err := utils.Decrypt(user.Password, f.Password); err == nil {
 		return errors.New("新密码不能与原密码相同")
 	}
 
-	newPassword, _ := utils.Encrypt(f.Password)
+	// newPassword, _ := utils.Encrypt(f.Password)
 
-	global.DB.Model(user).Debug().Where("signer = ?", f.Signer).Update("password", newPassword)
+	// global.DB.Model(user).Debug().Where("signer = ?", f.Signer).Update("password", newPassword)
 	return nil
 }
 
