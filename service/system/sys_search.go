@@ -14,34 +14,34 @@ func (s *SearchService) SearchBlog(title string, pageNo, pageSize int) (*respons
 	var blogs []model.Blog
 	var total int64
 	offset := (pageNo - 1) * pageSize
-	err := global.DB.Debug().Preload("Tags").Where("title LIKE ?", "%"+title+"%").Limit(pageSize).Offset(offset).Find(&blogs).Count(&total).Error
+	err := global.DB.Debug().Preload("Tags").Preload("User").Where("title LIKE ?", "%"+title+"%").Limit(pageSize).Offset(offset).Find(&blogs).Count(&total).Error
 
-	result := make([]response.BlogResult, 0, len(blogs))
-	var user model.User
-	for _, v := range blogs {
-		err := global.DB.Debug().Model(user).Where("nickname = ?", v.Nickname).First(&user).Error
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, response.BlogResult{
-			Id:        v.Id,
-			Nickname:  v.Nickname,
-			TypeName:  v.TypeName,
-			Title:     v.Title,
-			Content:   v.Content,
-			Avatar:    user.Avatar,
-			Flag:      v.Flag,
-			Views:     v.Views,
-			UpdatedAt: v.UpdatedAt,
-			Tags:      v.Tags,
-		})
-	}
+	// result := make([]response.BlogResult, 0, len(blogs))
+	// var user model.User
+	// for _, v := range blogs {
+	// 	err := global.DB.Debug().Model(user).Where("nickname = ?", v.Nickname).First(&user).Error
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	result = append(result, response.BlogResult{
+	// 		Id:        v.Id,
+	// 		Nickname:  v.Nickname,
+	// 		TypeName:  v.TypeName,
+	// 		Title:     v.Title,
+	// 		Content:   v.Content,
+	// 		Avatar:    user.Avatar,
+	// 		Flag:      v.Flag,
+	// 		Views:     v.Views,
+	// 		UpdatedAt: v.UpdatedAt,
+	// 		Tags:      v.Tags,
+	// 	})
+	// }
 
 	pageList := &response.PageList{
 		Total:    total,
 		PageNo:   pageNo,
 		PageSize: pageSize,
-		DataList: result,
+		DataList: blogs,
 	}
 	return pageList, err
 }

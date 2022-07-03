@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/qianxia/blog/global"
+	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/routers"
 	"github.com/qianxia/blog/utils"
 )
@@ -36,6 +37,10 @@ func main() {
 
 	global.DB = utils.Mysql(global.CONFIG) // 初始化mysql
 	if global.DB != nil {
+		err := global.DB.AutoMigrate(&model.User{}, &model.Type{}, &model.Comment{}, &model.Blog{}, &model.Tag{})
+		if err != nil {
+			global.LOG.Fatalf("Error AutoMigrate Table: %v\n", err)
+		}
 		db, _ := global.DB.DB()
 		defer db.Close()
 	}

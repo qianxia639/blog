@@ -177,7 +177,7 @@ func (bh BlogHandler) LatestList(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param		 id	  path  int   true    "根据id获取博客信息"
-// @Success 	 200  {object}  response.BlogResult
+// @Success 	 200  {object} model.Blog
 // @Router       /blog/{id} [get]
 func (bh BlogHandler) GetBlogInfo(ctx *gin.Context) {
 	blogId, _ := strconv.ParseUint(ctx.Params.ByName("id"), 10, 64)

@@ -98,7 +98,7 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 // @Tags         System/User
 // @Accept       json
 // @Produce      json
-// @Success 	 200  {object}  response.User {data=response.User}
+// @Success 	 200  {object}  model.User {data=model.User}
 // @Security 	 X-Token
 // @Router       /user/info [get]
 func (uh *UserHandler) UserInfo(ctx *gin.Context) {

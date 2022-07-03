@@ -8,8 +8,6 @@ import (
 	"github.com/qianxia/blog/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
 )
 
 func Mysql(y *config.Config) *gorm.DB {
@@ -26,13 +24,7 @@ func Mysql(y *config.Config) *gorm.DB {
 	db, _ := gorm.Open(mysql.New(mysql.Config{
 		DSN:               dsn,
 		DefaultStringSize: 150,
-	}), &gorm.Config{
-		Logger: logger.Default,
-		NamingStrategy: schema.NamingStrategy{
-			SingularTable: true,
-		},
-		DisableForeignKeyConstraintWhenMigrating: true,
-	})
+	}), &gorm.Config{})
 
 	sqlDB, _ := db.DB()
 	// 连接池最大空闲连接数

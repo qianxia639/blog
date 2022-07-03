@@ -19,7 +19,7 @@ func (*CommentService) Save(comment request.Comment) (*model.Comment, error) {
 	}
 
 	if comment.ParentId != 0 {
-		c.ParentId = comment.ParentId
+		c.ParentId = &comment.ParentId
 	}
 
 	return c, global.DB.Debug().Create(c).Error

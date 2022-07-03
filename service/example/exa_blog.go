@@ -35,29 +35,29 @@ func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) error {
 	}
 
 	// 构建数据
-	blog := model.Blog{
-		UserId:   userId,
-		Nickname: user.Nickname,
-		TypeId:   saveBlog.TypeId,
-		TypeName: tp.TypeName,
-		Title:    saveBlog.Title,
-		Content:  saveBlog.Content,
-		Flag:     saveBlog.Flag,
-		Tags:     tags,
-	}
+	// blog := model.Blog{
+	// 	UserId:   userId,
+	// 	Nickname: user.Nickname,
+	// 	TypeId:   saveBlog.TypeId,
+	// 	TypeName: tp.TypeName,
+	// 	Title:    saveBlog.Title,
+	// 	Content:  saveBlog.Content,
+	// 	Flag:     saveBlog.Flag,
+	// 	Tags:     tags,
+	// }
 
 	// 开启事务
 	tx := global.DB.Begin()
 	// 插入博客表数据以及博客标签中间表数据
-	if err := tx.Debug().Create(&blog).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	// 更新分类表中amount字段的值
-	if err := tx.Model(&model.Type{Id: blog.TypeId}).Debug().Update("amount", gorm.Expr("amount + ?", 1)).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
+	// if err := tx.Debug().Create(&blog).Error; err != nil {
+	// 	tx.Rollback()
+	// 	return err
+	// }
+	// // 更新分类表中amount字段的值
+	// if err := tx.Model(&model.Type{Id: blog.TypeId}).Debug().Update("amount", gorm.Expr("amount + ?", 1)).Error; err != nil {
+	// 	tx.Rollback()
+	// 	return err
+	// }
 
 	// 提交事务
 	return tx.Commit().Error
@@ -162,33 +162,33 @@ func (*BlogService) Update(ub request.UpdateBlog) error {
 /**
 * 获取博客信息
  */
-func (bs *BlogService) GetBlogInfo(id uint64) (*response.BlogResult, error) {
+func (bs *BlogService) GetBlogInfo(id uint64) (*model.Blog, error) {
 
 	var b model.Blog
 	if err := global.DB.Debug().Preload("Tags").Where("id = ?", id).First(&b).Error; err != nil {
 		return nil, err
 	}
 
-	var user model.User
-	if err := global.DB.Debug().Where("id = ?", b.UserId).First(&user).Error; err != nil {
-		return nil, err
-	}
+	// var user model.User
+	// if err := global.DB.Debug().Where("id = ?", b.UserId).First(&user).Error; err != nil {
+	// 	return nil, err
+	// }
 
-	result := &response.BlogResult{
-		Id:        id,
-		Views:     b.Views,
-		Flag:      b.Flag,
-		Nickname:  b.Nickname,
-		Avatar:    user.Avatar,
-		TypeName:  b.TypeName,
-		Title:     b.Title,
-		Content:   b.Content,
-		UpdatedAt: b.UpdatedAt,
-		Tags:      b.Tags,
-	}
+	// result := &response.BlogResult{
+	// 	Id:        id,
+	// 	Views:     b.Views,
+	// 	Flag:      b.Flag,
+	// 	Nickname:  b.Nickname,
+	// 	Avatar:    user.Avatar,
+	// 	TypeName:  b.TypeName,
+	// 	Title:     b.Title,
+	// 	Content:   b.Content,
+	// 	UpdatedAt: b.UpdatedAt,
+	// 	Tags:      b.Tags,
+	// }
 
 	// 返回
-	return result, nil
+	return &b, nil
 }
 
 // 增加 博客的浏览次数
