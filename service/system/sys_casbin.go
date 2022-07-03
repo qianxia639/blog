@@ -18,6 +18,9 @@ var (
 	enforcer *casbin.Enforcer
 )
 
+// @function Casbin
+// @description 初始化casbin
+// @return *casbin.Enforcer
 func (cs *CasbinService) Casbin() *casbin.Enforcer {
 	once.Do(func() {
 		a, _ := gormadapter.NewAdapterByDB(global.DB)
@@ -35,7 +38,7 @@ func (cs *CasbinService) Casbin() *casbin.Enforcer {
 		e = some(where (p.eft == allow))
 
 		[matchers]
-		m = r.sub == p.sub && keyMatch2(r.obj, p.obj) && r.act == p.act
+		m = g(r.sub,p.sub) && r.obj == p.obj && r.act == p.act
 		`
 		m, err := model.NewModelFromString(text)
 		if err != nil {

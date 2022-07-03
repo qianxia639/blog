@@ -13,10 +13,11 @@ import (
 
 type BlogService struct{}
 
-/**
-* 新增博客
- */
-func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) (*model.Blog, error) {
+// @function Save
+// @description 新增博客
+// @param saveBlog request.SaveBlog, userId uint64
+// @return *model.Blog, error
+func (bs *BlogService) SaveBlog(saveBlog request.SaveBlog, userId uint64) (*model.Blog, error) {
 
 	// 根据userId查询用户信息
 	var user model.User
@@ -63,9 +64,10 @@ func (bs *BlogService) Save(saveBlog request.SaveBlog, userId uint64) (*model.Bl
 	return &blog, tx.Commit().Error
 }
 
-/**
-* 个人博客列表展示
- */
+// @function List
+// @description 个人博客列表展示
+// @param id uint64, pageNo, pageSize int
+// @return *response.PageList, error
 func (bs *BlogService) List(id uint64, pageNo, pageSize int) (*response.PageList, error) {
 	var blogs []model.Blog
 	var total int64
@@ -84,9 +86,10 @@ func (bs *BlogService) List(id uint64, pageNo, pageSize int) (*response.PageList
 	return &pageList, err
 }
 
-/**
-* 最新推荐展示
- */
+// @function LatestList
+// @description 最新推荐展示
+// @param {}
+// @return []model.Blog, error
 func (bs *BlogService) LatestList() ([]model.Blog, error) {
 	list := make([]model.Blog, 5)
 	err := global.DB.Debug().Select("id,title").Order("updated_at DESC").Limit(5).Find(&list).Error
@@ -94,9 +97,10 @@ func (bs *BlogService) LatestList() ([]model.Blog, error) {
 	return list, err
 }
 
-/**
-* 首页博客展示及分页
- */
+// @function PageList
+// @description 首页博客展示及分页
+// @param pageSize, pageNo int
+// @return response.PageList, error
 func (bs *BlogService) PageList(pageSize, pageNo int) (response.PageList, error) {
 	var (
 		total int64
@@ -116,13 +120,13 @@ func (bs *BlogService) PageList(pageSize, pageNo int) (response.PageList, error)
 	return pageList, err
 }
 
-/**
-* 博客删除
- */
-func (bs *BlogService) Delete(id uint64) error {
+// @function Delete
+// @description 博客删除
+// @param id, userId uint64
+// @return error
+func (bs *BlogService) DeleteBlog(id, userId uint64) error {
 	var blog model.Blog
-	err := global.DB.Debug().Where("id = ?", id).First(&blog).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := global.DB.Debug().Where("id = ? AND user_id = ?", id, userId).First(&blog).Error; err != nil {
 		return err
 	}
 
@@ -142,10 +146,11 @@ func (bs *BlogService) Delete(id uint64) error {
 	return tx.Commit().Error
 }
 
-/**
-* 修改博客
- */
-func (*BlogService) Update(ub request.UpdateBlog) error {
+// @function Update
+// @description 修改博客
+// @param ub request.UpdateBlog
+// @return error
+func (*BlogService) UpdateBlog(ub request.UpdateBlog) error {
 
 	blog := &model.Blog{
 		Title:   ub.Title,
@@ -160,16 +165,20 @@ func (*BlogService) Update(ub request.UpdateBlog) error {
 	return nil
 }
 
-/**
-* 获取博客信息
- */
+// @function GetBlogInfo
+// @description 获取博客信息
+// @param id uint64
+// @return model.Blog, error
 func (bs *BlogService) GetBlogInfo(id uint64) (blog model.Blog, err error) {
 	err = global.DB.Debug().Preload("Tags").Preload("User").Where("id = ?", id).First(&blog).Error
 	// 返回
 	return
 }
 
-// 增加 博客的浏览次数
+// @function IncrViews
+// @description 增加博客的浏览次数
+// @param id uint64
+// @return error
 func (bs *BlogService) IncrViews(id uint64) error {
 
 	var blog = new(model.Blog)
@@ -182,4 +191,24 @@ func (bs *BlogService) IncrViews(id uint64) error {
 		return err
 	}
 	return nil
+}
+
+// @function QueryAll
+// @description 博客列表(所有博客)
+// @param {}
+// @return response.PageList
+func (bs *BlogService) QueryAll() (pageList response.PageList) {
+	var pageNo = 1
+	var pageSize = 20
+	var offset = (pageNo - 1) * pageSize
+	var blogs []model.Blog
+	var totle int64
+	global.DB.Debug().Model(&model.Blog{}).Limit(pageSize).Offset(offset).Find(&blogs).Count(&totle)
+
+	pageList.PageNo = pageNo
+	pageList.PageSize = pageSize
+	pageList.Total = totle
+	pageList.DataList = blogs
+
+	return
 }

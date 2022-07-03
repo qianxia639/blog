@@ -242,3 +242,15 @@ func (uh *UserHandler) UpdateAvatar(ctx *gin.Context) {
 	}
 	command.Success(ctx, "修改成功", nil)
 }
+
+// @Summary      获取用户用户信息列表
+// @Tags         System/User
+// @Accept       json
+// @Produce      json
+// @Success 	 200  {object}  response.PageList
+// @Security 	 X-Token
+// @Router       /user/list [get]
+func (uh *UserHandler) QueryAll(ctx *gin.Context) {
+	userList := userService.QueryAll()
+	command.Success(ctx, "查询成功", gin.H{"userList": userList})
+}

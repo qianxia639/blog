@@ -34,7 +34,7 @@ func (bh BlogHandler) CreateBlog(ctx *gin.Context) {
 	// 获取登录的用户信息
 	userId := utils.GetUserId(ctx)
 
-	blog, err := blogService.Save(saveBlog, userId)
+	blog, err := blogService.SaveBlog(saveBlog, userId)
 	if err != nil {
 		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "博客发布失败")
@@ -85,9 +85,9 @@ func (bh BlogHandler) BlogList(ctx *gin.Context) {
 // @Router       /blog/{id} [delete]
 func (bh BlogHandler) DeleteBlog(ctx *gin.Context) {
 
-	id, _ := strconv.ParseUint(ctx.Params.ByName("id"), 10, 64)
-
-	err := blogService.Delete(id)
+	id, _ := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	userId := utils.GetUserId(ctx)
+	err := blogService.DeleteBlog(id, userId)
 	if err != nil {
 		global.LOG.Errorf("要删除的博客不存在或已删除: ", err)
 		command.Failed(ctx, http.StatusInternalServerError, "删除失败")
@@ -116,7 +116,7 @@ func (bh *BlogHandler) UpdateBlog(ctx *gin.Context) {
 		return
 	}
 
-	if err := blogService.Update(ub); err != nil {
+	if err := blogService.UpdateBlog(ub); err != nil {
 		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "修改失败")
 		return
@@ -205,4 +205,16 @@ func (bh *BlogHandler) IncrViews(ctx *gin.Context) {
 		return
 	}
 	command.Success(ctx, "操作成功", nil)
+}
+
+// @Summary      博客列表(所有博客)
+// @Tags         Example/Blog
+// @Accept       json
+// @Produce      json
+// @Success 	 200  {object}	response.PageList
+// @Security	 X-Token
+// @Router       /blog/all [get]
+func (bh *BlogHandler) QueryAll(ctx *gin.Context) {
+	blogList := blogService.QueryAll()
+	command.Success(ctx, "查询成功", gin.H{"blogList": blogList})
 }

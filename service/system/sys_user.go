@@ -6,6 +6,7 @@ import (
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/request"
+	"github.com/qianxia/blog/model/response"
 	"github.com/qianxia/blog/utils"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
@@ -13,9 +14,10 @@ import (
 
 type UserService struct{}
 
-/**
-* 注册
- */
+// @function Register
+// @description 注册
+// @param r request.Register
+// @return *model.User, error
 func (us *UserService) Register(r request.Register) (*model.User, error) {
 	err := global.DB.Debug().Where("username = ?", r.Username).First(&model.User{}).Error
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -30,16 +32,17 @@ func (us *UserService) Register(r request.Register) (*model.User, error) {
 		Username: r.Username,
 		Nickname: r.Username,
 		Password: newPassword,
-		RoleId:   2,
+		RoleId:   999,
 	}
 
 	err = global.DB.Debug().Create(&newUser).Error
 	return &newUser, err
 }
 
-/**
-* 登录
- */
+// @function Login
+// @description 登录
+// @param l request.Login
+// @return *model.User, error
 func (*UserService) Login(l request.Login) (*model.User, error) {
 	var u model.User
 
@@ -56,18 +59,20 @@ func (*UserService) Login(l request.Login) (*model.User, error) {
 	return &u, nil
 }
 
-/**
-* 获取用户信息
- */
+// @function GetUserInfo
+// @description 获取用户信息
+// @param id uint64, uuid string
+// @return *model.User, error
 func (*UserService) GetUserInfo(id uint64, uuid string) (*model.User, error) {
 	var user model.User
 	err := global.DB.Debug().Where("id = ? AND uuid = ?", id, uuid).First(&user).Error
 	return &user, err
 }
 
-/**
-* 修改用户名
- */
+// @function UpdateNickname
+// @description 修改用户名
+// @param nickname string, id uint64, uuid string
+// @return error
 func (*UserService) UpdateNickname(nickname string, id uint64, uuid string) error {
 
 	err := global.DB.Debug().Where("nickname = ?", nickname).First(&model.User{}).Error
@@ -90,9 +95,10 @@ func (*UserService) UpdateNickname(nickname string, id uint64, uuid string) erro
 	})
 }
 
-/**
-*	修改密码
- */
+// @function UpdatePwd
+// @description 修改密码
+// @param u request.UpdatePwd, id uint64, uuid string
+// @return error
 func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error {
 
 	var user model.User
@@ -110,9 +116,10 @@ func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error
 	return nil
 }
 
-/**
-*	找回密码
- */
+// @function ForgetPwd
+// @description 找回密码
+// @param f request.ForgetPwd
+// @return error
 func (*UserService) ForgetPwd(f request.ForgetPwd) error {
 	var user model.User
 
@@ -126,9 +133,31 @@ func (*UserService) ForgetPwd(f request.ForgetPwd) error {
 	return nil
 }
 
-/**
-*	修改头像
- */
+// @function UpdateAvatar
+// @description 修改头像
+// @param url, uuid string, id uint64
+// @return error
 func (*UserService) UpdateAvatar(url, uuid string, id uint64) error {
 	return global.DB.Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("avatar", url).Error
+}
+
+// @function QueryAll
+// @description 用户信息列表
+// @return pageList response.PageList
+func (*UserService) QueryAll() (pageList response.PageList) {
+
+	var pageNo = 1
+	var pageSize = 20
+	var offset = (pageNo - 1) * pageSize
+	var users []model.User
+	var totle int64
+
+	global.DB.Model(&model.User{}).Limit(pageSize).Offset(offset).Find(&users).Count(&totle)
+
+	pageList.PageNo = pageNo
+	pageList.PageSize = pageSize
+	pageList.Total = totle
+	pageList.DataList = users
+
+	return
 }

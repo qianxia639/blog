@@ -9,6 +9,7 @@ import (
 	"time"
 
 	gormadapter "github.com/casbin/gorm-adapter/v3"
+	"github.com/qianxia/blog/data"
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/routers"
@@ -42,6 +43,7 @@ func main() {
 		if err != nil {
 			global.LOG.Fatalf("Error AutoMigrate Table: %v\n", err)
 		}
+		_ = data.InitCasbinRuleData(global.DB)
 		db, _ := global.DB.DB()
 		defer db.Close()
 	}
@@ -68,5 +70,4 @@ func main() {
 	if err := server.Shutdown(ctx); err != nil {
 		global.LOG.Fatalf("Error Server Shutdown: %v\n", err)
 	}
-
 }

@@ -14,7 +14,8 @@ import (
 func Authorization(e *casbin.Enforcer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 获取请求PATH
-		obj := ctx.Request.URL.Path
+		obj := ctx.FullPath()
+
 		// 获取请求方式
 		act := ctx.Request.Method
 

@@ -11,14 +11,20 @@ import (
 
 type TypeService struct{}
 
-// 查詢type列表，按amount降序排列
+// @function ListOrderByAmountDesc
+// @description 查詢type列表，按amount降序排列
+// @param {}
+// @return []model.Type, error
 func (ts *TypeService) ListOrderByAmountDesc() ([]model.Type, error) {
 	types := make([]model.Type, 5)
 	global.DB.Debug().Order("amount DESC").Limit(5).Find(&types)
 	return types, nil
 }
 
-// 只显示分类列表不排序
+// @function List
+// @description 只显示分类列表不排序
+// @param {}
+// @return []model.Type, error
 func (ts *TypeService) List() ([]model.Type, error) {
 	types := make([]model.Type, 10)
 	global.DB.Debug().Find(&types)
@@ -26,7 +32,10 @@ func (ts *TypeService) List() ([]model.Type, error) {
 	return types, nil
 }
 
-// 按分类查询博客并分页
+// @function TypePageList
+// @description 按分类查询博客并分页
+// @param id, pageSize, pageNo int
+// @return response.PageList, error
 func (ts *TypeService) TypePageList(id, pageSize, pageNo int) (response.PageList, error) {
 
 	var total int64
@@ -47,7 +56,10 @@ func (ts *TypeService) TypePageList(id, pageSize, pageNo int) (response.PageList
 	return pageList, err
 }
 
-// 新增分类
+// @function CreateType
+// @description 新增分类
+// @param typeName string
+// @return error
 func (ts *TypeService) CreateType(typeName string) error {
 
 	var tp model.Type
