@@ -15,13 +15,13 @@ var CasbinServices = new(CasbinService)
 
 var (
 	once     sync.Once
-	enforcer *casbin.Enforcer
+	enforcer *casbin.SyncedEnforcer
 )
 
 // @function Casbin
 // @description 初始化casbin
 // @return *casbin.Enforcer
-func (cs *CasbinService) Casbin() *casbin.Enforcer {
+func (cs *CasbinService) Casbin() *casbin.SyncedEnforcer {
 	once.Do(func() {
 		a, _ := gormadapter.NewAdapterByDB(global.DB)
 		text := `
@@ -45,7 +45,7 @@ func (cs *CasbinService) Casbin() *casbin.Enforcer {
 			global.LOG.Error("字符串模型加载失败!", err)
 			return
 		}
-		enforcer, _ = casbin.NewEnforcer(m, a)
+		enforcer, _ = casbin.NewSyncedEnforcer(m, a)
 	})
 	_ = enforcer.LoadPolicy()
 	return enforcer

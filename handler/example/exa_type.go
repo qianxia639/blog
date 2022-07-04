@@ -7,9 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
+	"github.com/qianxia/blog/service/example"
 )
 
-type TypeHandler struct{}
+type TypeHandler struct {
+	typeService example.TypeService
+}
 
 // @Summary      分类展示(amount降序)
 // @Tags         Example/Type
@@ -18,7 +21,7 @@ type TypeHandler struct{}
 // @Success 	 200  {object}  []model.Type
 // @Router       /type/listOrder [get]
 func (th *TypeHandler) ListOrder(ctx *gin.Context) {
-	types, _ := typeService.ListOrderByAmountDesc()
+	types, _ := th.typeService.ListOrderByAmountDesc()
 	command.Success(ctx, "查询成功", gin.H{"types": types})
 }
 
@@ -29,7 +32,7 @@ func (th *TypeHandler) ListOrder(ctx *gin.Context) {
 // @Success 	 200  {object}  []model.Type
 // @Router       /type/list [get]
 func (th *TypeHandler) TypeList(ctx *gin.Context) {
-	types, _ := typeService.List()
+	types, _ := th.typeService.List()
 	command.Success(ctx, "查询成功", gin.H{"types": types})
 }
 
@@ -56,7 +59,7 @@ func (th *TypeHandler) TypePageList(ctx *gin.Context) {
 		pageSize = 6
 	}
 
-	typeList, err := typeService.TypePageList(id, pageSize, pageNo)
+	typeList, err := th.typeService.TypePageList(id, pageSize, pageNo)
 	if err != nil {
 		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
@@ -82,7 +85,7 @@ func (th *TypeHandler) CreateType(ctx *gin.Context) {
 		return
 	}
 
-	if err := typeService.CreateType(typeName); err != nil {
+	if err := th.typeService.CreateType(typeName); err != nil {
 		global.LOG.Errorf("insert type err: %v", err)
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return

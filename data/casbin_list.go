@@ -22,6 +22,7 @@ func InitCasbinRuleData(db *gorm.DB) error {
 		{Ptype: "p", V0: "999", V1: "/blog/list", V2: "GET"},
 		{Ptype: "p", V0: "999", V1: "/blog/:id", V2: "DELETE"},
 		{Ptype: "p", V0: "777", V1: "/blog/all", V2: "GET"},
+		{Ptype: "p", V0: "777", V1: "/blog/flag/list", V2: "GET"},
 
 		{Ptype: "p", V0: "777", V1: "/type/save", V2: "POST"},
 

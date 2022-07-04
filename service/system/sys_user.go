@@ -10,7 +10,6 @@ import (
 	"github.com/qianxia/blog/utils"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type UserService struct{}
@@ -154,15 +153,4 @@ func (*UserService) QueryAll() (pageList response.PageList) {
 	pageList.DataList = users
 
 	return
-}
-
-func (*UserService) Logoff(userId uint64, userUuid string) error {
-
-	var user model.User
-	err := global.DB.Debug().Where("id = ? AND uuid = ?", userId, userUuid).First(&user).Error
-	if err != nil {
-		return err
-	}
-
-	return global.DB.Debug().Select(clause.Associations).Delete(&user).Error
 }

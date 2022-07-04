@@ -7,9 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
+	"github.com/qianxia/blog/service/system"
 )
 
-type SearchHandler struct{}
+type SearchHandler struct {
+	searchService system.SearchService
+}
 
 // @Summary      查询所有博客
 // @Tags         System/Search
@@ -33,7 +36,7 @@ func (sh *SearchHandler) SearchBlog(ctx *gin.Context) {
 		pageNo = 10
 	}
 
-	blogs, err := searchService.SearchBlog(query, pageNo, pageSize)
+	blogs, err := sh.searchService.SearchBlog(query, pageNo, pageSize)
 	if err != nil {
 		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")

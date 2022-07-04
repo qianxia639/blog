@@ -203,3 +203,29 @@ func (bs *BlogService) QueryAll() (pageList response.PageList) {
 
 	return
 }
+
+// @function GetBlogGroupByFlag
+// @description flag分组列表
+// @return map[string][]model.Blog, error
+func (bs *BlogService) GetBlogGroupByFlag() (map[string][]model.Blog, error) {
+
+	var flags []string
+	sql := `select flag from t_blog  GROUP BY flag`
+	err := global.DB.Debug().Raw(sql).Scan(&flags).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var blogs []model.Blog
+	m := make(map[string][]model.Blog)
+	for _, flag := range flags {
+		sql := `select * from t_blog WHERE flag = ?`
+		err = global.DB.Debug().Raw(sql, flag).Scan(&blogs).Error
+		if err != nil {
+			return nil, err
+		}
+		m[flag] = blogs
+	}
+
+	return m, nil
+}

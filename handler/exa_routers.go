@@ -25,6 +25,8 @@ func ExampleRouters(e *gin.Engine) *gin.Engine {
 		blogRouter.GET("/list", blogRouterApi.BlogList)     //个人博客展示
 		blogRouter.DELETE("/:id", blogRouterApi.DeleteBlog) // 根据id删除博客
 		blogRouter.GET("/all", blogRouterApi.QueryAll)      // 博客列表(所有博客)
+
+		blogRouter.GET("/flag/list", blogRouterApi.GetBlogGroupByFlag) // flag分组
 	}
 
 	//  ========== type router group ==========

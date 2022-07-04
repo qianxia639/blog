@@ -8,10 +8,13 @@ import (
 	"github.com/qianxia/blog/global"
 	"github.com/qianxia/blog/model"
 	"github.com/qianxia/blog/model/request"
+	"github.com/qianxia/blog/service/system"
 	"github.com/qianxia/blog/utils"
 )
 
-type UserHandler struct{}
+type UserHandler struct {
+	userService system.UserService
+}
 
 // @Summary      注册
 // @Tags         System/User
@@ -36,7 +39,7 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	user, err := userService.Register(r)
+	user, err := uh.userService.Register(r)
 	if err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -68,7 +71,7 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 	// 	return
 	// }
 
-	user, err := userService.Login(l)
+	user, err := uh.userService.Login(l)
 	if err != nil {
 		command.Failed(ctx, http.StatusUnauthorized, err.Error())
 		return
@@ -106,7 +109,7 @@ func (uh *UserHandler) createToken(ctx *gin.Context, user model.User) {
 func (uh *UserHandler) UserInfo(ctx *gin.Context) {
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
-	user, err := userService.GetUserInfo(id, uuid)
+	user, err := uh.userService.GetUserInfo(id, uuid)
 	if err != nil {
 		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
@@ -144,7 +147,7 @@ func (uh *UserHandler) UpdateNickname(ctx *gin.Context) {
 
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
-	if err := userService.UpdateNickname(nickname, id, uuid); err != nil {
+	if err := uh.userService.UpdateNickname(nickname, id, uuid); err != nil {
 		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -177,7 +180,7 @@ func (uh *UserHandler) UpdatePwd(ctx *gin.Context) {
 
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
-	if err := userService.UpdatePwd(u, id, uuid); err != nil {
+	if err := uh.userService.UpdatePwd(u, id, uuid); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -202,7 +205,7 @@ func (uh *UserHandler) ForgetPwd(ctx *gin.Context) {
 		return
 	}
 
-	if err := userService.ForgetPwd(f); err != nil {
+	if err := uh.userService.ForgetPwd(f); err != nil {
 		global.LOG.Error(err)
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -236,7 +239,7 @@ func (uh *UserHandler) UpdateAvatar(ctx *gin.Context) {
 
 	uuid := utils.GetUserUUID(ctx)
 	id := utils.GetUserId(ctx)
-	if err := userService.UpdateAvatar(url, uuid, id); err != nil {
+	if err := uh.userService.UpdateAvatar(url, uuid, id); err != nil {
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -251,28 +254,6 @@ func (uh *UserHandler) UpdateAvatar(ctx *gin.Context) {
 // @Security 	 X-Token
 // @Router       /user/list [get]
 func (uh *UserHandler) QueryAll(ctx *gin.Context) {
-	userList := userService.QueryAll()
+	userList := uh.userService.QueryAll()
 	command.Success(ctx, "查询成功", gin.H{"userList": userList})
-}
-
-// @Summary      注销账户
-// @Tags         System/User
-// @Accept       json
-// @Produce      json
-// @Success 	 200  {object} string
-// @Security 	 X-Token
-// @Router       /user/logoff [delete]
-func (uh *UserHandler) Logoff(ctx *gin.Context) {
-
-	// 身份校验
-
-	userId := utils.GetUserId(ctx)
-	userUuid := utils.GetUserUUID(ctx)
-	err := userService.Logoff(userId, userUuid)
-	if err != nil {
-		global.LOG.Errorf("Error Logoff: %v\n", err)
-		command.Failed(ctx, http.StatusInternalServerError, "服务异常")
-		return
-	}
-	command.Success(ctx, "操作成功", nil)
 }

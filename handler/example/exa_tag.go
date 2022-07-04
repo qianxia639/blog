@@ -6,9 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qianxia/blog/command"
 	"github.com/qianxia/blog/global"
+	"github.com/qianxia/blog/service/example"
 )
 
-type TagHandler struct{}
+type TagHandler struct {
+	tagService example.TagService
+}
 
 // @Summary      标签列表
 // @Tags         Example/Tag
@@ -17,7 +20,7 @@ type TagHandler struct{}
 // @Success 	 200  {object}  []model.Tag
 // @Router       /tag/list [get]
 func (th *TagHandler) TagList(ctx *gin.Context) {
-	tags, _ := tagService.List()
+	tags, _ := th.tagService.List()
 	command.Success(ctx, "查询成功", gin.H{"tags": tags})
 }
 
@@ -38,7 +41,7 @@ func (th *TagHandler) CreateTag(ctx *gin.Context) {
 		return
 	}
 
-	if err := tagService.CreateTag(tagName); err != nil {
+	if err := th.tagService.CreateTag(tagName); err != nil {
 		global.LOG.Errorf("insert tag err: %v", err)
 		command.Failed(ctx, http.StatusInternalServerError, err.Error())
 		return

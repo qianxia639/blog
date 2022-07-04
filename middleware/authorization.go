@@ -11,7 +11,7 @@ import (
 	"github.com/qianxia/blog/utils"
 )
 
-func Authorization(e *casbin.Enforcer) gin.HandlerFunc {
+func Authorization(e *casbin.SyncedEnforcer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 获取请求PATH
 		obj := ctx.FullPath()

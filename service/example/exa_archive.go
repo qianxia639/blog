@@ -17,7 +17,7 @@ func (*ArchiveService) GetArchiveGroupByYear() (m map[string][]response.Archive,
 
 	var years []string
 	m = make(map[string][]response.Archive)
-	sql := `SELECT FROM_UNIXTIME(updated_at, '%Y') AS year FROM t_blog GROUP By year ORDER BY year DESC`
+	sql := `SELECT FROM_UNIXTIME(updated_at, '%Y') AS year FROM t_blog GROUP BY year ORDER BY year DESC`
 	if err = global.DB.Debug().Raw(sql).Scan(&years).Error; err != nil {
 		return
 	}
