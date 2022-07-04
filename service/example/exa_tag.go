@@ -12,7 +12,6 @@ type TagService struct{}
 
 // @function List
 // @description tag列表
-// @param {}
 // @return[]model.Tag, error
 func (ts *TagService) List() ([]model.Tag, error) {
 	tags := make([]model.Tag, 10)
@@ -22,7 +21,6 @@ func (ts *TagService) List() ([]model.Tag, error) {
 
 // @function CreateTag
 // @description 新增标签
-// @param tagName string
 // @return error
 func (ts *TagService) CreateTag(tagName string) error {
 	var tag model.Tag

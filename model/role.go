@@ -1,5 +1,6 @@
 package model
 
+// 角色表
 type Role struct {
 	Id              uint32 `json:"id,omitempty" gorm:"primaryKey;comment:角色Id"`
 	RoleName        string `json:"roleName,omitempty" gorm:"size:20;not null;comment:角色名"`

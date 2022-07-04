@@ -11,7 +11,6 @@ type CommentService struct{}
 
 // @function Save
 // @description 添加评论
-// @param comment request.Comment
 // @return *model.Comment, error
 func (*CommentService) Save(comment request.Comment) (*model.Comment, error) {
 	// 当parentId不等于0的时候，表示是子级评论，等于0的时候，表示该评论是父级评论
@@ -30,7 +29,6 @@ func (*CommentService) Save(comment request.Comment) (*model.Comment, error) {
 
 // @function DeleteParentComment
 // @description 删除父级评论
-// @param commentId uint64
 // @return error
 func (*CommentService) DeleteParentComment(commentId uint64) error {
 	sql := `DELETE FROM t_comment WHERE id = ?`
@@ -49,7 +47,6 @@ func (*CommentService) DeleteParentComment(commentId uint64) error {
 
 // @function DeleteChildComment
 // @description 删除子级评论
-// @param id uint64
 // @return error
 func (*CommentService) DeleteChildComment(id uint64) error {
 	sql := `DELETE FROM t_comment WHERE id = ?`
@@ -58,7 +55,6 @@ func (*CommentService) DeleteChildComment(id uint64) error {
 
 // @function List
 // @description 评论列表
-// @param id uint64
 // @return []model.Comment, error
 func (*CommentService) List(id uint64) ([]model.Comment, error) {
 	var c []model.Comment

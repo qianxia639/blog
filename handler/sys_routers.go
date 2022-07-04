@@ -36,7 +36,9 @@ func SystemRouters(e *gin.Engine) *gin.Engine {
 		userRouter.PUT("/name", userRouterApi.UpdateNickname) // 修改名称
 		userRouter.PUT("/pwd", userRouterApi.UpdatePwd)       // 修改密码
 		userRouter.PUT("/avatar", userRouterApi.UpdateAvatar) // 修改头像
-		userRouter.GET("/list", userRouterApi.QueryAll)       // 用户列表
+
+		userRouter.GET("/list", userRouterApi.QueryAll)    // 用户列表
+		userRouter.DELETE("/logoff", userRouterApi.Logoff) //	账户注销
 	}
 
 	//  ========== search router group ==========

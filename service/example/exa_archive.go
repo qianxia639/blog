@@ -10,7 +10,6 @@ type ArchiveService struct{}
 
 // @function GetArchiveGroupByYear
 // @description 按年份显示全部博客信息
-// @param {}
 // @return map[string][]response.Archive, int64, error
 func (*ArchiveService) GetArchiveGroupByYear() (m map[string][]response.Archive, total int64, err error) {
 

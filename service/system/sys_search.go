@@ -10,7 +10,6 @@ type SearchService struct{}
 
 // @function SearchBlog
 // @description 根据title搜索博客
-// @param title string, pageNo, pageSize int
 // @return *response.PageList, error
 func (s *SearchService) SearchBlog(title string, pageNo, pageSize int) (*response.PageList, error) {
 

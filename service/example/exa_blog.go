@@ -15,7 +15,6 @@ type BlogService struct{}
 
 // @function Save
 // @description 新增博客
-// @param saveBlog request.SaveBlog, userId uint64
 // @return *model.Blog, error
 func (bs *BlogService) SaveBlog(saveBlog request.SaveBlog, userId uint64) (*model.Blog, error) {
 
@@ -66,7 +65,6 @@ func (bs *BlogService) SaveBlog(saveBlog request.SaveBlog, userId uint64) (*mode
 
 // @function List
 // @description 个人博客列表展示
-// @param id uint64, pageNo, pageSize int
 // @return *response.PageList, error
 func (bs *BlogService) List(id uint64, pageNo, pageSize int) (*response.PageList, error) {
 	var blogs []model.Blog
@@ -88,7 +86,6 @@ func (bs *BlogService) List(id uint64, pageNo, pageSize int) (*response.PageList
 
 // @function LatestList
 // @description 最新推荐展示
-// @param {}
 // @return []model.Blog, error
 func (bs *BlogService) LatestList() ([]model.Blog, error) {
 	list := make([]model.Blog, 5)
@@ -99,7 +96,6 @@ func (bs *BlogService) LatestList() ([]model.Blog, error) {
 
 // @function PageList
 // @description 首页博客展示及分页
-// @param pageSize, pageNo int
 // @return response.PageList, error
 func (bs *BlogService) PageList(pageSize, pageNo int) (response.PageList, error) {
 	var (
@@ -122,7 +118,6 @@ func (bs *BlogService) PageList(pageSize, pageNo int) (response.PageList, error)
 
 // @function Delete
 // @description 博客删除
-// @param id, userId uint64
 // @return error
 func (bs *BlogService) DeleteBlog(id, userId uint64) error {
 	var blog model.Blog
@@ -148,7 +143,6 @@ func (bs *BlogService) DeleteBlog(id, userId uint64) error {
 
 // @function Update
 // @description 修改博客
-// @param ub request.UpdateBlog
 // @return error
 func (*BlogService) UpdateBlog(ub request.UpdateBlog) error {
 
@@ -167,7 +161,6 @@ func (*BlogService) UpdateBlog(ub request.UpdateBlog) error {
 
 // @function GetBlogInfo
 // @description 获取博客信息
-// @param id uint64
 // @return model.Blog, error
 func (bs *BlogService) GetBlogInfo(id uint64) (blog model.Blog, err error) {
 	err = global.DB.Debug().Preload("Tags").Preload("User").Where("id = ?", id).First(&blog).Error
@@ -177,7 +170,6 @@ func (bs *BlogService) GetBlogInfo(id uint64) (blog model.Blog, err error) {
 
 // @function IncrViews
 // @description 增加博客的浏览次数
-// @param id uint64
 // @return error
 func (bs *BlogService) IncrViews(id uint64) error {
 
@@ -195,7 +187,6 @@ func (bs *BlogService) IncrViews(id uint64) error {
 
 // @function QueryAll
 // @description 博客列表(所有博客)
-// @param {}
 // @return response.PageList
 func (bs *BlogService) QueryAll() (pageList response.PageList) {
 	var pageNo = 1

@@ -10,13 +10,13 @@ import (
 	"github.com/qianxia/blog/utils"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type UserService struct{}
 
 // @function Register
 // @description 注册
-// @param r request.Register
 // @return *model.User, error
 func (us *UserService) Register(r request.Register) (*model.User, error) {
 	err := global.DB.Debug().Where("username = ?", r.Username).First(&model.User{}).Error
@@ -41,7 +41,6 @@ func (us *UserService) Register(r request.Register) (*model.User, error) {
 
 // @function Login
 // @description 登录
-// @param l request.Login
 // @return *model.User, error
 func (*UserService) Login(l request.Login) (*model.User, error) {
 	var u model.User
@@ -61,7 +60,6 @@ func (*UserService) Login(l request.Login) (*model.User, error) {
 
 // @function GetUserInfo
 // @description 获取用户信息
-// @param id uint64, uuid string
 // @return *model.User, error
 func (*UserService) GetUserInfo(id uint64, uuid string) (*model.User, error) {
 	var user model.User
@@ -71,7 +69,6 @@ func (*UserService) GetUserInfo(id uint64, uuid string) (*model.User, error) {
 
 // @function UpdateNickname
 // @description 修改用户名
-// @param nickname string, id uint64, uuid string
 // @return error
 func (*UserService) UpdateNickname(nickname string, id uint64, uuid string) error {
 
@@ -97,7 +94,6 @@ func (*UserService) UpdateNickname(nickname string, id uint64, uuid string) erro
 
 // @function UpdatePwd
 // @description 修改密码
-// @param u request.UpdatePwd, id uint64, uuid string
 // @return error
 func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error {
 
@@ -118,7 +114,6 @@ func (*UserService) UpdatePwd(u request.UpdatePwd, id uint64, uuid string) error
 
 // @function ForgetPwd
 // @description 找回密码
-// @param f request.ForgetPwd
 // @return error
 func (*UserService) ForgetPwd(f request.ForgetPwd) error {
 	var user model.User
@@ -135,7 +130,6 @@ func (*UserService) ForgetPwd(f request.ForgetPwd) error {
 
 // @function UpdateAvatar
 // @description 修改头像
-// @param url, uuid string, id uint64
 // @return error
 func (*UserService) UpdateAvatar(url, uuid string, id uint64) error {
 	return global.DB.Model(&model.User{}).Where("id = ? AND uuid = ?", id, uuid).Update("avatar", url).Error
@@ -160,4 +154,15 @@ func (*UserService) QueryAll() (pageList response.PageList) {
 	pageList.DataList = users
 
 	return
+}
+
+func (*UserService) Logoff(userId uint64, userUuid string) error {
+
+	var user model.User
+	err := global.DB.Debug().Where("id = ? AND uuid = ?", userId, userUuid).First(&user).Error
+	if err != nil {
+		return err
+	}
+
+	return global.DB.Debug().Select(clause.Associations).Delete(&user).Error
 }

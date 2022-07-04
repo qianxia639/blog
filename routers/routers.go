@@ -24,7 +24,6 @@ func Router() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	// r.Use(middleware.Recovery())
 	r.Use(middleware.CORS())
-	// r.Use(middleware.Authorization(system.CasbinServices.Casbin()))
 	for _, opt := range options {
 		opt(r)
 	}
