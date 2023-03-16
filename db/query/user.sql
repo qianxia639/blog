@@ -10,3 +10,14 @@ RETURNING *;
 SELECT * FROM users
 WHERE username = $1
 OR email = $1 LIMIT 1;
+
+-- name: UpdateUser :one
+UPDATE users
+SET
+    nickname = COALESCE(sqlc.narg(nickname), nickname),
+    email = COALESCE(sqlc.narg(email), email),
+    password = COALESCE(sqlc.narg(password), password),
+    avatar = COALESCE(sqlc.narg(avatar), avatar)
+WHERE
+    username = sqlc.arg(username)
+RETURNING *;
