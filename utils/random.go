@@ -3,12 +3,16 @@ package utils
 import (
 	"math/rand"
 	"strings"
+	"time"
 )
 
 const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 func RandomInt(min, max int64) int64 {
-	println("....")
 	return min + rand.Int63n(max-min+1)
 }
 

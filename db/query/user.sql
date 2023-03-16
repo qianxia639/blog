@@ -1,4 +1,12 @@
--- name: LoginUser :one
+-- name: CreateUser :one
+INSERT INTO users(
+    username, email, nickname, password
+) VALUES(
+    $1, $2, $3, $4
+)
+RETURNING *;
+
+-- name: GetUser :one
 SELECT * FROM users
-WHERE (username = $1 AND password = $2)
-OR (email = $1 AND password = $2) LIMIT 1;
+WHERE username = $1
+OR email = $1 LIMIT 1;
