@@ -13,4 +13,7 @@ type Config struct {
 		TokenSymmetricKey   string        `mapstructure:"token_symmetric_key"`
 		AccessTokenDuration time.Duration `mapstructure:"access_token_duration"`
 	}
+	Server struct {
+		Address string `mapstructure:"address"`
+	}
 }

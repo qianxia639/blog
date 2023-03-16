@@ -7,3 +7,6 @@ migrate_url = "file://db/migration"
 type = "paseto"
 token_symmetric_key = "plokmnjiuhbvgytfcxdreszawq564738"
 access_token_duration = "30m"
+
+[server]
+address = "0.0.0.0:9010"
