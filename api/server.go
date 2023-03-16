@@ -1,26 +1,30 @@
 package api
 
 import (
+	db "Blog/db/sqlc"
 	"Blog/token"
+	"Blog/utils/config"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
+	store  db.Store
+	conf   config.Config
 	router *gin.Engine
 	maker  token.Maker
 }
 
-const key = ""
+func NewServer(conf config.Config, store db.Store) (*Server, error) {
 
-func NewServer() (*Server, error) {
-
-	maker, err := token.NewPasetoMaker(key)
+	maker, err := token.NewPasetoMaker(conf.Token.TokenSymmetricKey)
 	if err != nil {
 		return nil, err
 	}
 
 	server := &Server{
+		conf:  conf,
+		store: store,
 		maker: maker,
 	}
 
@@ -32,7 +36,7 @@ func NewServer() (*Server, error) {
 func (server *Server) setupRouter() {
 	router := gin.Default()
 
-	router.POST("/usre", server.createUser)
+	router.POST("/user", server.createUser)
 	router.POST("/login", server.login)
 
 	server.router = router
