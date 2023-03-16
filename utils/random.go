@@ -8,6 +8,7 @@ import (
 const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
 func RandomInt(min, max int64) int64 {
+	println("....")
 	return min + rand.Int63n(max-min+1)
 }
 
