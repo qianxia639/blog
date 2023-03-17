@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func randomType(t *testing.T) Type {
+func createRandomType(t *testing.T) Type {
 	typeName := utils.RandomString(6)
 
 	types, err := testQueries.InsertType(context.Background(), typeName)
@@ -21,5 +21,5 @@ func randomType(t *testing.T) Type {
 }
 
 func TestInsertType(t *testing.T) {
-	randomType(t)
+	createRandomType(t)
 }

@@ -65,6 +65,35 @@ func (mr *MockStoreMockRecorder) GetUser(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockStore)(nil).GetUser), arg0, arg1)
 }
 
+// IncrViews mocks base method.
+func (m *MockStore) IncrViews(arg0 context.Context, arg1 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IncrViews", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// IncrViews indicates an expected call of IncrViews.
+func (mr *MockStoreMockRecorder) IncrViews(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncrViews", reflect.TypeOf((*MockStore)(nil).IncrViews), arg0, arg1)
+}
+
+// InsertBlog mocks base method.
+func (m *MockStore) InsertBlog(arg0 context.Context, arg1 db.InsertBlogParams) (db.Blog, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertBlog", arg0, arg1)
+	ret0, _ := ret[0].(db.Blog)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InsertBlog indicates an expected call of InsertBlog.
+func (mr *MockStoreMockRecorder) InsertBlog(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertBlog", reflect.TypeOf((*MockStore)(nil).InsertBlog), arg0, arg1)
+}
+
 // InsertType mocks base method.
 func (m *MockStore) InsertType(arg0 context.Context, arg1 string) (db.Type, error) {
 	m.ctrl.T.Helper()

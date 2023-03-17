@@ -5,7 +5,6 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -23,11 +22,11 @@ type Blog struct {
 	// 图片链接
 	Image string `json:"image"`
 	// 浏览次数
-	Views sql.NullInt32 `json:"views"`
+	Views int32 `json:"views"`
 	// 创建时间
-	CreatedAt sql.NullTime `json:"created_at"`
+	CreatedAt time.Time `json:"created_at"`
 	// 修改时间
-	UpdatedAt sql.NullTime `json:"updated_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type Type struct {

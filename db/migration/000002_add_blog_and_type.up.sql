@@ -5,9 +5,9 @@ CREATE TABLE "blogs" (
   "title" varchar(50) NOT NULL,
   "content" text NOT NULL,
   "image" varchar(255) NOT NULL,
-  "views" int4 DEFAULT 0,
-  "created_at" timestamptz DEFAULT (now()),
-  "updated_at" timestamptz
+  "views" int4 DEFAULT 0 NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "updated_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "types" (

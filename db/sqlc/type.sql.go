@@ -10,7 +10,7 @@ import (
 )
 
 const insertType = `-- name: InsertType :one
-INSERT INTO types(
+INSERT INTO types (
     type_name
 ) VALUES (
     $1

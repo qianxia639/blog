@@ -11,6 +11,8 @@ import (
 type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	GetUser(ctx context.Context, username string) (User, error)
+	IncrViews(ctx context.Context, id int64) error
+	InsertBlog(ctx context.Context, arg InsertBlogParams) (Blog, error)
 	InsertType(ctx context.Context, typeName string) (Type, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }
