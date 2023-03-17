@@ -4,7 +4,6 @@ source = "postgresql://root:root@localhost:5432/blog?sslmode=disable&timeZone=As
 migrate_url = "file://db/migration"
 
 [token]
-type = "paseto"
 token_symmetric_key = "plokmnjiuhbvgytfcxdreszawq564738"
 access_token_duration = "30m"
 

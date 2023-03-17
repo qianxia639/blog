@@ -9,7 +9,6 @@ type Config struct {
 		MigrateUrl string `mapstructure:"migrate_url"`
 	}
 	Token struct {
-		Type                string        `mapstructure:"type"`
 		TokenSymmetricKey   string        `mapstructure:"token_symmetric_key"`
 		AccessTokenDuration time.Duration `mapstructure:"access_token_duration"`
 	}

@@ -15,8 +15,14 @@ createdb:
 migrateup:
 	migrate -path db/migration -database "${DB_URL}" -verbose up
 
+migrateup1:
+	migrate -path db/migration -database "${DB_URL}" -verbose up 1
+
 migratedown:
 	migrate -path db/migration -database "${DB_URL}" -verbose down
+
+migratedown1:
+	migrate -path db/migration -database "${DB_URL}" -verbose down 1
 
 sqlc:
 	sqlc generate
@@ -24,4 +30,4 @@ sqlc:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go Blog/db/sqlc Store
 
-.PHONY: server test postgres createdb migrateup migratedown sqlc mock
+.PHONY: server test postgres createdb migrateup migrateup1 migratedown migratedown1 sqlc mock

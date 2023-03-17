@@ -65,6 +65,21 @@ func (mr *MockStoreMockRecorder) GetUser(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockStore)(nil).GetUser), arg0, arg1)
 }
 
+// InsertType mocks base method.
+func (m *MockStore) InsertType(arg0 context.Context, arg1 string) (db.Type, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertType", arg0, arg1)
+	ret0, _ := ret[0].(db.Type)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InsertType indicates an expected call of InsertType.
+func (mr *MockStoreMockRecorder) InsertType(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertType", reflect.TypeOf((*MockStore)(nil).InsertType), arg0, arg1)
+}
+
 // UpdateUser mocks base method.
 func (m *MockStore) UpdateUser(arg0 context.Context, arg1 db.UpdateUserParams) (db.User, error) {
 	m.ctrl.T.Helper()
