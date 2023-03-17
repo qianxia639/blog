@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	authorizationHeader     = "authorization"
-	authorizationPayloadKey = "authorization_payload"
+	authorizationHeader     = "Authorization"
+	authorizationPayloadKey = "Authorization_Payload"
 )
 
-func AuthMiddlware(tokenMaker token.Maker) gin.HandlerFunc {
+func (srever Server) authMiddlware(tokenMaker token.Maker) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authorization := ctx.Request.Header.Get(authorizationHeader)
 

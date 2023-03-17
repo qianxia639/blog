@@ -108,7 +108,7 @@ func (server *Server) login(ctx *gin.Context) {
 }
 
 type UpdateUserRequest struct {
-	Username string  `json:"username"`
+	Username string  `json:"username" binding:"required"`
 	Email    *string `json:"email"`
 	Nickname *string `json:"nickname"`
 	Password *string `json:"password"`
