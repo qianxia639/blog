@@ -40,7 +40,11 @@ func (server *Server) setupRouter() {
 	router.POST("/login", server.login)
 
 	authRouter := router.Group("/").Use(server.authMiddlware(server.maker))
-	authRouter.PUT("/user", server.updateUser)
+	{
+		authRouter.PUT("/user", server.updateUser)
+
+		authRouter.POST("/type", server.insertType)
+	}
 
 	server.router = router
 }
