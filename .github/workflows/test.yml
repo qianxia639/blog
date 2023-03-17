@@ -23,9 +23,9 @@ jobs:
         image: postgres:14-alpine
         # 环境变量
         env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: imchat
+          POSTGRES_PASSWORD: root
+          POSTGRES_USER: root
+          POSTGRES_DB: blog
         # 健康检查
         options: >-
           --health-cmd pg_isready
