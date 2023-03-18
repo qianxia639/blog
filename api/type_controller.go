@@ -22,7 +22,7 @@ func (server *Server) insertType(ctx *gin.Context) {
 	if err != nil {
 		if pqEerr, ok := err.(*pq.Error); ok {
 			switch pqEerr.Code.Name() {
-			case "unique_violation":
+			case ErrUniqueViolation:
 				ctx.SecureJSON(http.StatusForbidden, err.Error())
 				return
 			}

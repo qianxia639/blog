@@ -4,6 +4,7 @@ import (
 	db "Blog/db/sqlc"
 	"Blog/utils"
 	"Blog/utils/config"
+	"database/sql"
 	"os"
 	"testing"
 	"time"
@@ -22,6 +23,18 @@ func newTestServer(t *testing.T, store db.Store) *Server {
 	require.NoError(t, err)
 
 	return server
+}
+
+func newTestDB(t *testing.T) db.Store {
+
+	conf, err := config.LoadConfig("..")
+	require.NoError(t, err)
+
+	conn, err := sql.Open(conf.Postgres.Driver, conf.Postgres.Source)
+	require.NoError(t, err)
+
+	return db.NewStore(conn)
+
 }
 
 func TestMain(m *testing.M) {

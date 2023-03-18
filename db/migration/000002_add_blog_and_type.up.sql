@@ -2,7 +2,7 @@ CREATE TABLE "blogs" (
   "id" bigserial PRIMARY KEY,
   "owner_id" int8 NOT NULL,
   "type_id" int8 NOT NULL,
-  "title" varchar(50) NOT NULL,
+  "title" varchar(50) NOT NULL UNIQUE,
   "content" text NOT NULL,
   "image" varchar(255) NOT NULL,
   "views" int4 DEFAULT 0 NOT NULL,

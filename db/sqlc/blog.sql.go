@@ -7,7 +7,40 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
+
+const deleteBlog = `-- name: DeleteBlog :exec
+DELETE FROM blogs
+WHERE id = $1
+`
+
+func (q *Queries) DeleteBlog(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteBlog, id)
+	return err
+}
+
+const getBlog = `-- name: GetBlog :one
+SELECT id, owner_id, type_id, title, content, image, views, created_at, updated_at FROM blogs
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetBlog(ctx context.Context, id int64) (Blog, error) {
+	row := q.db.QueryRowContext(ctx, getBlog, id)
+	var i Blog
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.TypeID,
+		&i.Title,
+		&i.Content,
+		&i.Image,
+		&i.Views,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
 
 const incrViews = `-- name: IncrViews :exec
 UPDATE blogs
@@ -45,6 +78,87 @@ func (q *Queries) InsertBlog(ctx context.Context, arg InsertBlogParams) (Blog, e
 		arg.Title,
 		arg.Content,
 		arg.Image,
+	)
+	var i Blog
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.TypeID,
+		&i.Title,
+		&i.Content,
+		&i.Image,
+		&i.Views,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const listBlogs = `-- name: ListBlogs :many
+SELECT id, owner_id, type_id, title, content, image, views, created_at, updated_at FROM blogs
+ORDER BY created_at
+`
+
+func (q *Queries) ListBlogs(ctx context.Context) ([]Blog, error) {
+	rows, err := q.db.QueryContext(ctx, listBlogs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Blog{}
+	for rows.Next() {
+		var i Blog
+		if err := rows.Scan(
+			&i.ID,
+			&i.OwnerID,
+			&i.TypeID,
+			&i.Title,
+			&i.Content,
+			&i.Image,
+			&i.Views,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateBlog = `-- name: UpdateBlog :one
+UPDATE blogs
+SET
+    type_id = COALESCE($1, type_id),
+    title = COALESCE($2, title),
+    content = COALESCE($3, content),
+    image = COALESCE($4, image)
+WHERE 
+    id = $5
+RETURNING id, owner_id, type_id, title, content, image, views, created_at, updated_at
+`
+
+type UpdateBlogParams struct {
+	TypeID  sql.NullInt64  `json:"type_id"`
+	Title   sql.NullString `json:"title"`
+	Content sql.NullString `json:"content"`
+	Image   sql.NullString `json:"image"`
+	ID      int64          `json:"id"`
+}
+
+func (q *Queries) UpdateBlog(ctx context.Context, arg UpdateBlogParams) (Blog, error) {
+	row := q.db.QueryRowContext(ctx, updateBlog,
+		arg.TypeID,
+		arg.Title,
+		arg.Content,
+		arg.Image,
+		arg.ID,
 	)
 	var i Blog
 	err := row.Scan(

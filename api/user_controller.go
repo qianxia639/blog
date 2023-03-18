@@ -41,7 +41,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
-			case "unique_violation":
+			case ErrUniqueViolation:
 				ctx.SecureJSON(http.StatusForbidden, err.Error())
 				return
 			}
@@ -72,7 +72,7 @@ func (server *Server) login(ctx *gin.Context) {
 	}
 	user, err := server.store.GetUser(ctx, req.Username)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == ErrNoRows {
 			ctx.SecureJSON(http.StatusNotFound, err.Error())
 			return
 		}
