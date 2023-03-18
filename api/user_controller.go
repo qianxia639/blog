@@ -172,6 +172,13 @@ func (server *Server) updateUser(ctx *gin.Context) {
 
 	_, err := server.store.UpdateUser(ctx, arg)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case ErrUniqueViolation:
+				ctx.SecureJSON(http.StatusForbidden, err.Error())
+				return
+			}
+		}
 		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
 		return
 	}

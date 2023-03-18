@@ -417,6 +417,58 @@ func TestUpdateUsre(t *testing.T) {
 			},
 		},
 		{
+			name: "Duplicate Nickname",
+			body: gin.H{
+				"username": user.Username,
+				"nickname": user.Username,
+			},
+			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
+				addAuthorizatin(t, req, tokenMaker, user.Username, time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.UpdateUserParams{
+					Username: user.Username,
+					Nickname: sql.NullString{
+						String: user.Username,
+						Valid:  true,
+					},
+				}
+				store.EXPECT().
+					UpdateUser(gomock.Any(), gomock.Eq(arg)).
+					Times(1).
+					Return(db.User{}, &pq.Error{Code: "23505"})
+			},
+			checkResponse: func(recoder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusForbidden, recoder.Code)
+			},
+		},
+		{
+			name: "Duplicate Email",
+			body: gin.H{
+				"username": user.Username,
+				"email":    fmt.Sprintf("%s@email.com", user.Username),
+			},
+			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
+				addAuthorizatin(t, req, tokenMaker, user.Username, time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.UpdateUserParams{
+					Username: user.Username,
+					Email: sql.NullString{
+						String: fmt.Sprintf("%s@email.com", user.Username),
+						Valid:  true,
+					},
+				}
+				store.EXPECT().
+					UpdateUser(gomock.Any(), gomock.Eq(arg)).
+					Times(1).
+					Return(db.User{}, &pq.Error{Code: "23505"})
+			},
+			checkResponse: func(recoder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusForbidden, recoder.Code)
+			},
+		},
+		{
 			name: "Update Only Nickname",
 			body: gin.H{
 				"username": user.Username,

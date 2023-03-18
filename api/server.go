@@ -39,7 +39,7 @@ func (server *Server) setupRouter() {
 	router.POST("/user", server.createUser)
 	router.POST("/login", server.login)
 
-	router.PUT("/blog/inrc", server.incrViews)
+	router.PUT("/blog/incr/:id", server.incrViews)
 	router.GET("/blog", server.listBlogs)
 	router.GET("/blog/:id", server.getBlog)
 
@@ -51,6 +51,7 @@ func (server *Server) setupRouter() {
 
 		authRouter.POST("/blog", server.insertBlog)
 		authRouter.DELETE("/blog/:id", server.deleteBlog)
+		authRouter.PUT("/blog", server.updateBlog)
 	}
 
 	server.router = router
