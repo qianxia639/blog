@@ -182,10 +182,27 @@ func TestIncrViews(t *testing.T) {
 
 	store := newTestDB(t)
 
-	blogs, err := store.ListBlogs(ctx)
+	user, password := randomUser(t)
+
+	user, err := store.CreateUser(ctx, db.CreateUserParams{
+		Username: user.Username,
+		Nickname: user.Nickname,
+		Email:    user.Email,
+		Password: password,
+	})
 	require.NoError(t, err)
 
-	id := blogs[0].ID
+	ty, err := store.InsertType(ctx, fmt.Sprintf("%s-typeName", user.Username))
+	require.NoError(t, err)
+
+	blog, err := store.InsertBlog(ctx, db.InsertBlogParams{
+		OwnerID: user.ID,
+		TypeID:  ty.ID,
+		Title:   utils.RandomString(6),
+		Content: utils.RandomString(50),
+		Image:   fmt.Sprintf("%s.jpg", utils.RandomString(10)),
+	})
+	require.NoError(t, err)
 
 	testCases := []struct {
 		name          string
@@ -196,10 +213,10 @@ func TestIncrViews(t *testing.T) {
 			name: "OK",
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetBlog(gomock.Any(), gomock.Eq(id)).
+					GetBlog(gomock.Any(), gomock.Eq(blog.ID)).
 					Times(1)
 				store.EXPECT().
-					IncrViews(gomock.Any(), gomock.Eq(id)).
+					IncrViews(gomock.Any(), gomock.Eq(blog.ID)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -222,7 +239,7 @@ func TestIncrViews(t *testing.T) {
 			name: "Internal Error One",
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetBlog(gomock.Any(), gomock.Eq(id)).
+					GetBlog(gomock.Any(), gomock.Eq(blog.ID)).
 					Times(1).
 					Return(db.Blog{}, sql.ErrConnDone)
 			},
@@ -234,11 +251,11 @@ func TestIncrViews(t *testing.T) {
 			name: "Internal Error Two",
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetBlog(gomock.Any(), gomock.Eq(id)).
+					GetBlog(gomock.Any(), gomock.Eq(blog.ID)).
 					Times(1).
 					Return(db.Blog{}, nil)
 				store.EXPECT().
-					IncrViews(gomock.Any(), gomock.Eq(id)).
+					IncrViews(gomock.Any(), gomock.Eq(blog.ID)).
 					Times(1).
 					Return(sql.ErrConnDone)
 			},
@@ -260,7 +277,7 @@ func TestIncrViews(t *testing.T) {
 			server := newTestServer(t, store)
 			recodre := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/blog/incr/%d", id)
+			url := fmt.Sprintf("/blog/incr/%d", blog.ID)
 			request, err := http.NewRequest(http.MethodPut, url, nil)
 			require.NoError(t, err)
 
@@ -274,10 +291,27 @@ func TestDeleteBlog(t *testing.T) {
 
 	store := newTestDB(t)
 
-	blogs, err := store.ListBlogs(ctx)
+	user, password := randomUser(t)
+
+	user, err := store.CreateUser(ctx, db.CreateUserParams{
+		Username: user.Username,
+		Nickname: user.Nickname,
+		Email:    user.Email,
+		Password: password,
+	})
 	require.NoError(t, err)
 
-	id := blogs[0].ID
+	ty, err := store.InsertType(ctx, fmt.Sprintf("%s-typeName", user.Username))
+	require.NoError(t, err)
+
+	blog, err := store.InsertBlog(ctx, db.InsertBlogParams{
+		OwnerID: user.ID,
+		TypeID:  ty.ID,
+		Title:   utils.RandomString(6),
+		Content: utils.RandomString(50),
+		Image:   fmt.Sprintf("%s.jpg", utils.RandomString(10)),
+	})
+	require.NoError(t, err)
 
 	testCases := []struct {
 		name          string
@@ -292,7 +326,7 @@ func TestDeleteBlog(t *testing.T) {
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteBlog(gomock.Any(), gomock.Any()).
+					DeleteBlog(gomock.Any(), gomock.Eq(blog.ID)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -342,7 +376,7 @@ func TestDeleteBlog(t *testing.T) {
 			server := newTestServer(t, store)
 			recodre := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/blog/%d", id)
+			url := fmt.Sprintf("/blog/%d", blog.ID)
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
