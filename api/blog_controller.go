@@ -157,7 +157,7 @@ func (server *Server) deleteBlog(ctx *gin.Context) {
 
 type UpdateBlogRequest struct {
 	Id      int64   `json:"id" binding:"required"`
-	TypId   *int64  `json:"type_id"`
+	TypeId  *int64  `json:"type_id"`
 	Title   *string `json:"title"`
 	Content *string `json:"content"`
 	Image   *string `json:"image"`
@@ -174,9 +174,9 @@ func (server *Server) updateBlog(ctx *gin.Context) {
 		ID: req.Id,
 	}
 
-	if req.TypId != nil {
+	if req.TypeId != nil {
 		arg.TypeID = sql.NullInt64{
-			Int64: *req.TypId,
+			Int64: *req.TypeId,
 			Valid: true,
 		}
 	}
