@@ -70,8 +70,20 @@ func TestGetBlog(t *testing.T) {
 
 func TestListBlogs(t *testing.T) {
 
-	_, err := testQueries.ListBlogs(context.Background())
+	for i := 0; i < 10; i++ {
+		createRandomBlog(t)
+	}
+
+	blogs, err := testQueries.ListBlogs(context.Background(), ListBlogsParams{
+		Limit:  5,
+		Offset: 5,
+	})
 	require.NoError(t, err)
+	require.Len(t, blogs, 5)
+
+	for _, blog := range blogs {
+		require.NotEmpty(t, blog)
+	}
 }
 
 func TestDeleteBlog(t *testing.T) {

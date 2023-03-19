@@ -4,7 +4,6 @@ import (
 	db "Blog/db/sqlc"
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
@@ -49,15 +48,18 @@ func (server *Server) insertBlog(ctx *gin.Context) {
 	ctx.SecureJSON(http.StatusOK, "Insert Blog Successful")
 }
 
-func (server *Server) incrViews(ctx *gin.Context) {
+type incrViewsRequest struct {
+	Id int64 `uri:"id" binding:"required,min=1"`
+}
 
-	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
-	if err != nil {
-		ctx.SecureJSON(http.StatusBadRequest, "invalid parameter")
+func (server *Server) incrViews(ctx *gin.Context) {
+	var req incrViewsRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.SecureJSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	_, err = server.store.GetBlog(ctx, id)
+	_, err := server.store.GetBlog(ctx, req.Id)
 	if err != nil {
 		if err == ErrNoRows {
 			ctx.SecureJSON(http.StatusNotFound, err.Error())
@@ -67,7 +69,7 @@ func (server *Server) incrViews(ctx *gin.Context) {
 		return
 	}
 
-	err = server.store.IncrViews(ctx, id)
+	err = server.store.IncrViews(ctx, req.Id)
 	if err != nil {
 		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
 		return
@@ -76,9 +78,21 @@ func (server *Server) incrViews(ctx *gin.Context) {
 	ctx.SecureJSON(http.StatusOK, "Increment Views Successfully")
 }
 
-func (server *Server) listBlogs(ctx *gin.Context) {
+type listBlogsRequest struct {
+	PageNo   int32 `form:"page_no" binding:"required,min=1"`
+	PageSize int32 `form:"page_size" binding:"required,min=1"`
+}
 
-	blogs, err := server.store.ListBlogs(ctx)
+func (server *Server) listBlogs(ctx *gin.Context) {
+	var req listBlogsRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.SecureJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+	blogs, err := server.store.ListBlogs(ctx, db.ListBlogsParams{
+		Limit:  req.PageSize,
+		Offset: (req.PageNo - 1) * req.PageSize,
+	})
 	if err != nil {
 		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
 		return
@@ -87,14 +101,18 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 	ctx.SecureJSON(http.StatusOK, blogs)
 }
 
-func (server *Server) getBlog(ctx *gin.Context) {
-	id, _ := strconv.ParseInt(ctx.Param("id"), 10, 64)
-	// if err != nil {
-	// 	ctx.SecureJSON(http.StatusBadRequest, "invalid parameter")
-	// 	return
-	// }
+type getBlogRequest struct {
+	Id int64 `uri:"id" binding:"required,min=1"`
+}
 
-	blog, err := server.store.GetBlog(ctx, id)
+func (server *Server) getBlog(ctx *gin.Context) {
+	var req getBlogRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.SecureJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	blog, err := server.store.GetBlog(ctx, req.Id)
 	if err != nil {
 		if err == ErrNoRows {
 			ctx.SecureJSON(http.StatusNotFound, err.Error())
@@ -107,14 +125,28 @@ func (server *Server) getBlog(ctx *gin.Context) {
 	ctx.SecureJSON(http.StatusOK, blog)
 }
 
-func (server *Server) deleteBlog(ctx *gin.Context) {
-	id, _ := strconv.ParseInt(ctx.Param("id"), 10, 64)
-	// if err != nil {
-	// 	ctx.SecureJSON(http.StatusBadRequest, "invalid parameter")
-	// 	return
-	// }
+type deleteBlogRequest struct {
+	Id int64 `uri:"id" binding:"required,min=1"`
+}
 
-	err := server.store.DeleteBlog(ctx, id)
+func (server *Server) deleteBlog(ctx *gin.Context) {
+	var req deleteBlogRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.SecureJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	_, err := server.store.GetBlog(ctx, req.Id)
+	if err != nil {
+		if err == ErrNoRows {
+			ctx.SecureJSON(http.StatusNotFound, err.Error())
+			return
+		}
+		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = server.store.DeleteBlog(ctx, req.Id)
 	if err != nil {
 		ctx.SecureJSON(http.StatusInternalServerError, err)
 		return

@@ -18,7 +18,9 @@ WHERE id = $1 LIMIT 1;
 
 -- name: ListBlogs :many
 SELECT * FROM blogs
-ORDER BY created_at;
+ORDER BY created_at
+LIMIT $1
+OFFSET $2;
 
 -- name: DeleteBlog :exec
 DELETE FROM blogs

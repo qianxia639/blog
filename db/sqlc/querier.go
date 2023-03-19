@@ -16,7 +16,7 @@ type Querier interface {
 	IncrViews(ctx context.Context, id int64) error
 	InsertBlog(ctx context.Context, arg InsertBlogParams) (Blog, error)
 	InsertType(ctx context.Context, typeName string) (Type, error)
-	ListBlogs(ctx context.Context) ([]Blog, error)
+	ListBlogs(ctx context.Context, arg ListBlogsParams) ([]Blog, error)
 	UpdateBlog(ctx context.Context, arg UpdateBlogParams) (Blog, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }

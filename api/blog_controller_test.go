@@ -180,43 +180,23 @@ func TestInsertBlog(t *testing.T) {
 
 func TestIncrViews(t *testing.T) {
 
-	store := newTestDB(t)
-
-	user, password := randomUser(t)
-
-	user, err := store.CreateUser(ctx, db.CreateUserParams{
-		Username: user.Username,
-		Nickname: user.Nickname,
-		Email:    user.Email,
-		Password: password,
-	})
-	require.NoError(t, err)
-
-	ty, err := store.InsertType(ctx, fmt.Sprintf("%s-typeName", user.Username))
-	require.NoError(t, err)
-
-	blog, err := store.InsertBlog(ctx, db.InsertBlogParams{
-		OwnerID: user.ID,
-		TypeID:  ty.ID,
-		Title:   utils.RandomString(6),
-		Content: utils.RandomString(50),
-		Image:   fmt.Sprintf("%s.jpg", utils.RandomString(10)),
-	})
-	require.NoError(t, err)
+	id := utils.RandomInt(1, 100)
 
 	testCases := []struct {
 		name          string
+		blogId        int64
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
 		{
-			name: "OK",
+			name:   "OK",
+			blogId: id,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetBlog(gomock.Any(), gomock.Eq(blog.ID)).
+					GetBlog(gomock.Any(), gomock.Eq(id)).
 					Times(1)
 				store.EXPECT().
-					IncrViews(gomock.Any(), gomock.Eq(blog.ID)).
+					IncrViews(gomock.Any(), gomock.Eq(id)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -224,7 +204,8 @@ func TestIncrViews(t *testing.T) {
 			},
 		},
 		{
-			name: "Not Found",
+			name:   "Not Found",
+			blogId: id,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetBlog(gomock.Any(), gomock.Any()).
@@ -236,10 +217,11 @@ func TestIncrViews(t *testing.T) {
 			},
 		},
 		{
-			name: "Internal Error One",
+			name:   "Internal Error One",
+			blogId: id,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetBlog(gomock.Any(), gomock.Eq(blog.ID)).
+					GetBlog(gomock.Any(), gomock.Eq(id)).
 					Times(1).
 					Return(db.Blog{}, sql.ErrConnDone)
 			},
@@ -248,19 +230,32 @@ func TestIncrViews(t *testing.T) {
 			},
 		},
 		{
-			name: "Internal Error Two",
+			name:   "Internal Error Two",
+			blogId: id,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetBlog(gomock.Any(), gomock.Eq(blog.ID)).
+					GetBlog(gomock.Any(), gomock.Eq(id)).
 					Times(1).
 					Return(db.Blog{}, nil)
 				store.EXPECT().
-					IncrViews(gomock.Any(), gomock.Eq(blog.ID)).
+					IncrViews(gomock.Any(), gomock.Eq(id)).
 					Times(1).
 					Return(sql.ErrConnDone)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recoder.Code)
+			},
+		},
+		{
+			name:   "Invalid ID",
+			blogId: 0,
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetBlog(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recoder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recoder.Code)
 			},
 		},
 	}
@@ -277,7 +272,7 @@ func TestIncrViews(t *testing.T) {
 			server := newTestServer(t, store)
 			recodre := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/blog/incr/%d", blog.ID)
+			url := fmt.Sprintf("/blog/incr/%d", tc.blogId)
 			request, err := http.NewRequest(http.MethodPut, url, nil)
 			require.NoError(t, err)
 
@@ -289,44 +284,27 @@ func TestIncrViews(t *testing.T) {
 
 func TestDeleteBlog(t *testing.T) {
 
-	store := newTestDB(t)
-
-	user, password := randomUser(t)
-
-	user, err := store.CreateUser(ctx, db.CreateUserParams{
-		Username: user.Username,
-		Nickname: user.Nickname,
-		Email:    user.Email,
-		Password: password,
-	})
-	require.NoError(t, err)
-
-	ty, err := store.InsertType(ctx, fmt.Sprintf("%s-typeName", user.Username))
-	require.NoError(t, err)
-
-	blog, err := store.InsertBlog(ctx, db.InsertBlogParams{
-		OwnerID: user.ID,
-		TypeID:  ty.ID,
-		Title:   utils.RandomString(6),
-		Content: utils.RandomString(50),
-		Image:   fmt.Sprintf("%s.jpg", utils.RandomString(10)),
-	})
-	require.NoError(t, err)
+	id := utils.RandomInt(1, 100)
 
 	testCases := []struct {
 		name          string
+		blogId        int64
 		setupAuth     func(t *testing.T, req *http.Request, tokenMaker token.Maker)
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
 		{
-			name: "OK",
+			name:   "OK",
+			blogId: id,
 			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
 				addAuthorizatin(t, req, tokenMaker, "user", time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteBlog(gomock.Any(), gomock.Eq(blog.ID)).
+					GetBlog(gomock.Any(), gomock.Eq(id)).
+					Times(1)
+				store.EXPECT().
+					DeleteBlog(gomock.Any(), gomock.Eq(id)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -334,13 +312,50 @@ func TestDeleteBlog(t *testing.T) {
 			},
 		},
 		{
-			name: "Internal Error",
+			name:   "Not Found",
+			blogId: id,
 			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
 				addAuthorizatin(t, req, tokenMaker, "user", time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteBlog(gomock.Any(), gomock.Any()).
+					GetBlog(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(db.Blog{}, sql.ErrNoRows)
+			},
+			checkResponse: func(recoder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusNotFound, recoder.Code)
+			},
+		},
+		{
+			name:   "Internal Error One",
+			blogId: id,
+			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
+				addAuthorizatin(t, req, tokenMaker, "user", time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetBlog(gomock.Any(), gomock.Eq(id)).
+					Times(1).
+					Return(db.Blog{}, sql.ErrConnDone)
+			},
+			checkResponse: func(recoder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recoder.Code)
+			},
+		},
+		{
+			name:   "Internal Error Two",
+			blogId: id,
+			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
+				addAuthorizatin(t, req, tokenMaker, "user", time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetBlog(gomock.Any(), gomock.Eq(id)).
+					Times(1).
+					Return(db.Blog{}, nil)
+				store.EXPECT().
+					DeleteBlog(gomock.Any(), gomock.Eq(id)).
 					Times(1).
 					Return(sql.ErrConnDone)
 			},
@@ -348,20 +363,21 @@ func TestDeleteBlog(t *testing.T) {
 				require.Equal(t, http.StatusInternalServerError, recoder.Code)
 			},
 		},
-		// {
-		// 	name: "Bad Request Error",
-		// 	setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
-		// 		addAuthorizatin(t, req, tokenMaker, "user", time.Minute)
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore) {
-		// 		store.EXPECT().
-		// 			DeleteBlog(gomock.Any(), "invalid").
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(recoder *httptest.ResponseRecorder) {
-		// 		require.Equal(t, http.StatusBadRequest, recoder.Code)
-		// 	},
-		// },
+		{
+			name:   "Invalid ID",
+			blogId: 0,
+			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
+				addAuthorizatin(t, req, tokenMaker, "user", time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetBlog(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recoder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recoder.Code)
+			},
+		},
 	}
 
 	for i := range testCases {
@@ -376,7 +392,7 @@ func TestDeleteBlog(t *testing.T) {
 			server := newTestServer(t, store)
 			recodre := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/blog/%d", blog.ID)
+			url := fmt.Sprintf("/blog/%d", tc.blogId)
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
@@ -388,17 +404,36 @@ func TestDeleteBlog(t *testing.T) {
 	}
 }
 
+type Page struct {
+	PageNo   int32 `json:"page_no"`
+	PageSize int32 `json:"page_size"`
+}
+
 func TestListBlog(t *testing.T) {
+
+	page := Page{
+		PageNo:   5,
+		PageSize: 5,
+	}
+
 	testCases := []struct {
 		name          string
+		page          Page
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
+			page: page,
 			buildStubs: func(store *mockdb.MockStore) {
+
+				arg := db.ListBlogsParams{
+					Limit:  page.PageSize,
+					Offset: (page.PageNo - 1) * page.PageSize,
+				}
+
 				store.EXPECT().
-					ListBlogs(gomock.Any()).
+					ListBlogs(gomock.Any(), arg).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -407,9 +442,14 @@ func TestListBlog(t *testing.T) {
 		},
 		{
 			name: "Internal Error",
+			page: page,
 			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.ListBlogsParams{
+					Limit:  page.PageSize,
+					Offset: (page.PageNo - 1) * page.PageSize,
+				}
 				store.EXPECT().
-					ListBlogs(gomock.Any()).
+					ListBlogs(gomock.Any(), arg).
 					Times(1).
 					Return([]db.Blog{}, sql.ErrConnDone)
 			},
@@ -417,17 +457,21 @@ func TestListBlog(t *testing.T) {
 				require.Equal(t, http.StatusInternalServerError, recoder.Code)
 			},
 		},
-		// {
-		// 	name: "Bad Request Error",
-		// 	buildStubs: func(store *mockdb.MockStore) {
-		// 		store.EXPECT().
-		// 			GetBlog(gomock.Any(), "invalid").
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(recoder *httptest.ResponseRecorder) {
-		// 		require.Equal(t, http.StatusBadRequest, recoder.Code)
-		// 	},
-		// },
+		{
+			name: "Invalid Parameter",
+			page: Page{
+				PageNo:   0,
+				PageSize: 0,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetBlog(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recoder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recoder.Code)
+			},
+		},
 	}
 
 	for i := range testCases {
@@ -442,7 +486,7 @@ func TestListBlog(t *testing.T) {
 			server := newTestServer(t, store)
 			recodre := httptest.NewRecorder()
 
-			url := "/blog"
+			url := fmt.Sprintf("/blog?page_no=%d&page_size=%d", tc.page.PageNo, tc.page.PageSize)
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -454,16 +498,20 @@ func TestListBlog(t *testing.T) {
 
 func TestGetBlog(t *testing.T) {
 
+	id := utils.RandomInt(1, 100)
+
 	testCases := []struct {
 		name          string
+		blogId        int64
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
 		{
-			name: "OK",
+			name:   "OK",
+			blogId: id,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetBlog(gomock.Any(), gomock.Any()).
+					GetBlog(gomock.Any(), gomock.Eq(id)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -471,10 +519,11 @@ func TestGetBlog(t *testing.T) {
 			},
 		},
 		{
-			name: "Internal Error",
+			name:   "Internal Error",
+			blogId: id,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetBlog(gomock.Any(), gomock.Any()).
+					GetBlog(gomock.Any(), gomock.Eq(id)).
 					Times(1).
 					Return(db.Blog{}, sql.ErrConnDone)
 			},
@@ -483,10 +532,11 @@ func TestGetBlog(t *testing.T) {
 			},
 		},
 		{
-			name: "Not Found",
+			name:   "Not Found",
+			blogId: id,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetBlog(gomock.Any(), gomock.Any()).
+					GetBlog(gomock.Any(), gomock.Eq(id)).
 					Times(1).
 					Return(db.Blog{}, sql.ErrNoRows)
 			},
@@ -494,20 +544,18 @@ func TestGetBlog(t *testing.T) {
 				require.Equal(t, http.StatusNotFound, recoder.Code)
 			},
 		},
-		// {
-		// 	name: "Bad Request Error",
-		// 	setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
-		// 		addAuthorizatin(t, req, tokenMaker, "user", time.Minute)
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore) {
-		// 		store.EXPECT().
-		// 			DeleteBlog(gomock.Any(), "invalid").
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(recoder *httptest.ResponseRecorder) {
-		// 		require.Equal(t, http.StatusBadRequest, recoder.Code)
-		// 	},
-		// },
+		{
+			name:   "Invalid Id",
+			blogId: 0,
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetBlog(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recoder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recoder.Code)
+			},
+		},
 	}
 
 	for i := range testCases {
@@ -522,7 +570,7 @@ func TestGetBlog(t *testing.T) {
 			server := newTestServer(t, store)
 			recodre := httptest.NewRecorder()
 
-			url := "/blog/:id"
+			url := fmt.Sprintf("/blog/%d", tc.blogId)
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 

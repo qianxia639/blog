@@ -97,10 +97,17 @@ func (q *Queries) InsertBlog(ctx context.Context, arg InsertBlogParams) (Blog, e
 const listBlogs = `-- name: ListBlogs :many
 SELECT id, owner_id, type_id, title, content, image, views, created_at, updated_at FROM blogs
 ORDER BY created_at
+LIMIT $1
+OFFSET $2
 `
 
-func (q *Queries) ListBlogs(ctx context.Context) ([]Blog, error) {
-	rows, err := q.db.QueryContext(ctx, listBlogs)
+type ListBlogsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListBlogs(ctx context.Context, arg ListBlogsParams) ([]Blog, error) {
+	rows, err := q.db.QueryContext(ctx, listBlogs, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

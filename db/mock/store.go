@@ -139,18 +139,18 @@ func (mr *MockStoreMockRecorder) InsertType(arg0, arg1 interface{}) *gomock.Call
 }
 
 // ListBlogs mocks base method.
-func (m *MockStore) ListBlogs(arg0 context.Context) ([]db.Blog, error) {
+func (m *MockStore) ListBlogs(arg0 context.Context, arg1 db.ListBlogsParams) ([]db.Blog, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListBlogs", arg0)
+	ret := m.ctrl.Call(m, "ListBlogs", arg0, arg1)
 	ret0, _ := ret[0].([]db.Blog)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListBlogs indicates an expected call of ListBlogs.
-func (mr *MockStoreMockRecorder) ListBlogs(arg0 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) ListBlogs(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListBlogs", reflect.TypeOf((*MockStore)(nil).ListBlogs), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListBlogs", reflect.TypeOf((*MockStore)(nil).ListBlogs), arg0, arg1)
 }
 
 // UpdateBlog mocks base method.
