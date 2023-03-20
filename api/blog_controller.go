@@ -4,6 +4,7 @@ import (
 	db "Blog/db/sqlc"
 	"database/sql"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
@@ -101,18 +102,14 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 	ctx.SecureJSON(http.StatusOK, blogs)
 }
 
-type getBlogRequest struct {
-	Id int64 `uri:"id" binding:"required,min=1"`
-}
-
 func (server *Server) getBlog(ctx *gin.Context) {
-	var req getBlogRequest
-	if err := ctx.ShouldBindUri(&req); err != nil {
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+	if err != nil {
 		ctx.SecureJSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	blog, err := server.store.GetBlog(ctx, req.Id)
+	blog, err := server.store.GetBlog(ctx, id)
 	if err != nil {
 		if err == ErrNoRows {
 			ctx.SecureJSON(http.StatusNotFound, err.Error())
