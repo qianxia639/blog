@@ -7,12 +7,12 @@ import (
 	"github.com/lib/pq"
 )
 
-type InsertTypeRequest struct {
+type insertTypeRequest struct {
 	TypeName string `json:"type_name" binding:"required"`
 }
 
 func (server *Server) insertType(ctx *gin.Context) {
-	var req InsertTypeRequest
+	var req insertTypeRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.SecureJSON(http.StatusBadRequest, err.Error)
 		return

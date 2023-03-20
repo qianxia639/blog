@@ -9,21 +9,23 @@ services:
       - POSTGRES_DB=blog
     ports:
       - "5432:5432"
+    restart: always
+    user: postgres
 
-  blog:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "9010:9010"
-    environment:
-      POSTGRES.SOURCE: postgresql://root:root@postgres:5432/blog?sslmode=disable&timeZone=Asia/Shanghai
-    depends_on:
-      - postgres
-    entrypoint: [
-      "/app/wait-for.sh",
-      "postgres:5432",
-      "--",
-      "/app/start.sh"
-    ]
-    command: ["/app/blog"]
+  # blog:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "9010:9010"
+  #   environment:
+  #     POSTGRES.SOURCE: postgresql://root:root@postgres:5432/blog?sslmode=disable&timeZone=Asia/Shanghai
+  #   depends_on:
+  #     - postgres
+  #   entrypoint: [
+  #     "/app/wait-for.sh",
+  #     "postgres:5432",
+  #     "--",
+  #     "/app/start.sh"
+  #   ]
+  #   command: ["/app/blog"]

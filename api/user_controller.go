@@ -11,14 +11,14 @@ import (
 	"github.com/lib/pq"
 )
 
-type CreateUserRequest struct {
+type createUserRequest struct {
 	Username string `json:"username" binding:"alphanum"`
 	Email    string `json:"email" binding:"email"`
 	Password string `json:"password" binding:"min=6,max=20"`
 }
 
 func (server *Server) createUser(ctx *gin.Context) {
-	var req CreateUserRequest
+	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.SecureJSON(http.StatusBadRequest, err.Error())
 		return
@@ -53,19 +53,19 @@ func (server *Server) createUser(ctx *gin.Context) {
 	ctx.SecureJSON(http.StatusOK, "Create User Successfully")
 }
 
-type LoginRequest struct {
+type loginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password"`
 }
 
-type LoginResponse struct {
+type loginResponse struct {
 	Token string  `json:"token"`
 	User  db.User `json:"user"`
 }
 
 func (server *Server) login(ctx *gin.Context) {
 
-	var req LoginRequest
+	var req loginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.SecureJSON(http.StatusBadRequest, err.Error())
 		return
@@ -92,7 +92,7 @@ func (server *Server) login(ctx *gin.Context) {
 		return
 	}
 
-	resp := LoginResponse{
+	resp := loginResponse{
 		Token: token,
 		User: db.User{
 			ID:           user.ID,
@@ -107,7 +107,7 @@ func (server *Server) login(ctx *gin.Context) {
 	ctx.SecureJSON(http.StatusOK, resp)
 }
 
-type UpdateUserRequest struct {
+type updateUserRequest struct {
 	Username string  `json:"username" binding:"required"`
 	Email    *string `json:"email"`
 	Nickname *string `json:"nickname"`
@@ -116,7 +116,7 @@ type UpdateUserRequest struct {
 }
 
 func (server *Server) updateUser(ctx *gin.Context) {
-	var req UpdateUserRequest
+	var req updateUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.SecureJSON(http.StatusBadRequest, err.Error())
 		return

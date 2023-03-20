@@ -433,7 +433,7 @@ func TestListBlog(t *testing.T) {
 				}
 
 				store.EXPECT().
-					ListBlogs(gomock.Any(), arg).
+					ListBlogs(gomock.Any(), gomock.Eq(arg)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -449,7 +449,7 @@ func TestListBlog(t *testing.T) {
 					Offset: (page.PageNo - 1) * page.PageSize,
 				}
 				store.EXPECT().
-					ListBlogs(gomock.Any(), arg).
+					ListBlogs(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return([]db.Blog{}, sql.ErrConnDone)
 			},
@@ -465,7 +465,7 @@ func TestListBlog(t *testing.T) {
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetBlog(gomock.Any(), gomock.Any()).
+					ListBlogs(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {

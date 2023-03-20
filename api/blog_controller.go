@@ -4,13 +4,12 @@ import (
 	db "Blog/db/sqlc"
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 )
 
-type InsertBlogRequest struct {
+type insertBlogRequest struct {
 	OwnerId int64  `json:"owner_id" binding:"required"`
 	TypeId  int64  `json:"type_id" binding:"required"`
 	Title   string `json:"title" binding:"required"`
@@ -19,7 +18,7 @@ type InsertBlogRequest struct {
 }
 
 func (server *Server) insertBlog(ctx *gin.Context) {
-	var req InsertBlogRequest
+	var req insertBlogRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.SecureJSON(http.StatusBadRequest, err.Error)
 		return
@@ -102,14 +101,18 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 	ctx.SecureJSON(http.StatusOK, blogs)
 }
 
+type getBlogRequest struct {
+	Id int64 `uri:"id" binding:"required,min=1"`
+}
+
 func (server *Server) getBlog(ctx *gin.Context) {
-	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
-	if err != nil {
+	var req getBlogRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.SecureJSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	blog, err := server.store.GetBlog(ctx, id)
+	blog, err := server.store.GetBlog(ctx, req.Id)
 	if err != nil {
 		if err == ErrNoRows {
 			ctx.SecureJSON(http.StatusNotFound, err.Error())
@@ -152,7 +155,7 @@ func (server *Server) deleteBlog(ctx *gin.Context) {
 	ctx.SecureJSON(http.StatusOK, "Delete Blog Successfully")
 }
 
-type UpdateBlogRequest struct {
+type updateBlogRequest struct {
 	Id      int64   `json:"id" binding:"required"`
 	TypeId  *int64  `json:"type_id"`
 	Title   *string `json:"title"`
@@ -161,7 +164,7 @@ type UpdateBlogRequest struct {
 }
 
 func (server *Server) updateBlog(ctx *gin.Context) {
-	var req UpdateBlogRequest
+	var req updateBlogRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.SecureJSON(http.StatusBadRequest, err.Error())
 		return
