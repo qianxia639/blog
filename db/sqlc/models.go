@@ -5,6 +5,7 @@
 package db
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -27,6 +28,31 @@ type Blog struct {
 	CreatedAt time.Time `json:"created_at"`
 	// 修改时间
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type RequestLog struct {
+	// 主键
+	ID int64 `json:"id"`
+	// 请求方式
+	Method string `json:"method"`
+	// 路由
+	Path string `json:"path"`
+	// 状态码
+	StatusCode int32 `json:"status_code"`
+	// 访问ip
+	Ip string `json:"ip"`
+	// 主机名
+	Hostname string `json:"hostname"`
+	// 请求体
+	RequestBody sql.NullString `json:"request_body"`
+	// 响应时间/ms
+	ResponseTime int64 `json:"response_time"`
+	// 请求时间
+	RequestTime time.Time `json:"request_time"`
+	// 请求数据类型
+	ContentType string `json:"content_type"`
+	// ua
+	UserAgent string `json:"user_agent"`
 }
 
 type Type struct {

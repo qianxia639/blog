@@ -1,7 +1,6 @@
 package api
 
 import (
-	"Blog/token"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +11,7 @@ const (
 	authorizationPayloadKey = "Authorization_Payload"
 )
 
-func (srever Server) authMiddlware(tokenMaker token.Maker) gin.HandlerFunc {
+func (server Server) authMiddlware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authorization := ctx.Request.Header.Get(authorizationHeader)
 
@@ -21,7 +20,7 @@ func (srever Server) authMiddlware(tokenMaker token.Maker) gin.HandlerFunc {
 			return
 		}
 
-		payload, err := tokenMaker.VerifyToken(authorization)
+		payload, err := server.maker.VerifyToken(authorization)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, err.Error())
 			return
