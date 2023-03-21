@@ -1,7 +1,7 @@
 CREATE TABLE "comments" (
   "id" bigserial PRIMARY KEY,
   "blog_id" int8 NOT NULL,
-  "comment_id" int8 NOT NULL,
+  "comment_id" int8 DEFAULT 0,
   "nickname" varchar(20) NOT NULL,
   "avatar" varchar(255) NOT NULL DEFAULT '',
   "content" varchar(255) NOT NULL,

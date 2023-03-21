@@ -30,6 +30,23 @@ type Blog struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type Comment struct {
+	// 主键
+	ID int64 `json:"id"`
+	// 博客Id
+	BlogID int64 `json:"blog_id"`
+	// 父评论Id
+	CommentID sql.NullInt64 `json:"comment_id"`
+	// 昵称
+	Nickname string `json:"nickname"`
+	// 头像
+	Avatar string `json:"avatar"`
+	// 评论内容
+	Content string `json:"content"`
+	// 创建时间
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type RequestLog struct {
 	// 主键
 	ID int64 `json:"id"`
