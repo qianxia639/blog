@@ -36,7 +36,7 @@ type Comment struct {
 	// 博客Id
 	BlogID int64 `json:"blog_id"`
 	// 父评论Id
-	CommentID sql.NullInt64 `json:"comment_id"`
+	CommentID int64 `json:"comment_id"`
 	// 昵称
 	Nickname string `json:"nickname"`
 	// 头像

@@ -1,7 +1,7 @@
 CREATE TABLE "comments" (
   "id" bigserial PRIMARY KEY,
   "blog_id" int8 NOT NULL,
-  "comment_id" int8 DEFAULT 0,
+  "comment_id" int8 NOT NULL DEFAULT 0,
   "nickname" varchar(20) NOT NULL,
   "avatar" varchar(255) NOT NULL DEFAULT '',
   "content" varchar(255) NOT NULL,
@@ -23,5 +23,3 @@ COMMENT ON COLUMN "comments"."content" IS '评论内容';
 COMMENT ON COLUMN "comments"."created_at" IS '创建时间';
 
 ALTER TABLE "comments" ADD FOREIGN KEY ("blog_id") REFERENCES "blogs" ("id");
-
-ALTER TABLE "comments" ADD FOREIGN KEY ("comment_id") REFERENCES "comments" ("id");

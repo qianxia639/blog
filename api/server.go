@@ -36,7 +36,7 @@ func NewServer(conf config.Config, store db.Store) (*Server, error) {
 func (server *Server) setupRouter() {
 	router := gin.Default()
 
-	router.Use(server.requestLogMiddleware())
+	// router.Use(server.requestLogMiddleware())
 
 	router.POST("/user", server.createUser)
 	router.POST("/login", server.login)
@@ -44,6 +44,8 @@ func (server *Server) setupRouter() {
 	router.PUT("/blog/incr/:id", server.incrViews)
 	router.GET("/blog", server.listBlogs)
 	router.GET("/blog/:id", server.getBlog)
+
+	router.POST("/comment", server.insertComment)
 
 	authRouter := router.Group("/").Use(server.authMiddlware())
 	{
