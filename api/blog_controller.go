@@ -3,6 +3,7 @@ package api
 import (
 	db "Blog/db/sqlc"
 	"database/sql"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -216,4 +217,16 @@ func (server *Server) updateBlog(ctx *gin.Context) {
 	}
 
 	ctx.SecureJSON(http.StatusOK, "Update Blog Successfully")
+}
+
+func (server *Server) searchBlog(ctx *gin.Context) {
+	title := ctx.Query("title")
+	title = fmt.Sprintf("%%%s%%", title)
+	blogs, err := server.store.SearchBlog(ctx, title)
+	if err != nil {
+		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, blogs)
 }

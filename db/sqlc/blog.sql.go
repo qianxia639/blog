@@ -139,6 +139,44 @@ func (q *Queries) ListBlogs(ctx context.Context, arg ListBlogsParams) ([]Blog, e
 	return items, nil
 }
 
+const searchBlog = `-- name: SearchBlog :many
+SELECT id, owner_id, type_id, title, content, image, views, created_at, updated_at FROM blogs
+WHERE title LIKE $1
+`
+
+func (q *Queries) SearchBlog(ctx context.Context, title string) ([]Blog, error) {
+	rows, err := q.db.QueryContext(ctx, searchBlog, title)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Blog{}
+	for rows.Next() {
+		var i Blog
+		if err := rows.Scan(
+			&i.ID,
+			&i.OwnerID,
+			&i.TypeID,
+			&i.Title,
+			&i.Content,
+			&i.Image,
+			&i.Views,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateBlog = `-- name: UpdateBlog :one
 UPDATE blogs
 SET

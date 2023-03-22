@@ -19,6 +19,7 @@ type Querier interface {
 	InsertRequestLog(ctx context.Context, arg InsertRequestLogParams) (RequestLog, error)
 	InsertType(ctx context.Context, typeName string) (Type, error)
 	ListBlogs(ctx context.Context, arg ListBlogsParams) ([]Blog, error)
+	SearchBlog(ctx context.Context, title string) ([]Blog, error)
 	UpdateBlog(ctx context.Context, arg UpdateBlogParams) (Blog, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }

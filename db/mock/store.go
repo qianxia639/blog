@@ -183,6 +183,21 @@ func (mr *MockStoreMockRecorder) ListBlogs(arg0, arg1 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListBlogs", reflect.TypeOf((*MockStore)(nil).ListBlogs), arg0, arg1)
 }
 
+// SearchBlog mocks base method.
+func (m *MockStore) SearchBlog(arg0 context.Context, arg1 string) ([]db.Blog, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchBlog", arg0, arg1)
+	ret0, _ := ret[0].([]db.Blog)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchBlog indicates an expected call of SearchBlog.
+func (mr *MockStoreMockRecorder) SearchBlog(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchBlog", reflect.TypeOf((*MockStore)(nil).SearchBlog), arg0, arg1)
+}
+
 // UpdateBlog mocks base method.
 func (m *MockStore) UpdateBlog(arg0 context.Context, arg1 db.UpdateBlogParams) (db.Blog, error) {
 	m.ctrl.T.Helper()

@@ -44,6 +44,7 @@ func (server *Server) setupRouter() {
 	router.PUT("/blog/incr/:id", server.incrViews)
 	router.GET("/blog", server.listBlogs)
 	router.GET("/blog/:id", server.getBlog)
+	router.GET("/blog/search", server.searchBlog)
 
 	router.POST("/comment", server.insertComment)
 

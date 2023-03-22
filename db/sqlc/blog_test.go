@@ -204,3 +204,14 @@ func TestUpdateBlogAll(t *testing.T) {
 	require.Equal(t, content, newBlog.Content)
 	require.Equal(t, image, newBlog.Image)
 }
+
+func TestSearchBlog(t *testing.T) {
+
+	str := fmt.Sprintf("%%%s%%", "s")
+	t.Logf("str: %s\n", str)
+
+	blogs, err := testQueries.SearchBlog(ctx, str)
+	require.NoError(t, err)
+
+	t.Logf("[]blogs: %#+v\n", blogs)
+}

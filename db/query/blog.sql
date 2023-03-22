@@ -36,3 +36,7 @@ SET
 WHERE 
     id = sqlc.arg(id)
 RETURNING *;
+
+-- name: SearchBlog :many
+SELECT * FROM blogs
+WHERE title LIKE $1;
