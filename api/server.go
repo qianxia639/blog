@@ -46,7 +46,8 @@ func (server *Server) setupRouter() {
 	router.GET("/blog/:id", server.getBlog)
 	router.GET("/blog/search", server.searchBlog)
 
-	router.POST("/comment", server.insertComment)
+	router.POST("/comment", server.createComment)
+	router.GET("/comment", server.getComments)
 
 	authRouter := router.Group("/").Use(server.authMiddlware())
 	{

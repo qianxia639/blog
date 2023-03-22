@@ -35,6 +35,21 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
+// CreateComment mocks base method.
+func (m *MockStore) CreateComment(arg0 context.Context, arg1 db.CreateCommentParams) (db.Comment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateComment", arg0, arg1)
+	ret0, _ := ret[0].(db.Comment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateComment indicates an expected call of CreateComment.
+func (mr *MockStoreMockRecorder) CreateComment(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateComment", reflect.TypeOf((*MockStore)(nil).CreateComment), arg0, arg1)
+}
+
 // CreateUser mocks base method.
 func (m *MockStore) CreateUser(arg0 context.Context, arg1 db.CreateUserParams) (db.User, error) {
 	m.ctrl.T.Helper()
@@ -79,6 +94,36 @@ func (mr *MockStoreMockRecorder) GetBlog(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBlog", reflect.TypeOf((*MockStore)(nil).GetBlog), arg0, arg1)
 }
 
+// GetChildComments mocks base method.
+func (m *MockStore) GetChildComments(arg0 context.Context, arg1 db.GetChildCommentsParams) ([]db.Comment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetChildComments", arg0, arg1)
+	ret0, _ := ret[0].([]db.Comment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetChildComments indicates an expected call of GetChildComments.
+func (mr *MockStoreMockRecorder) GetChildComments(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChildComments", reflect.TypeOf((*MockStore)(nil).GetChildComments), arg0, arg1)
+}
+
+// GetComments mocks base method.
+func (m *MockStore) GetComments(arg0 context.Context, arg1 int64) ([]db.Comment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetComments", arg0, arg1)
+	ret0, _ := ret[0].([]db.Comment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetComments indicates an expected call of GetComments.
+func (mr *MockStoreMockRecorder) GetComments(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetComments", reflect.TypeOf((*MockStore)(nil).GetComments), arg0, arg1)
+}
+
 // GetUser mocks base method.
 func (m *MockStore) GetUser(arg0 context.Context, arg1 string) (db.User, error) {
 	m.ctrl.T.Helper()
@@ -121,21 +166,6 @@ func (m *MockStore) InsertBlog(arg0 context.Context, arg1 db.InsertBlogParams) (
 func (mr *MockStoreMockRecorder) InsertBlog(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertBlog", reflect.TypeOf((*MockStore)(nil).InsertBlog), arg0, arg1)
-}
-
-// InsertComment mocks base method.
-func (m *MockStore) InsertComment(arg0 context.Context, arg1 db.InsertCommentParams) (db.Comment, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertComment", arg0, arg1)
-	ret0, _ := ret[0].(db.Comment)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// InsertComment indicates an expected call of InsertComment.
-func (mr *MockStoreMockRecorder) InsertComment(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertComment", reflect.TypeOf((*MockStore)(nil).InsertComment), arg0, arg1)
 }
 
 // InsertRequestLog mocks base method.

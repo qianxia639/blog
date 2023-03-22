@@ -34,9 +34,9 @@ type Comment struct {
 	// 主键
 	ID int64 `json:"id"`
 	// 博客Id
-	BlogID int64 `json:"blog_id"`
+	OwnerID int64 `json:"owner_id"`
 	// 父评论Id
-	CommentID int64 `json:"comment_id"`
+	ParentID int64 `json:"parent_id"`
 	// 昵称
 	Nickname string `json:"nickname"`
 	// 头像

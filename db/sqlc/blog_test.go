@@ -208,10 +208,7 @@ func TestUpdateBlogAll(t *testing.T) {
 func TestSearchBlog(t *testing.T) {
 
 	str := fmt.Sprintf("%%%s%%", "s")
-	t.Logf("str: %s\n", str)
 
-	blogs, err := testQueries.SearchBlog(ctx, str)
+	_, err := testQueries.SearchBlog(ctx, str)
 	require.NoError(t, err)
-
-	t.Logf("[]blogs: %#+v\n", blogs)
 }
