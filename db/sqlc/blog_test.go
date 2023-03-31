@@ -13,25 +13,23 @@ import (
 
 func createRandomBlog(t *testing.T) Blog {
 	user := createRandomUser(t)
-	ty := createRandomType(t)
 
 	title := utils.RandomString(6)
 	content := fmt.Sprintf("%s-content", title)
 	image := fmt.Sprintf("%s.jpg", title)
 
 	arg := InsertBlogParams{
-		OwnerID: user.ID,
-		TypeID:  ty.ID,
-		Title:   title,
-		Content: content,
-		Image:   image,
+		OwnerID:   user.ID,
+		Title:     title,
+		Content:   content,
+		Image:     image,
+		CreatedAt: time.Now(),
 	}
 
 	blog, err := testQueries.InsertBlog(context.Background(), arg)
 	require.NoError(t, err)
 
 	require.Equal(t, user.ID, blog.OwnerID)
-	require.Equal(t, ty.ID, blog.TypeID)
 	require.Equal(t, title, blog.Title)
 	require.Equal(t, content, blog.Content)
 	require.Equal(t, image, blog.Image)
@@ -59,7 +57,6 @@ func TestGetBlog(t *testing.T) {
 
 	require.Equal(t, blog1.ID, blog2.ID)
 	require.Equal(t, blog1.OwnerID, blog2.OwnerID)
-	require.Equal(t, blog1.TypeID, blog2.TypeID)
 	require.Equal(t, blog1.Title, blog2.Title)
 	require.Equal(t, blog1.Content, blog2.Content)
 	require.Equal(t, blog1.Image, blog2.Image)
@@ -94,24 +91,6 @@ func TestDeleteBlog(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestUpdateBlogOnlyTypeID(t *testing.T) {
-
-	blog := createRandomBlog(t)
-	ty := createRandomType(t)
-
-	newBlog, err := testQueries.UpdateBlog(ctx, UpdateBlogParams{
-		ID: blog.ID,
-		TypeID: sql.NullInt64{
-			Int64: ty.ID,
-			Valid: true,
-		},
-	})
-	require.NoError(t, err)
-
-	require.NotEqual(t, blog.TypeID, newBlog.TypeID)
-	require.Equal(t, ty.ID, newBlog.TypeID)
-}
-
 func TestUpdateBlogOnlyTitle(t *testing.T) {
 
 	blog := createRandomBlog(t)
@@ -124,6 +103,7 @@ func TestUpdateBlogOnlyTitle(t *testing.T) {
 			String: title,
 			Valid:  true,
 		},
+		UpdatedAt: time.Now(),
 	})
 	require.NoError(t, err)
 
@@ -143,6 +123,7 @@ func TestUpdateBlogOnlyContent(t *testing.T) {
 			String: content,
 			Valid:  true,
 		},
+		UpdatedAt: time.Now(),
 	})
 	require.NoError(t, err)
 
@@ -162,6 +143,7 @@ func TestUpdateBlogOnlyImage(t *testing.T) {
 			String: image,
 			Valid:  true,
 		},
+		UpdatedAt: time.Now(),
 	})
 	require.NoError(t, err)
 
@@ -172,18 +154,12 @@ func TestUpdateBlogOnlyImage(t *testing.T) {
 func TestUpdateBlogAll(t *testing.T) {
 	oldBlog := createRandomBlog(t)
 
-	ty := createRandomType(t)
-
 	title := utils.RandomString(6)
 	image := fmt.Sprintf("%s.jpg", utils.RandomString(32))
 	content := utils.RandomString(50)
 
 	newBlog, err := testQueries.UpdateBlog(ctx, UpdateBlogParams{
 		ID: oldBlog.ID,
-		TypeID: sql.NullInt64{
-			Int64: ty.ID,
-			Valid: true,
-		},
 		Title: sql.NullString{
 			String: title,
 			Valid:  true,
@@ -196,10 +172,10 @@ func TestUpdateBlogAll(t *testing.T) {
 			String: content,
 			Valid:  true,
 		},
+		UpdatedAt: time.Now(),
 	})
 	require.NoError(t, err)
 
-	require.Equal(t, ty.ID, newBlog.TypeID)
 	require.Equal(t, title, newBlog.Title)
 	require.Equal(t, content, newBlog.Content)
 	require.Equal(t, image, newBlog.Image)
@@ -209,6 +185,14 @@ func TestSearchBlog(t *testing.T) {
 
 	str := fmt.Sprintf("%%%s%%", "s")
 
-	_, err := testQueries.SearchBlog(ctx, str)
+	var limit int32 = 5
+
+	arg := SearchBlogParams{
+		Title:  str,
+		Limit:  limit,
+		Offset: (limit - 1) * limit,
+	}
+
+	_, err := testQueries.SearchBlog(ctx, arg)
 	require.NoError(t, err)
 }

@@ -5,7 +5,6 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -14,8 +13,6 @@ type Blog struct {
 	ID int64 `json:"id"`
 	// 创建者Id
 	OwnerID int64 `json:"owner_id"`
-	// 分类Id
-	TypeID int64 `json:"type_id"`
 	// 标题
 	Title string `json:"title"`
 	// 内容
@@ -61,22 +58,15 @@ type RequestLog struct {
 	// 主机名
 	Hostname string `json:"hostname"`
 	// 请求体
-	RequestBody sql.NullString `json:"request_body"`
+	RequestBody string `json:"request_body"`
 	// 响应时间/ms
 	ResponseTime int64 `json:"response_time"`
 	// 请求时间
 	RequestTime time.Time `json:"request_time"`
 	// 请求数据类型
 	ContentType string `json:"content_type"`
-	// ua
+	// user_agent
 	UserAgent string `json:"user_agent"`
-}
-
-type Type struct {
-	// 主键
-	ID int64 `json:"id"`
-	// 类别
-	TypeName string `json:"type_name"`
 }
 
 type User struct {

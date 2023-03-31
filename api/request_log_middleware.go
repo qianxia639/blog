@@ -3,7 +3,6 @@ package api
 import (
 	db "Blog/db/sqlc"
 	"bytes"
-	"database/sql"
 	"io"
 	"os"
 	"time"
@@ -36,19 +35,16 @@ func (server Server) requestLogMiddleware() gin.HandlerFunc {
 
 		statusCode := ctx.Writer.Status()
 
-		contentType := ctx.ContentType()
+		contentType := ctx.Request.Header.Get("Content-Type")
 		cost := time.Since(start).Milliseconds()
 
 		arg := db.InsertRequestLogParams{
-			Method:     method,
-			Path:       path,
-			StatusCode: int32(statusCode),
-			Ip:         ip,
-			Hostname:   hostname,
-			RequestBody: sql.NullString{
-				String: body,
-				Valid:  true,
-			},
+			Method:       method,
+			Path:         path,
+			StatusCode:   int32(statusCode),
+			Ip:           ip,
+			Hostname:     hostname,
+			RequestBody:  body,
 			ResponseTime: cost,
 			UserAgent:    ua,
 			ContentType:  contentType,

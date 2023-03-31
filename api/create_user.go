@@ -4,6 +4,7 @@ import (
 	db "Blog/db/sqlc"
 	"Blog/utils"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
@@ -29,10 +30,11 @@ func (server *Server) createUser(ctx *gin.Context) {
 	}
 
 	arg := db.CreateUserParams{
-		Username: req.Username,
-		Email:    req.Email,
-		Nickname: req.Email,
-		Password: hashPassword,
+		Username:     req.Username,
+		Email:        req.Email,
+		Nickname:     req.Email,
+		Password:     hashPassword,
+		RegisterTime: time.Now(),
 	}
 
 	_, err = server.store.CreateUser(ctx, arg)

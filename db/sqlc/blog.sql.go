@@ -8,6 +8,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 const deleteBlog = `-- name: DeleteBlog :exec
@@ -21,7 +22,7 @@ func (q *Queries) DeleteBlog(ctx context.Context, id int64) error {
 }
 
 const getBlog = `-- name: GetBlog :one
-SELECT id, owner_id, type_id, title, content, image, views, created_at, updated_at FROM blogs
+SELECT id, owner_id, title, content, image, views, created_at, updated_at FROM blogs
 WHERE id = $1 LIMIT 1
 `
 
@@ -31,7 +32,6 @@ func (q *Queries) GetBlog(ctx context.Context, id int64) (Blog, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.OwnerID,
-		&i.TypeID,
 		&i.Title,
 		&i.Content,
 		&i.Image,
@@ -56,34 +56,33 @@ func (q *Queries) IncrViews(ctx context.Context, id int64) error {
 
 const insertBlog = `-- name: InsertBlog :one
 INSERT INTO blogs (
-    owner_id, type_id, title, content, image
+    owner_id, title, content, image, created_at
 ) VALUES (
     $1, $2, $3, $4, $5
 )
-RETURNING id, owner_id, type_id, title, content, image, views, created_at, updated_at
+RETURNING id, owner_id, title, content, image, views, created_at, updated_at
 `
 
 type InsertBlogParams struct {
-	OwnerID int64  `json:"owner_id"`
-	TypeID  int64  `json:"type_id"`
-	Title   string `json:"title"`
-	Content string `json:"content"`
-	Image   string `json:"image"`
+	OwnerID   int64     `json:"owner_id"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	Image     string    `json:"image"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (q *Queries) InsertBlog(ctx context.Context, arg InsertBlogParams) (Blog, error) {
 	row := q.db.QueryRowContext(ctx, insertBlog,
 		arg.OwnerID,
-		arg.TypeID,
 		arg.Title,
 		arg.Content,
 		arg.Image,
+		arg.CreatedAt,
 	)
 	var i Blog
 	err := row.Scan(
 		&i.ID,
 		&i.OwnerID,
-		&i.TypeID,
 		&i.Title,
 		&i.Content,
 		&i.Image,
@@ -95,7 +94,7 @@ func (q *Queries) InsertBlog(ctx context.Context, arg InsertBlogParams) (Blog, e
 }
 
 const listBlogs = `-- name: ListBlogs :many
-SELECT id, owner_id, type_id, title, content, image, views, created_at, updated_at FROM blogs
+SELECT id, owner_id, title, content, image, views, created_at, updated_at FROM blogs
 ORDER BY created_at
 LIMIT $1
 OFFSET $2
@@ -118,7 +117,6 @@ func (q *Queries) ListBlogs(ctx context.Context, arg ListBlogsParams) ([]Blog, e
 		if err := rows.Scan(
 			&i.ID,
 			&i.OwnerID,
-			&i.TypeID,
 			&i.Title,
 			&i.Content,
 			&i.Image,
@@ -140,29 +138,52 @@ func (q *Queries) ListBlogs(ctx context.Context, arg ListBlogsParams) ([]Blog, e
 }
 
 const searchBlog = `-- name: SearchBlog :many
-SELECT id, owner_id, type_id, title, content, image, views, created_at, updated_at FROM blogs
+SELECT b.id, b.owner_id, b.title, b.content, b.image, b.views, b.created_at, b.updated_at, u.nickname, u.avatar FROM blogs b 
+JOIN users u ON b.owner_id = u.id
 WHERE title LIKE $1
+LIMIT $2
+OFFSET $3
 `
 
-func (q *Queries) SearchBlog(ctx context.Context, title string) ([]Blog, error) {
-	rows, err := q.db.QueryContext(ctx, searchBlog, title)
+type SearchBlogParams struct {
+	Title  string `json:"title"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
+}
+
+type SearchBlogRow struct {
+	ID        int64     `json:"id"`
+	OwnerID   int64     `json:"owner_id"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	Image     string    `json:"image"`
+	Views     int32     `json:"views"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Nickname  string    `json:"nickname"`
+	Avatar    string    `json:"avatar"`
+}
+
+func (q *Queries) SearchBlog(ctx context.Context, arg SearchBlogParams) ([]SearchBlogRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchBlog, arg.Title, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Blog{}
+	items := []SearchBlogRow{}
 	for rows.Next() {
-		var i Blog
+		var i SearchBlogRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.OwnerID,
-			&i.TypeID,
 			&i.Title,
 			&i.Content,
 			&i.Image,
 			&i.Views,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Nickname,
+			&i.Avatar,
 		); err != nil {
 			return nil, err
 		}
@@ -180,36 +201,35 @@ func (q *Queries) SearchBlog(ctx context.Context, title string) ([]Blog, error) 
 const updateBlog = `-- name: UpdateBlog :one
 UPDATE blogs
 SET
-    type_id = COALESCE($1, type_id),
-    title = COALESCE($2, title),
-    content = COALESCE($3, content),
-    image = COALESCE($4, image)
+    title = COALESCE($1, title),
+    content = COALESCE($2, content),
+    image = COALESCE($3, image),
+    updated_at = $4
 WHERE 
     id = $5
-RETURNING id, owner_id, type_id, title, content, image, views, created_at, updated_at
+RETURNING id, owner_id, title, content, image, views, created_at, updated_at
 `
 
 type UpdateBlogParams struct {
-	TypeID  sql.NullInt64  `json:"type_id"`
-	Title   sql.NullString `json:"title"`
-	Content sql.NullString `json:"content"`
-	Image   sql.NullString `json:"image"`
-	ID      int64          `json:"id"`
+	Title     sql.NullString `json:"title"`
+	Content   sql.NullString `json:"content"`
+	Image     sql.NullString `json:"image"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	ID        int64          `json:"id"`
 }
 
 func (q *Queries) UpdateBlog(ctx context.Context, arg UpdateBlogParams) (Blog, error) {
 	row := q.db.QueryRowContext(ctx, updateBlog,
-		arg.TypeID,
 		arg.Title,
 		arg.Content,
 		arg.Image,
+		arg.UpdatedAt,
 		arg.ID,
 	)
 	var i Blog
 	err := row.Scan(
 		&i.ID,
 		&i.OwnerID,
-		&i.TypeID,
 		&i.Title,
 		&i.Content,
 		&i.Image,

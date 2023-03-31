@@ -3,6 +3,7 @@ package api
 import (
 	db "Blog/db/sqlc"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
@@ -10,7 +11,6 @@ import (
 
 type insertBlogRequest struct {
 	OwnerId int64  `json:"owner_id" binding:"required"`
-	TypeId  int64  `json:"type_id" binding:"required"`
 	Title   string `json:"title" binding:"required"`
 	Content string `json:"content" binding:"required"`
 	Image   string `json:"image" binding:"required"`
@@ -24,11 +24,11 @@ func (server *Server) insertBlog(ctx *gin.Context) {
 	}
 
 	arg := db.InsertBlogParams{
-		OwnerID: req.OwnerId,
-		TypeID:  req.TypeId,
-		Title:   req.Title,
-		Content: req.Content,
-		Image:   req.Image,
+		OwnerID:   req.OwnerId,
+		Title:     req.Title,
+		Content:   req.Content,
+		Image:     req.Image,
+		CreatedAt: time.Now(),
 	}
 
 	_, err := server.store.InsertBlog(ctx, arg)

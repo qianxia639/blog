@@ -8,22 +8,24 @@ package db
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
-    username, email, nickname, password
+    username, email, nickname, password, register_time
 ) VALUES(
-    $1, $2, $3, $4
+    $1, $2, $3, $4, $5
 )
 RETURNING id, username, email, nickname, password, avatar, register_time
 `
 
 type CreateUserParams struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Nickname string `json:"nickname"`
-	Password string `json:"password"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	Nickname     string    `json:"nickname"`
+	Password     string    `json:"password"`
+	RegisterTime time.Time `json:"register_time"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -32,6 +34,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.Email,
 		arg.Nickname,
 		arg.Password,
+		arg.RegisterTime,
 	)
 	var i User
 	err := row.Scan(

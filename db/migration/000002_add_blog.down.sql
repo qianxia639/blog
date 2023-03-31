@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS blogs;
+
+ALTER TABLE IF EXISTS "blogs" DROP CONSTRAINT IF EXISTS "blogs_owner_id_fkey";

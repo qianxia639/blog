@@ -24,6 +24,7 @@ import (
 type eqCreateUserParamsMatcher struct {
 	arg      db.CreateUserParams
 	password string
+	tm       time.Time
 }
 
 func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
@@ -38,6 +39,7 @@ func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
 	}
 
 	e.arg.Password = arg.Password
+	e.arg.RegisterTime = arg.RegisterTime
 
 	return reflect.DeepEqual(e.arg, arg)
 }
@@ -46,8 +48,8 @@ func (e eqCreateUserParamsMatcher) String() string {
 	return fmt.Sprintf("matches arg %v and password %v\n", e.arg, e.password)
 }
 
-func EqCreateUserParams(arg db.CreateUserParams, password string) gomock.Matcher {
-	return eqCreateUserParamsMatcher{arg, password}
+func EqCreateUserParams(arg db.CreateUserParams, password string, tm time.Time) gomock.Matcher {
+	return eqCreateUserParamsMatcher{arg, password, tm}
 }
 
 func TestCreateUser(t *testing.T) {
@@ -67,14 +69,16 @@ func TestCreateUser(t *testing.T) {
 				"email":    user.Email,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
+				registerTime := time.Now()
 				arg := db.CreateUserParams{
-					Username: user.Username,
-					Password: password,
-					Email:    user.Email,
-					Nickname: user.Nickname,
+					Username:     user.Username,
+					Password:     password,
+					Email:        user.Email,
+					Nickname:     user.Nickname,
+					RegisterTime: registerTime,
 				}
 				store.EXPECT().
-					CreateUser(gomock.Any(), EqCreateUserParams(arg, password)).
+					CreateUser(gomock.Any(), EqCreateUserParams(arg, password, registerTime)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {

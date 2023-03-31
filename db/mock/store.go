@@ -183,21 +183,6 @@ func (mr *MockStoreMockRecorder) InsertRequestLog(arg0, arg1 interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertRequestLog", reflect.TypeOf((*MockStore)(nil).InsertRequestLog), arg0, arg1)
 }
 
-// InsertType mocks base method.
-func (m *MockStore) InsertType(arg0 context.Context, arg1 string) (db.Type, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertType", arg0, arg1)
-	ret0, _ := ret[0].(db.Type)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// InsertType indicates an expected call of InsertType.
-func (mr *MockStoreMockRecorder) InsertType(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertType", reflect.TypeOf((*MockStore)(nil).InsertType), arg0, arg1)
-}
-
 // ListBlogs mocks base method.
 func (m *MockStore) ListBlogs(arg0 context.Context, arg1 db.ListBlogsParams) ([]db.Blog, error) {
 	m.ctrl.T.Helper()
@@ -214,10 +199,10 @@ func (mr *MockStoreMockRecorder) ListBlogs(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // SearchBlog mocks base method.
-func (m *MockStore) SearchBlog(arg0 context.Context, arg1 string) ([]db.Blog, error) {
+func (m *MockStore) SearchBlog(arg0 context.Context, arg1 db.SearchBlogParams) ([]db.SearchBlogRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SearchBlog", arg0, arg1)
-	ret0, _ := ret[0].([]db.Blog)
+	ret0, _ := ret[0].([]db.SearchBlogRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

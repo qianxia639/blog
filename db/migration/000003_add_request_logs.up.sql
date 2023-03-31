@@ -5,7 +5,7 @@ CREATE TABLE "request_logs" (
   "status_code" int4 NOT NULL,
   "ip" varchar(30) NOT NULL,
   "hostname" varchar(30) NOT NULL,
-  "request_body" text DEFAULT '',
+  "request_body" text NOT NULL DEFAULT '',
   "response_time" int8 NOT NULL DEFAULT 0,
   "request_time" timestamptz NOT NULL DEFAULT(now()),
   "content_type" varchar(40) NOT NULL DEFAULT '',
@@ -32,4 +32,4 @@ COMMENT ON COLUMN "request_logs"."request_time" IS '请求时间';
 
 COMMENT ON COLUMN "request_logs"."content_type" IS '请求数据类型';
 
-COMMENT ON COLUMN "request_logs"."user_agent" IS 'ua';
+COMMENT ON COLUMN "request_logs"."user_agent" IS 'user_agent';

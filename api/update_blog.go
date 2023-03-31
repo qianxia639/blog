@@ -4,6 +4,7 @@ import (
 	db "Blog/db/sqlc"
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
@@ -11,7 +12,6 @@ import (
 
 type updateBlogRequest struct {
 	Id      int64   `json:"id" binding:"required"`
-	TypeId  *int64  `json:"type_id"`
 	Title   *string `json:"title"`
 	Content *string `json:"content"`
 	Image   *string `json:"image"`
@@ -25,14 +25,8 @@ func (server *Server) updateBlog(ctx *gin.Context) {
 	}
 
 	arg := db.UpdateBlogParams{
-		ID: req.Id,
-	}
-
-	if req.TypeId != nil {
-		arg.TypeID = sql.NullInt64{
-			Int64: *req.TypeId,
-			Valid: true,
-		}
+		ID:        req.Id,
+		UpdatedAt: time.Now(),
 	}
 
 	if req.Title != nil {

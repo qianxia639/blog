@@ -23,10 +23,11 @@ func createRandomUser(t *testing.T) User {
 	email := fmt.Sprintf("%s@email.com", username)
 
 	arg := CreateUserParams{
-		Username: username,
-		Email:    email,
-		Nickname: email,
-		Password: hashPwd,
+		Username:     username,
+		Email:        email,
+		Nickname:     email,
+		Password:     hashPwd,
+		RegisterTime: time.Now(),
 	}
 
 	user, err := testQueries.CreateUser(context.Background(), arg)

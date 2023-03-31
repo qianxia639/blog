@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const insertRequestLog = `-- name: InsertRequestLog :one
@@ -20,15 +19,15 @@ RETURNING id, method, path, status_code, ip, hostname, request_body, response_ti
 `
 
 type InsertRequestLogParams struct {
-	Method       string         `json:"method"`
-	Path         string         `json:"path"`
-	StatusCode   int32          `json:"status_code"`
-	Ip           string         `json:"ip"`
-	Hostname     string         `json:"hostname"`
-	RequestBody  sql.NullString `json:"request_body"`
-	ResponseTime int64          `json:"response_time"`
-	ContentType  string         `json:"content_type"`
-	UserAgent    string         `json:"user_agent"`
+	Method       string `json:"method"`
+	Path         string `json:"path"`
+	StatusCode   int32  `json:"status_code"`
+	Ip           string `json:"ip"`
+	Hostname     string `json:"hostname"`
+	RequestBody  string `json:"request_body"`
+	ResponseTime int64  `json:"response_time"`
+	ContentType  string `json:"content_type"`
+	UserAgent    string `json:"user_agent"`
 }
 
 func (q *Queries) InsertRequestLog(ctx context.Context, arg InsertRequestLogParams) (RequestLog, error) {

@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 	"time"
 
@@ -22,6 +23,30 @@ import (
 )
 
 var ctx = context.Background()
+
+type eqInsertBlogParamsMatcher struct {
+	arg        db.InsertBlogParams
+	created_at time.Time
+}
+
+func (e eqInsertBlogParamsMatcher) Matches(x interface{}) bool {
+	arg, ok := x.(db.InsertBlogParams)
+	if !ok {
+		return false
+	}
+
+	e.arg.CreatedAt = arg.CreatedAt
+
+	return reflect.DeepEqual(e.arg, arg)
+}
+
+func (e eqInsertBlogParamsMatcher) String() string {
+	return fmt.Sprintf("matches arg %v and created_at %v\n", e.arg, e.created_at)
+}
+
+func EqInsertBlogParams(arg db.InsertBlogParams, created_at time.Time) gomock.Matcher {
+	return eqInsertBlogParamsMatcher{arg, created_at}
+}
 
 func TestInsertBlog(t *testing.T) {
 
@@ -39,11 +64,6 @@ func TestInsertBlog(t *testing.T) {
 	user, err := store.CreateUser(context.Background(), arg)
 	require.NoError(t, err)
 
-	typeName := fmt.Sprintf("%s-typeName", user.Username)
-
-	ty, err := store.InsertType(context.Background(), typeName)
-	require.NoError(t, err)
-
 	title := utils.RandomString(6)
 	content := fmt.Sprintf("%s-content", title)
 	image := fmt.Sprintf("%s.jpg", title)
@@ -59,7 +79,6 @@ func TestInsertBlog(t *testing.T) {
 			name: "OK",
 			body: gin.H{
 				"owner_id": user.ID,
-				"type_id":  ty.ID,
 				"title":    title,
 				"content":  content,
 				"image":    image,
@@ -68,15 +87,16 @@ func TestInsertBlog(t *testing.T) {
 				addAuthorizatin(t, req, tokenMaker, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
+				createdAt := time.Now()
 				arg := db.InsertBlogParams{
-					OwnerID: user.ID,
-					TypeID:  ty.ID,
-					Title:   title,
-					Content: content,
-					Image:   image,
+					OwnerID:   user.ID,
+					Title:     title,
+					Content:   content,
+					Image:     image,
+					CreatedAt: createdAt,
 				}
 				store.EXPECT().
-					InsertBlog(gomock.Any(), gomock.Eq(arg)).
+					InsertBlog(gomock.Any(), EqInsertBlogParams(arg, createdAt)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -87,7 +107,6 @@ func TestInsertBlog(t *testing.T) {
 			name: "Internal Error",
 			body: gin.H{
 				"owner_id": user.ID,
-				"type_id":  ty.ID,
 				"title":    title,
 				"content":  content,
 				"image":    image,
@@ -96,15 +115,16 @@ func TestInsertBlog(t *testing.T) {
 				addAuthorizatin(t, req, tokenMaker, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
+				createdAt := time.Now()
 				arg := db.InsertBlogParams{
-					OwnerID: user.ID,
-					TypeID:  ty.ID,
-					Title:   title,
-					Content: content,
-					Image:   image,
+					OwnerID:   user.ID,
+					Title:     title,
+					Content:   content,
+					Image:     image,
+					CreatedAt: createdAt,
 				}
 				store.EXPECT().
-					InsertBlog(gomock.Any(), gomock.Eq(arg)).
+					InsertBlog(gomock.Any(), EqInsertBlogParams(arg, createdAt)).
 					Times(1).
 					Return(db.Blog{}, sql.ErrConnDone)
 			},
@@ -116,7 +136,6 @@ func TestInsertBlog(t *testing.T) {
 			name: "Duplicate Title",
 			body: gin.H{
 				"owner_id": user.ID,
-				"type_id":  ty.ID,
 				"title":    title,
 				"content":  content,
 				"image":    image,
@@ -580,6 +599,30 @@ func TestGetBlog(t *testing.T) {
 	}
 }
 
+type eqUpdateBloggParamsMatcher struct {
+	arg        db.UpdateBlogParams
+	updated_at time.Time
+}
+
+func (e eqUpdateBloggParamsMatcher) Matches(x interface{}) bool {
+	arg, ok := x.(db.UpdateBlogParams)
+	if !ok {
+		return false
+	}
+
+	e.arg.UpdatedAt = arg.UpdatedAt
+
+	return reflect.DeepEqual(e.arg, arg)
+}
+
+func (e eqUpdateBloggParamsMatcher) String() string {
+	return fmt.Sprintf("matches arg %v and updated_at %v\n", e.arg, e.updated_at)
+}
+
+func EqUpdateBlogParams(arg db.UpdateBlogParams, updated_at time.Time) gomock.Matcher {
+	return eqUpdateBloggParamsMatcher{arg, updated_at}
+}
+
 func TestUpdateBlog(t *testing.T) {
 
 	store := newTestDB(t)
@@ -594,15 +637,8 @@ func TestUpdateBlog(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	ty, err := store.InsertType(ctx, fmt.Sprintf("%s-typeName", user.Username))
-	require.NoError(t, err)
-
-	ty2, err := store.InsertType(context.Background(), time.Now().Format("15:04:05"))
-	require.NoError(t, err)
-
 	blog, err := store.InsertBlog(ctx, db.InsertBlogParams{
 		OwnerID: user.ID,
-		TypeID:  ty.ID,
 		Title:   utils.RandomString(6),
 		Content: utils.RandomString(50),
 		Image:   fmt.Sprintf("%s.jpg", utils.RandomString(10)),
@@ -675,31 +711,6 @@ func TestUpdateBlog(t *testing.T) {
 			},
 		},
 		{
-			name: "Update Only TypeID",
-			body: gin.H{
-				"id":      blog.ID,
-				"type_id": ty2.ID,
-			},
-			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
-				addAuthorizatin(t, req, tokenMaker, user.Username, time.Minute)
-			},
-			buildStubs: func(store *mockdb.MockStore) {
-				arg := db.UpdateBlogParams{
-					ID: blog.ID,
-					TypeID: sql.NullInt64{
-						Int64: ty2.ID,
-						Valid: true,
-					},
-				}
-				store.EXPECT().
-					UpdateBlog(gomock.Any(), gomock.Eq(arg)).
-					Times(1)
-			},
-			checkResponse: func(recoder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, recoder.Code)
-			},
-		},
-		{
 			name: "Update Only Title",
 			body: gin.H{
 				"id":    blog.ID,
@@ -709,15 +720,17 @@ func TestUpdateBlog(t *testing.T) {
 				addAuthorizatin(t, req, tokenMaker, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
+				updatedAt := time.Now()
 				arg := db.UpdateBlogParams{
 					ID: blog.ID,
 					Title: sql.NullString{
 						String: title,
 						Valid:  true,
 					},
+					UpdatedAt: updatedAt,
 				}
 				store.EXPECT().
-					UpdateBlog(gomock.Any(), gomock.Eq(arg)).
+					UpdateBlog(gomock.Any(), EqUpdateBlogParams(arg, updatedAt)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -734,15 +747,17 @@ func TestUpdateBlog(t *testing.T) {
 				addAuthorizatin(t, req, tokenMaker, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
+				updatedAt := time.Now()
 				arg := db.UpdateBlogParams{
 					ID: blog.ID,
 					Content: sql.NullString{
 						String: content,
 						Valid:  true,
 					},
+					UpdatedAt: updatedAt,
 				}
 				store.EXPECT().
-					UpdateBlog(gomock.Any(), gomock.Eq(arg)).
+					UpdateBlog(gomock.Any(), EqUpdateBlogParams(arg, updatedAt)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -759,15 +774,17 @@ func TestUpdateBlog(t *testing.T) {
 				addAuthorizatin(t, req, tokenMaker, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
+				updatedAt := time.Now()
 				arg := db.UpdateBlogParams{
 					ID: blog.ID,
 					Image: sql.NullString{
 						String: image,
 						Valid:  true,
 					},
+					UpdatedAt: updatedAt,
 				}
 				store.EXPECT().
-					UpdateBlog(gomock.Any(), gomock.Eq(arg)).
+					UpdateBlog(gomock.Any(), EqUpdateBlogParams(arg, updatedAt)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -778,7 +795,6 @@ func TestUpdateBlog(t *testing.T) {
 			name: "Update Only All",
 			body: gin.H{
 				"id":      blog.ID,
-				"type_id": ty.ID,
 				"title":   title,
 				"image":   image,
 				"content": content,
@@ -787,12 +803,9 @@ func TestUpdateBlog(t *testing.T) {
 				addAuthorizatin(t, req, tokenMaker, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
+				updatedAt := time.Now()
 				arg := db.UpdateBlogParams{
 					ID: blog.ID,
-					TypeID: sql.NullInt64{
-						Int64: ty.ID,
-						Valid: true,
-					},
 					Title: sql.NullString{
 						String: title,
 						Valid:  true,
@@ -805,9 +818,10 @@ func TestUpdateBlog(t *testing.T) {
 						String: image,
 						Valid:  true,
 					},
+					UpdatedAt: updatedAt,
 				}
 				store.EXPECT().
-					UpdateBlog(gomock.Any(), gomock.Eq(arg)).
+					UpdateBlog(gomock.Any(), EqUpdateBlogParams(arg, updatedAt)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -836,6 +850,129 @@ func TestUpdateBlog(t *testing.T) {
 			require.NoError(t, err)
 
 			tc.setupAuth(t, request, server.maker)
+
+			server.router.ServeHTTP(recodre, request)
+			tc.checkResponse(recodre)
+		})
+	}
+}
+
+type Search struct {
+	Title    string
+	PageNo   int32
+	PageSize int32
+}
+
+type eqSearchBloggParamsMatcher struct {
+	arg   db.SearchBlogParams
+	title string
+}
+
+func (e eqSearchBloggParamsMatcher) Matches(x interface{}) bool {
+	arg, ok := x.(db.SearchBlogParams)
+	if !ok {
+		return false
+	}
+
+	e.arg.Title = arg.Title
+
+	return reflect.DeepEqual(e.arg, arg)
+}
+
+func (e eqSearchBloggParamsMatcher) String() string {
+	return fmt.Sprintf("matches arg %v and titlee %v\n", e.arg, e.title)
+}
+
+func EqSearchBlogParams(arg db.SearchBlogParams, title string) gomock.Matcher {
+	return eqSearchBloggParamsMatcher{arg, title}
+}
+
+func TestSearchBlog(t *testing.T) {
+
+	search := Search{
+		Title:    "s",
+		PageNo:   1,
+		PageSize: 5,
+	}
+
+	testCases := []struct {
+		name          string
+		search        Search
+		buildStubs    func(store *mockdb.MockStore)
+		checkResponse func(recoder *httptest.ResponseRecorder)
+	}{
+		{
+			name:   "OK",
+			search: search,
+			buildStubs: func(store *mockdb.MockStore) {
+				title := "s"
+				arg := db.SearchBlogParams{
+					Title:  title,
+					Limit:  search.PageSize,
+					Offset: (search.PageNo - 1) * search.PageSize,
+				}
+
+				store.EXPECT().
+					SearchBlog(gomock.Any(), EqSearchBlogParams(arg, title)).
+					Times(1)
+			},
+			checkResponse: func(recoder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recoder.Code)
+			},
+		},
+		{
+			name:   "Internal Error",
+			search: search,
+			buildStubs: func(store *mockdb.MockStore) {
+				title := "s"
+				arg := db.SearchBlogParams{
+					Title:  title,
+					Limit:  search.PageSize,
+					Offset: (search.PageNo - 1) * search.PageSize,
+				}
+				store.EXPECT().
+					SearchBlog(gomock.Any(), EqSearchBlogParams(arg, title)).
+					Times(1).
+					Return([]db.SearchBlogRow{}, sql.ErrConnDone)
+			},
+			checkResponse: func(recoder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recoder.Code)
+			},
+		},
+		{
+			name: "Invalid Parameter",
+			search: Search{
+				Title:    "s",
+				PageNo:   0,
+				PageSize: 0,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					SearchBlog(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recoder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recoder.Code)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			store := mockdb.NewMockStore(ctrl)
+			tc.buildStubs(store)
+
+			server := newTestServer(t, store)
+			recodre := httptest.NewRecorder()
+
+			url := fmt.Sprintf("/blog/search?title=%s&page_no=%d&page_size=%d", tc.search.Title, tc.search.PageNo, tc.search.PageSize)
+			request, err := http.NewRequest(http.MethodGet, url, nil)
+			require.NoError(t, err)
 
 			server.router.ServeHTTP(recodre, request)
 			tc.checkResponse(recodre)

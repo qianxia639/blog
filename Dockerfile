@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY . .
 
-ENV GOPROXY=https://goproxy.cn
+ENV GOPROXY=https://goproxy.cn,direct
 
 RUN go build -o blog main.go
 RUN apk update && \

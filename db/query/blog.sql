@@ -1,6 +1,6 @@
 -- name: InsertBlog :one
 INSERT INTO blogs (
-    owner_id, type_id, title, content, image
+    owner_id, title, content, image, created_at
 ) VALUES (
     $1, $2, $3, $4, $5
 )
@@ -29,14 +29,17 @@ WHERE id = $1;
 -- name: UpdateBlog :one
 UPDATE blogs
 SET
-    type_id = COALESCE(sqlc.narg(type_id), type_id),
     title = COALESCE(sqlc.narg(title), title),
     content = COALESCE(sqlc.narg(content), content),
-    image = COALESCE(sqlc.narg(image), image)
+    image = COALESCE(sqlc.narg(image), image),
+    updated_at = sqlc.arg(updated_at)
 WHERE 
     id = sqlc.arg(id)
 RETURNING *;
 
 -- name: SearchBlog :many
-SELECT * FROM blogs
-WHERE title LIKE $1;
+SELECT b.*, u.nickname, u.avatar FROM blogs b 
+JOIN users u ON b.owner_id = u.id
+WHERE title LIKE $1
+LIMIT $2
+OFFSET $3;
