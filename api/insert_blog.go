@@ -19,7 +19,7 @@ type insertBlogRequest struct {
 func (server *Server) insertBlog(ctx *gin.Context) {
 	var req insertBlogRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.SecureJSON(http.StatusBadRequest, err.Error)
+		ctx.SecureJSON(http.StatusBadRequest, err.Error())
 		return
 	}
 

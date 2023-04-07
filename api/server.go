@@ -4,7 +4,6 @@ import (
 	db "Blog/db/sqlc"
 	"Blog/token"
 	"Blog/utils/config"
-	"sync"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +13,6 @@ type Server struct {
 	conf   config.Config
 	router *gin.Engine
 	maker  token.Maker
-	wg     sync.WaitGroup
 }
 
 func NewServer(conf config.Config, store db.Store) (*Server, error) {

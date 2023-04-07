@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const wildcard = "%%%s%%"
+
 type searchBlogRequest struct {
 	Title    string `form:"title"`
 	PageNo   int32  `form:"page_no" binding:"required,min=1"`
@@ -22,7 +24,7 @@ func (server *Server) searchBlog(ctx *gin.Context) {
 	}
 
 	arg := db.SearchBlogParams{
-		Title:  fmt.Sprintf("%%%s%%", req.Title),
+		Title:  fmt.Sprintf(wildcard, req.Title),
 		Limit:  req.PageSize,
 		Offset: (req.PageNo - 1) * req.PageSize,
 	}

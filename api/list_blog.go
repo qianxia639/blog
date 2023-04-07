@@ -3,6 +3,7 @@ package api
 import (
 	db "Blog/db/sqlc"
 	"net/http"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,44 +26,34 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 	}
 
 	var resp pageResponse
-	var err error
 
 	offset := (req.PageNo - 1) * req.PageSize
 
-	server.wg.Add(2)
+	var wg sync.WaitGroup
+
+	wg.Add(2)
 	go func() {
-		defer server.wg.Done()
-		resp.Data, err = server.store.ListBlogs(ctx, db.ListBlogsParams{
+		defer wg.Done()
+		data, err := server.store.ListBlogs(ctx, db.ListBlogsParams{
 			Limit:  req.PageSize,
 			Offset: offset,
 		})
-
-		// if err != nil {
-		// 	ctx.SecureJSON(http.StatusInternalServerError, err.Error())
-		// 	return
-		// }
+		if err != nil {
+			ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+			return
+		}
+		resp.Data = data
 	}()
 
 	go func() {
-		defer server.wg.Done()
-		resp.Total, err = server.store.CountBlog(ctx)
-		// if err != nil {
-		// 	ctx.SecureJSON(http.StatusInternalServerError, err.Error())
-		// 	return
-		// }
+		defer wg.Done()
+		total, err := server.store.CountBlog(ctx)
+		if err != nil {
+			ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+			return
+		}
+		resp.Total = total
 	}()
-
-	server.wg.Wait()
-
-	if err != nil {
-		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// resp := pageResponse{
-	// 	Total: total,
-	// 	Data:  blogs,
-	// }
 
 	ctx.JSON(http.StatusOK, resp)
 }

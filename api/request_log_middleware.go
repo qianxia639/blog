@@ -15,43 +15,44 @@ func (server *Server) requestLogMiddleware() gin.HandlerFunc {
 		start := time.Now()
 
 		b, _ := ctx.GetRawData()
-		body := string(b)
+		body := bytes.NewBuffer(b).String()
 
 		ctx.Request.Body = io.NopCloser(bytes.NewBuffer(b))
 
 		ctx.Next()
 
-		method := ctx.Request.Method
-		ip := ctx.ClientIP()
-		path := ctx.Request.URL.Path
-		raw := ctx.Request.URL.RawQuery
-		hostname := getHostname()
+		defer func() {
+			method := ctx.Request.Method
+			ip := ctx.ClientIP()
+			path := ctx.Request.URL.Path
+			raw := ctx.Request.URL.RawQuery
+			hostname := getHostname()
 
-		if raw != "" {
-			path += raw
-		}
+			if raw != "" {
+				path += raw
+			}
 
-		ua := ctx.Request.Header.Get("User-Agent")
+			ua := ctx.Request.Header.Get("User-Agent")
 
-		statusCode := ctx.Writer.Status()
+			statusCode := ctx.Writer.Status()
 
-		contentType := ctx.Request.Header.Get("Content-Type")
-		cost := time.Since(start).Milliseconds()
+			contentType := ctx.Request.Header.Get("Content-Type")
+			cost := time.Since(start).Milliseconds()
 
-		arg := db.InsertRequestLogParams{
-			Method:       method,
-			Path:         path,
-			StatusCode:   int32(statusCode),
-			Ip:           ip,
-			Hostname:     hostname,
-			RequestBody:  body,
-			ResponseTime: cost,
-			UserAgent:    ua,
-			ContentType:  contentType,
-		}
+			arg := db.InsertRequestLogParams{
+				Method:       method,
+				Path:         path,
+				StatusCode:   int32(statusCode),
+				Ip:           ip,
+				Hostname:     hostname,
+				RequestBody:  body,
+				ResponseTime: cost,
+				UserAgent:    ua,
+				ContentType:  contentType,
+			}
 
-		server.store.InsertRequestLog(ctx, arg)
-
+			server.store.InsertRequestLog(ctx, arg)
+		}()
 	}
 }
 
