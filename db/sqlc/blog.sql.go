@@ -11,6 +11,17 @@ import (
 	"time"
 )
 
+const countBlog = `-- name: CountBlog :one
+SELECT COUNT(*) FROM blogs
+`
+
+func (q *Queries) CountBlog(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countBlog)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const deleteBlog = `-- name: DeleteBlog :exec
 DELETE FROM blogs
 WHERE id = $1
@@ -94,7 +105,9 @@ func (q *Queries) InsertBlog(ctx context.Context, arg InsertBlogParams) (Blog, e
 }
 
 const listBlogs = `-- name: ListBlogs :many
-SELECT id, owner_id, title, content, image, views, created_at, updated_at FROM blogs
+SELECT b.id, b.owner_id, b.title, b.content, b.image, b.views, b.created_at, b.updated_at, u.nickname, u.avatar FROM blogs b
+JOIN users u 
+ON b.owner_id = u.id
 ORDER BY created_at
 LIMIT $1
 OFFSET $2
@@ -105,15 +118,28 @@ type ListBlogsParams struct {
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) ListBlogs(ctx context.Context, arg ListBlogsParams) ([]Blog, error) {
+type ListBlogsRow struct {
+	ID        int64     `json:"id"`
+	OwnerID   int64     `json:"owner_id"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	Image     string    `json:"image"`
+	Views     int32     `json:"views"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Nickname  string    `json:"nickname"`
+	Avatar    string    `json:"avatar"`
+}
+
+func (q *Queries) ListBlogs(ctx context.Context, arg ListBlogsParams) ([]ListBlogsRow, error) {
 	rows, err := q.db.QueryContext(ctx, listBlogs, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Blog{}
+	items := []ListBlogsRow{}
 	for rows.Next() {
-		var i Blog
+		var i ListBlogsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.OwnerID,
@@ -123,6 +149,8 @@ func (q *Queries) ListBlogs(ctx context.Context, arg ListBlogsParams) ([]Blog, e
 			&i.Views,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Nickname,
+			&i.Avatar,
 		); err != nil {
 			return nil, err
 		}

@@ -17,7 +17,9 @@ SELECT * FROM blogs
 WHERE id = $1 LIMIT 1;
 
 -- name: ListBlogs :many
-SELECT * FROM blogs
+SELECT b.*, u.nickname, u.avatar FROM blogs b
+JOIN users u 
+ON b.owner_id = u.id
 ORDER BY created_at
 LIMIT $1
 OFFSET $2;
@@ -43,3 +45,6 @@ JOIN users u ON b.owner_id = u.id
 WHERE title LIKE $1
 LIMIT $2
 OFFSET $3;
+
+-- name: CountBlog :one
+SELECT COUNT(*) FROM blogs;

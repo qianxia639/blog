@@ -11,7 +11,7 @@ const (
 	authorizationPayloadKey = "Authorization_Payload"
 )
 
-func (server Server) authMiddlware() gin.HandlerFunc {
+func (server *Server) authMiddlware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authorization := ctx.Request.Header.Get(authorizationHeader)
 

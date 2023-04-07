@@ -454,6 +454,9 @@ func TestListBlog(t *testing.T) {
 				store.EXPECT().
 					ListBlogs(gomock.Any(), gomock.Eq(arg)).
 					Times(1)
+				store.EXPECT().
+					CountBlog(gomock.Any()).
+					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recoder.Code)
@@ -470,7 +473,7 @@ func TestListBlog(t *testing.T) {
 				store.EXPECT().
 					ListBlogs(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
-					Return([]db.Blog{}, sql.ErrConnDone)
+					Return(nil, sql.ErrConnDone)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recoder.Code)

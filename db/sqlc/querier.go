@@ -9,6 +9,7 @@ import (
 )
 
 type Querier interface {
+	CountBlog(ctx context.Context) (int64, error)
 	CreateComment(ctx context.Context, arg CreateCommentParams) (Comment, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteBlog(ctx context.Context, id int64) error
@@ -19,7 +20,7 @@ type Querier interface {
 	IncrViews(ctx context.Context, id int64) error
 	InsertBlog(ctx context.Context, arg InsertBlogParams) (Blog, error)
 	InsertRequestLog(ctx context.Context, arg InsertRequestLogParams) (RequestLog, error)
-	ListBlogs(ctx context.Context, arg ListBlogsParams) ([]Blog, error)
+	ListBlogs(ctx context.Context, arg ListBlogsParams) ([]ListBlogsRow, error)
 	SearchBlog(ctx context.Context, arg SearchBlogParams) ([]SearchBlogRow, error)
 	UpdateBlog(ctx context.Context, arg UpdateBlogParams) (Blog, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)

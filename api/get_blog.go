@@ -27,5 +27,5 @@ func (server *Server) getBlog(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SecureJSON(http.StatusOK, blog)
+	ctx.JSON(http.StatusOK, blog)
 }

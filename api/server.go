@@ -4,6 +4,7 @@ import (
 	db "Blog/db/sqlc"
 	"Blog/token"
 	"Blog/utils/config"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +14,7 @@ type Server struct {
 	conf   config.Config
 	router *gin.Engine
 	maker  token.Maker
+	wg     sync.WaitGroup
 }
 
 func NewServer(conf config.Config, store db.Store) (*Server, error) {
@@ -36,7 +38,7 @@ func NewServer(conf config.Config, store db.Store) (*Server, error) {
 func (server *Server) setupRouter() {
 	router := gin.Default()
 
-	// router.Use(server.requestLogMiddleware())
+	// router.Use(CORS()).Use(server.requestLogMiddleware())
 
 	router.POST("/user", server.createUser)
 	router.POST("/login", server.login)

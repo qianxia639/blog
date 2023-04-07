@@ -35,6 +35,21 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
+// CountBlog mocks base method.
+func (m *MockStore) CountBlog(arg0 context.Context) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountBlog", arg0)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountBlog indicates an expected call of CountBlog.
+func (mr *MockStoreMockRecorder) CountBlog(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountBlog", reflect.TypeOf((*MockStore)(nil).CountBlog), arg0)
+}
+
 // CreateComment mocks base method.
 func (m *MockStore) CreateComment(arg0 context.Context, arg1 db.CreateCommentParams) (db.Comment, error) {
 	m.ctrl.T.Helper()
@@ -184,10 +199,10 @@ func (mr *MockStoreMockRecorder) InsertRequestLog(arg0, arg1 interface{}) *gomoc
 }
 
 // ListBlogs mocks base method.
-func (m *MockStore) ListBlogs(arg0 context.Context, arg1 db.ListBlogsParams) ([]db.Blog, error) {
+func (m *MockStore) ListBlogs(arg0 context.Context, arg1 db.ListBlogsParams) ([]db.ListBlogsRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListBlogs", arg0, arg1)
-	ret0, _ := ret[0].([]db.Blog)
+	ret0, _ := ret[0].([]db.ListBlogsRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

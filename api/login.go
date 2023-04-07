@@ -59,5 +59,5 @@ func (server *Server) login(ctx *gin.Context) {
 		},
 	}
 
-	ctx.SecureJSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, resp)
 }
