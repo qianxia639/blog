@@ -10,11 +10,10 @@ import (
 )
 
 type insertBlogRequest struct {
-	OwnerId   int64     `json:"owner_id" binding:"required"`
-	Title     string    `json:"title" binding:"required"`
-	Content   string    `json:"content" binding:"required"`
-	Image     string    `json:"image" binding:"required"`
-	CreatedAt time.Time `json:"created_at"`
+	OwnerId int64  `json:"owner_id" binding:"required"`
+	Title   string `json:"title" binding:"required"`
+	Content string `json:"content" binding:"required"`
+	Image   string `json:"image" binding:"required"`
 }
 
 func (server *Server) insertBlog(ctx *gin.Context) {

@@ -29,43 +29,26 @@ func (server *Server) updateBlog(ctx *gin.Context) {
 		UpdatedAt: time.Now(),
 	}
 
-	for _, filed := range []struct {
-		name  string
-		value *string
-	}{
-		{"Title", req.Title},
-		{"Content", req.Content},
-		{"Image", req.Image},
-	} {
-		if filed.value != nil {
-			argValue := sql.NullString{
-				String: *filed.value,
-				Valid:  true,
-			}
-			argValue.Scan(filed.value)
+	if req.Title != nil {
+		arg.Title = sql.NullString{
+			String: *req.Title,
+			Valid:  true,
 		}
 	}
 
-	// if req.Title != nil {
-	// 	arg.Title = sql.NullString{
-	// 		String: *req.Title,
-	// 		Valid:  true,
-	// 	}
-	// }
+	if req.Content != nil {
+		arg.Content = sql.NullString{
+			String: *req.Content,
+			Valid:  true,
+		}
+	}
 
-	// if req.Content != nil {
-	// 	arg.Content = sql.NullString{
-	// 		String: *req.Content,
-	// 		Valid:  true,
-	// 	}
-	// }
-
-	// if req.Image != nil {
-	// 	arg.Image = sql.NullString{
-	// 		String: *req.Image,
-	// 		Valid:  true,
-	// 	}
-	// }
+	if req.Image != nil {
+		arg.Image = sql.NullString{
+			String: *req.Image,
+			Valid:  true,
+		}
+	}
 
 	_, err := server.store.UpdateBlog(ctx, arg)
 	if err != nil {

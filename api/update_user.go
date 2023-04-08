@@ -28,7 +28,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 
 	payload, ok := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if !ok {
-		ctx.SecureJSON(http.StatusInternalServerError, "")
+		ctx.SecureJSON(http.StatusInternalServerError, "internal server error")
 		return
 	}
 
