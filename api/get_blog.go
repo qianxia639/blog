@@ -18,14 +18,12 @@ func (server *Server) getBlog(ctx *gin.Context) {
 	}
 
 	blog, err := server.store.GetBlog(ctx, req.Id)
-	if err != nil {
-		if err == ErrNoRows {
-			ctx.SecureJSON(http.StatusNotFound, err.Error())
-			return
-		}
+	switch err {
+	case nil:
+		ctx.JSON(http.StatusOK, blog)
+	case ErrNoRows:
+		ctx.SecureJSON(http.StatusNotFound, err.Error())
+	default:
 		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
-		return
 	}
-
-	ctx.JSON(http.StatusOK, blog)
 }

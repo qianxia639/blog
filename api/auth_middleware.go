@@ -16,7 +16,7 @@ func (server *Server) authMiddlware() gin.HandlerFunc {
 		authorization := ctx.Request.Header.Get(authorizationHeader)
 
 		if len(authorization) == 0 {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, " not authorization")
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, "not authorization")
 			return
 		}
 
