@@ -55,5 +55,7 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 		resp.Total = total
 	}()
 
+	wg.Wait()
+
 	ctx.JSON(http.StatusOK, resp)
 }

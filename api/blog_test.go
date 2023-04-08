@@ -474,6 +474,10 @@ func TestListBlog(t *testing.T) {
 					ListBlogs(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(nil, sql.ErrConnDone)
+				store.EXPECT().
+					CountBlog(gomock.Any()).
+					Times(1).
+					Return(0, sql.ErrConnDone)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recoder.Code)
