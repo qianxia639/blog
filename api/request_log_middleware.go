@@ -15,6 +15,7 @@ func (server *Server) requestLogMiddleware() gin.HandlerFunc {
 		start := time.Now()
 
 		b, _ := ctx.GetRawData()
+
 		body := bytes.NewBuffer(b).String()
 
 		ctx.Request.Body = io.NopCloser(bytes.NewBuffer(b))

@@ -11,4 +11,4 @@ sql:
         emit_prepared_queries: false  # 
         emit_interface: true          # 是否生成接口
         emit_exact_table_names: false # 是否生成复数表名
-        emit_empty_slices: true       
+        emit_empty_slices: true
