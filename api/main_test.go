@@ -43,3 +43,29 @@ func TestMain(m *testing.M) {
 
 	os.Exit(m.Run())
 }
+
+type TestServer struct {
+	store db.Store
+}
+
+type Option func(*TestServer)
+
+func InitOption(opts ...Option) *TestServer {
+	ts := &TestServer{}
+	for _, opt := range opts {
+		opt(ts)
+	}
+	return ts
+}
+
+func WithStore(store db.Store) Option {
+	return func(ts *TestServer) {
+		ts.store = store
+	}
+}
+
+func WithCache() Option {
+	return func(ts *TestServer) {
+
+	}
+}

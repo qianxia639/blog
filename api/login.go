@@ -53,7 +53,7 @@ func (server *Server) login(ctx *gin.Context) {
 			ID:           user.ID,
 			Username:     user.Username,
 			Nickname:     user.Nickname,
-			Email:        user.Email,
+			Email:        utils.DesnsitizeEmail(user.Email),
 			Avatar:       user.Avatar,
 			RegisterTime: user.RegisterTime,
 		},

@@ -2,6 +2,7 @@ package main
 
 import (
 	"Blog/api"
+	"Blog/core/logs"
 	db "Blog/db/sqlc"
 	"Blog/utils/config"
 	"database/sql"
@@ -19,6 +20,8 @@ func main() {
 	if err != nil {
 		log.Fatal("load config err: ", err)
 	}
+
+	logs.Logs = logs.InitZap(&conf)
 
 	conn, err := sql.Open(conf.Postgres.Driver, conf.Postgres.Source)
 	if err != nil {
@@ -42,7 +45,7 @@ func runDBMigrate(migrateUrl, dbSource string) {
 		log.Fatal("failed to run migrate up: ", err)
 	}
 
-	log.Println("db migrated successfully")
+	logs.Logs.Info("db migrated successfully")
 }
 
 func runGinServer(conf config.Config, store db.Store) {

@@ -15,4 +15,19 @@ type Config struct {
 	Server struct {
 		Address string `mapstructure:"address"`
 	}
+	Zap struct {
+		Prefix     string    `mapstructure:"prefix"`
+		TimeFormat time.Time `mapstructure:"time_format"`
+		Level      string    `mapstructure:"level"`
+		Caller     bool      `mapstructure:"caller"`
+		StackTrace bool      `mapstructure:"stack_trace"`
+		Writer     string    `mapstructure:"writer"`
+		Encode     string    `mapstructure:"encode"`
+	}
+	LogFile struct {
+		MaxSize  int    `mapstructure:"max_size"`
+		Backups  int    `mapstructure:"backups"`
+		Compress bool   `mapstructure:"compress"`
+		Output   string `mapstructure:"output"`
+	}
 }

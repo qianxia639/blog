@@ -1,13 +1,14 @@
 package api
 
 import (
-	db "Blog/db/sqlc"
+	"Blog/core/logs"
 	"bytes"
 	"io"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func (server *Server) requestLogMiddleware() gin.HandlerFunc {
@@ -37,22 +38,34 @@ func (server *Server) requestLogMiddleware() gin.HandlerFunc {
 
 			statusCode := ctx.Writer.Status()
 
-			contentType := ctx.Request.Header.Get("Content-Type")
+			contentType := ctx.ContentType()
 			cost := time.Since(start).Milliseconds()
 
-			arg := db.InsertRequestLogParams{
-				Method:       method,
-				Path:         path,
-				StatusCode:   int32(statusCode),
-				Ip:           ip,
-				Hostname:     hostname,
-				RequestBody:  body,
-				ResponseTime: cost,
-				UserAgent:    ua,
-				ContentType:  contentType,
-			}
+			logs.Logs.Info("Request Log",
+				zap.String("Method", method),
+				zap.String("Path", path),
+				zap.Int32("StatusCode", int32(statusCode)),
+				zap.String("Ip", ip),
+				zap.String("Hostname", hostname),
+				zap.String("RequestBody", body),
+				zap.Int64("ResponseTime", cost),
+				zap.String("UserAgent", ua),
+				zap.String("ContentType", contentType),
+			)
 
-			server.store.InsertRequestLog(ctx, arg)
+			// arg := db.InsertRequestLogParams{
+			// 	Method:       method,
+			// 	Path:         path,
+			// 	StatusCode:   int32(statusCode),
+			// 	Ip:           ip,
+			// 	Hostname:     hostname,
+			// 	RequestBody:  body,
+			// 	ResponseTime: cost,
+			// 	UserAgent:    ua,
+			// 	ContentType:  contentType,
+			// }
+
+			// server.store.InsertRequestLog(ctx, arg)
 		}()
 	}
 }

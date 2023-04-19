@@ -30,16 +30,17 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 	offset := (req.PageNo - 1) * req.PageSize
 
 	var wg sync.WaitGroup
+	ctxCopy := ctx.Copy()
 
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		data, err := server.store.ListBlogs(ctx, db.ListBlogsParams{
+		data, err := server.store.ListBlogs(ctxCopy, db.ListBlogsParams{
 			Limit:  req.PageSize,
 			Offset: offset,
 		})
 		if err != nil {
-			ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+			ctxCopy.SecureJSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 		resp.Data = data
@@ -47,9 +48,9 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 
 	go func() {
 		defer wg.Done()
-		total, err := server.store.CountBlog(ctx)
+		total, err := server.store.CountBlog(ctxCopy)
 		if err != nil {
-			ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+			ctxCopy.SecureJSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 		resp.Total = total
