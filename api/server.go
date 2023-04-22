@@ -1,11 +1,14 @@
 package api
 
 import (
+	"Blog/core/config"
+	"Blog/core/logs"
 	db "Blog/db/sqlc"
 	"Blog/token"
-	"Blog/utils/config"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 )
 
 type Server struct {
@@ -13,6 +16,44 @@ type Server struct {
 	conf   config.Config
 	router *gin.Engine
 	maker  token.Maker
+	rdb    *redis.Client
+}
+
+type ServerOptions func(*Server)
+
+func WithStor(store db.Store) ServerOptions {
+	return func(s *Server) {
+		s.store = store
+	}
+}
+
+func WithConfig(conf config.Config) ServerOptions {
+	return func(s *Server) {
+		s.conf = conf
+	}
+}
+
+func WithMaker(maker token.Maker) ServerOptions {
+	return func(s *Server) {
+		s.maker = maker
+	}
+}
+
+func WithCache(rdb *redis.Client) ServerOptions {
+	return func(s *Server) {
+		s.rdb = rdb
+	}
+}
+
+func NewServerV2(opts ...ServerOptions) *Server {
+	server := &Server{}
+	for _, opt := range opts {
+		opt(server)
+	}
+
+	server.setupRouter()
+
+	return server
 }
 
 func NewServer(conf config.Config, store db.Store) (*Server, error) {
@@ -36,7 +77,7 @@ func NewServer(conf config.Config, store db.Store) (*Server, error) {
 func (server *Server) setupRouter() {
 	router := gin.Default()
 
-	// router.Use(CORS()).Use(server.requestLogMiddleware())
+	router.Use(CORS()).Use(LogFuncExecTime())
 
 	router.POST("/user", server.createUser)
 	router.POST("/login", server.login)
@@ -63,4 +104,30 @@ func (server *Server) setupRouter() {
 
 func (server *Server) Start(addr string) error {
 	return server.router.Run(addr)
+}
+
+func LogFuncExecTime() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		start := time.Now()
+		path := ctx.Request.URL.Path
+		raw := ctx.Request.URL.RawQuery
+
+		ctx.Next()
+
+		method := ctx.Request.Method
+		ip := ctx.ClientIP()
+
+		if raw != "" {
+			path += raw
+		}
+
+		statusCode := ctx.Writer.Status()
+
+		latency := time.Since(start).Milliseconds()
+
+		// time | statusCode | timeSub | ip | method | path
+		logs.Logs.Infof("%s | %d | %5dms | %s | %s | %s",
+			start.Format("2006/01/02 15:04:05"), statusCode, latency, ip, method, path,
+		)
+	}
 }

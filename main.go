@@ -2,9 +2,11 @@ package main
 
 import (
 	"Blog/api"
+	"Blog/core/cache"
+	"Blog/core/config"
 	"Blog/core/logs"
 	db "Blog/db/sqlc"
-	"Blog/utils/config"
+	"Blog/token"
 	"database/sql"
 	"log"
 
@@ -49,10 +51,22 @@ func runDBMigrate(migrateUrl, dbSource string) {
 }
 
 func runGinServer(conf config.Config, store db.Store) {
-	server, err := api.NewServer(conf, store)
+
+	rdb := cache.InitRedis(conf)
+
+	maker, err := token.NewPasetoMaker(conf.Token.TokenSymmetricKey)
 	if err != nil {
-		log.Fatal("can't create serveere: ", err)
+		log.Fatal(err)
 	}
+
+	opts := []api.ServerOptions{
+		api.WithStor(store),
+		api.WithConfig(conf),
+		api.WithMaker(maker),
+		api.WithCache(rdb),
+	}
+
+	server := api.NewServerV2(opts...)
 
 	log.Fatal(server.Start(conf.Server.Address))
 }

@@ -1,7 +1,7 @@
 package db
 
 import (
-	"Blog/utils/config"
+	"Blog/core/config"
 	"database/sql"
 	"log"
 	"os"

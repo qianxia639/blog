@@ -1,6 +1,8 @@
 package api
 
 import (
+	"Blog/core/errors"
+	"Blog/core/logs"
 	db "Blog/db/sqlc"
 	"net/http"
 	"sync"
@@ -19,14 +21,15 @@ type pageResponse struct {
 }
 
 func (server *Server) listBlogs(ctx *gin.Context) {
+
 	var req listBlogsRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.SecureJSON(http.StatusBadRequest, err.Error())
+		logs.Logs.Error(err)
+		ctx.JSON(http.StatusBadRequest, errors.ParamErr)
 		return
 	}
 
 	var resp pageResponse
-
 	offset := (req.PageNo - 1) * req.PageSize
 
 	var wg sync.WaitGroup
@@ -40,7 +43,8 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 			Offset: offset,
 		})
 		if err != nil {
-			ctxCopy.SecureJSON(http.StatusInternalServerError, err.Error())
+			logs.Logs.Error(err)
+			ctxCopy.JSON(http.StatusInternalServerError, errors.ServerErr)
 			return
 		}
 		resp.Data = data
@@ -50,12 +54,12 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 		defer wg.Done()
 		total, err := server.store.CountBlog(ctxCopy)
 		if err != nil {
-			ctxCopy.SecureJSON(http.StatusInternalServerError, err.Error())
+			logs.Logs.Error(err)
+			ctxCopy.JSON(http.StatusInternalServerError, errors.ServerErr)
 			return
 		}
 		resp.Total = total
 	}()
-
 	wg.Wait()
 
 	ctx.JSON(http.StatusOK, resp)

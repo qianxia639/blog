@@ -1,9 +1,10 @@
 package api
 
 import (
+	"Blog/core/config"
+	"Blog/core/logs"
 	db "Blog/db/sqlc"
 	"Blog/utils"
-	"Blog/utils/config"
 	"database/sql"
 	"os"
 	"testing"
@@ -21,6 +22,10 @@ func newTestServer(t *testing.T, store db.Store) *Server {
 
 	server, err := NewServer(conf, store)
 	require.NoError(t, err)
+
+	server.router.Use(CORS(), LogFuncExecTime())
+
+	logs.Logs = logs.InitZap(&conf)
 
 	return server
 }
@@ -64,8 +69,8 @@ func WithStore(store db.Store) Option {
 	}
 }
 
-func WithCache() Option {
-	return func(ts *TestServer) {
+// func WithCache() Option {
+// 	return func(ts *TestServer) {
 
-	}
-}
+// 	}
+// }

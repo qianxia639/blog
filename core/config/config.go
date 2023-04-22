@@ -15,6 +15,11 @@ type Config struct {
 	Server struct {
 		Address string `mapstructure:"address"`
 	}
+	Redis struct {
+		Address  string `mapstructure:"address"`
+		Password string `mapstructure:"password"`
+		DB       int    `mapstructure:"db"`
+	}
 	Zap struct {
 		Prefix     string    `mapstructure:"prefix"`
 		TimeFormat time.Time `mapstructure:"time_format"`

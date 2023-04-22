@@ -10,6 +10,11 @@ access_token_duration = "30m"
 [server]
 address = "0.0.0.0:9010"
 
+[redis]
+address = "localhost:6379"
+password = ""
+db = 0
+
 [zap]
 prefix = "BlogLog"
 time_format = 2006-01-02 15:04:05Z
