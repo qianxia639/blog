@@ -1,9 +1,9 @@
 package api
 
 import (
+	"Blog/core/token"
 	mockdb "Blog/db/mock"
 	db "Blog/db/sqlc"
-	"Blog/token"
 	"Blog/utils"
 	"bytes"
 	"database/sql"

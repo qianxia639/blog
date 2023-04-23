@@ -5,8 +5,8 @@ import (
 	"Blog/core/cache"
 	"Blog/core/config"
 	"Blog/core/logs"
+	"Blog/core/token"
 	db "Blog/db/sqlc"
-	"Blog/token"
 	"database/sql"
 	"log"
 
@@ -66,7 +66,7 @@ func runGinServer(conf config.Config, store db.Store) {
 		api.WithCache(rdb),
 	}
 
-	server := api.NewServerV2(opts...)
+	server := api.NewServer(opts...)
 
 	log.Fatal(server.Start(conf.Server.Address))
 }

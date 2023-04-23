@@ -2,10 +2,9 @@ package api
 
 import (
 	"Blog/core/config"
-	"Blog/core/logs"
+	"Blog/core/token"
 	db "Blog/db/sqlc"
-	"Blog/token"
-	"time"
+	"Blog/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -45,7 +44,7 @@ func WithCache(rdb *redis.Client) ServerOptions {
 	}
 }
 
-func NewServerV2(opts ...ServerOptions) *Server {
+func NewServer(opts ...ServerOptions) *Server {
 	server := &Server{}
 	for _, opt := range opts {
 		opt(server)
@@ -56,28 +55,12 @@ func NewServerV2(opts ...ServerOptions) *Server {
 	return server
 }
 
-func NewServer(conf config.Config, store db.Store) (*Server, error) {
-
-	maker, err := token.NewPasetoMaker(conf.Token.TokenSymmetricKey)
-	if err != nil {
-		return nil, err
-	}
-
-	server := &Server{
-		conf:  conf,
-		store: store,
-		maker: maker,
-	}
-
-	server.setupRouter()
-
-	return server, nil
-}
-
 func (server *Server) setupRouter() {
-	router := gin.Default()
+	// router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Recovery())
 
-	router.Use(CORS()).Use(LogFuncExecTime())
+	router.Use(middleware.CORS()).Use(middleware.LogFuncExecTime())
 
 	router.POST("/user", server.createUser)
 	router.POST("/login", server.login)
@@ -90,7 +73,7 @@ func (server *Server) setupRouter() {
 	router.POST("/comment", server.createComment)
 	router.GET("/comment", server.getComments)
 
-	authRouter := router.Group("/").Use(server.authMiddlware())
+	authRouter := router.Group("/").Use(middleware.Authorization(server.maker, server.rdb))
 	{
 		authRouter.PUT("/user", server.updateUser)
 
@@ -106,28 +89,10 @@ func (server *Server) Start(addr string) error {
 	return server.router.Run(addr)
 }
 
-func LogFuncExecTime() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		start := time.Now()
-		path := ctx.Request.URL.Path
-		raw := ctx.Request.URL.RawQuery
+func (server Server) GetRoutr() *gin.Engine {
+	return server.router
+}
 
-		ctx.Next()
-
-		method := ctx.Request.Method
-		ip := ctx.ClientIP()
-
-		if raw != "" {
-			path += raw
-		}
-
-		statusCode := ctx.Writer.Status()
-
-		latency := time.Since(start).Milliseconds()
-
-		// time | statusCode | timeSub | ip | method | path
-		logs.Logs.Infof("%s | %d | %5dms | %s | %s | %s",
-			start.Format("2006/01/02 15:04:05"), statusCode, latency, ip, method, path,
-		)
-	}
+func (server Server) GetMaker() token.Maker {
+	return server.maker
 }

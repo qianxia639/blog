@@ -1,8 +1,8 @@
 package api
 
 import (
+	"Blog/core/token"
 	db "Blog/db/sqlc"
-	"Blog/token"
 	"Blog/utils"
 	"database/sql"
 	"net/http"
@@ -26,7 +26,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		return
 	}
 
-	payload, ok := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	payload, ok := ctx.MustGet("Authorization_Payload").(*token.Payload)
 	if !ok {
 		ctx.SecureJSON(http.StatusInternalServerError, "internal server error")
 		return

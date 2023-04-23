@@ -1,13 +1,15 @@
-package api
+package middleware
 
 import (
-	"Blog/token"
+	"Blog/core/token"
+	"Blog/utils"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 )
 
@@ -58,10 +60,18 @@ func TestAuthMiddleware(t *testing.T) {
 		tc := testCases[i]
 
 		t.Run(tc.name, func(t *testing.T) {
-			server := newTestServer(t, nil)
+			gin.SetMode(gin.TestMode)
+			r := gin.New()
+
+			maker, err := token.NewPasetoMaker(utils.RandomString(32))
+			require.NoError(t, err)
+
+			rdb := redis.NewClient(&redis.Options{
+				Addr: "localhost:6379",
+			})
 
 			authPath := "/auth"
-			server.router.GET(authPath, server.authMiddlware(), func(ctx *gin.Context) {
+			r.GET(authPath, Authorization(maker, rdb), func(ctx *gin.Context) {
 				ctx.JSON(http.StatusOK, gin.H{})
 			})
 
@@ -69,8 +79,8 @@ func TestAuthMiddleware(t *testing.T) {
 			requst, err := http.NewRequest(http.MethodGet, authPath, nil)
 			require.NoError(t, err)
 
-			tc.setupAuth(t, requst, server.maker)
-			server.router.ServeHTTP(recorder, requst)
+			tc.setupAuth(t, requst, maker)
+			r.ServeHTTP(recorder, requst)
 
 			tc.checkResponse(t, recorder)
 		})

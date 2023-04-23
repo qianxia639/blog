@@ -1,9 +1,11 @@
-package api
+package middleware
 
 import (
+	"Blog/core/token"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 )
 
 const (
@@ -11,7 +13,7 @@ const (
 	authorizationPayloadKey = "Authorization_Payload"
 )
 
-func (server *Server) authMiddlware() gin.HandlerFunc {
+func Authorization(maker token.Maker, rdb *redis.Client) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authorization := ctx.Request.Header.Get(authorizationHeader)
 
@@ -20,7 +22,7 @@ func (server *Server) authMiddlware() gin.HandlerFunc {
 			return
 		}
 
-		payload, err := server.maker.VerifyToken(authorization)
+		payload, err := maker.VerifyToken(authorization)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, err.Error())
 			return
