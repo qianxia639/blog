@@ -79,8 +79,10 @@ func (server *Server) setupRouter() {
 
 		authRouter.POST("/blog", server.insertBlog)
 		authRouter.DELETE("/blog/:id", server.deleteBlog)
-		authRouter.PUT("/blog", server.updateBlog)
+		// authRouter.PUT("/blog", server.updateBlog)
 	}
+
+	router.PUT("/blog", server.updateBlog)
 
 	server.router = router
 }

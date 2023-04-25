@@ -17,6 +17,17 @@ type updateBlogRequest struct {
 	Image   *string `json:"image"`
 }
 
+func newNullString(s *string) sql.NullString {
+	if s == nil {
+		return sql.NullString{}
+	}
+
+	return sql.NullString{
+		String: *s,
+		Valid:  true,
+	}
+}
+
 func (server *Server) updateBlog(ctx *gin.Context) {
 	var req updateBlogRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -27,30 +38,12 @@ func (server *Server) updateBlog(ctx *gin.Context) {
 	arg := db.UpdateBlogParams{
 		ID:        req.Id,
 		UpdatedAt: time.Now(),
+		Title:     newNullString(req.Title),
+		Content:   newNullString(req.Content),
+		Image:     newNullString(req.Image),
 	}
 
-	if req.Title != nil {
-		arg.Title = sql.NullString{
-			String: *req.Title,
-			Valid:  true,
-		}
-	}
-
-	if req.Content != nil {
-		arg.Content = sql.NullString{
-			String: *req.Content,
-			Valid:  true,
-		}
-	}
-
-	if req.Image != nil {
-		arg.Image = sql.NullString{
-			String: *req.Image,
-			Valid:  true,
-		}
-	}
-
-	_, err := server.store.UpdateBlog(ctx, arg)
+	result, err := server.store.UpdateBlog(ctx, arg)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
@@ -63,5 +56,5 @@ func (server *Server) updateBlog(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SecureJSON(http.StatusOK, "Update Blog Successfully")
+	ctx.SecureJSON(http.StatusOK, result)
 }

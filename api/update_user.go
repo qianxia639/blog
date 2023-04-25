@@ -39,13 +39,9 @@ func (server *Server) updateUser(ctx *gin.Context) {
 
 	arg := db.UpdateUserParams{
 		Username: req.Username,
-	}
-
-	if req.Email != nil {
-		arg.Email = sql.NullString{
-			String: *req.Email,
-			Valid:  req.Email != nil,
-		}
+		Email:    newNullString(req.Email),
+		Nickname: newNullString(req.Nickname),
+		Avatar:   newNullString(req.Avatar),
 	}
 
 	if req.Password != nil {
@@ -57,20 +53,6 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		arg.Password = sql.NullString{
 			String: hashPassword,
 			Valid:  true,
-		}
-	}
-
-	if req.Nickname != nil {
-		arg.Nickname = sql.NullString{
-			String: *req.Nickname,
-			Valid:  req.Nickname != nil,
-		}
-	}
-
-	if req.Avatar != nil {
-		arg.Avatar = sql.NullString{
-			String: *req.Avatar,
-			Valid:  req.Avatar != nil,
 		}
 	}
 
