@@ -4,6 +4,7 @@ import (
 	"Blog/core/errors"
 	"Blog/core/logs"
 	"Blog/utils"
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -44,31 +45,17 @@ func (server *Server) login(ctx *gin.Context) {
 		return
 	}
 
-	loginAttemptskey := fmt.Sprintf("loginAttempts:%s", user.Username)
+	loginAttemptsKey := fmt.Sprintf("loginAttempts:%s", user.Username)
 	lockedAccountKey := fmt.Sprintf("lockedAccount:%s", user.Username)
 
 	if err := utils.Decrypt(req.Password, user.Password); err != nil {
+
+		if statusCode, err := server.accountLocked(ctx, loginAttemptsKey, lockedAccountKey); err != nil && statusCode != http.StatusOK {
+			ctx.SecureJSON(statusCode, err.Error())
+			return
+		}
+
 		logs.Logs.Error(err)
-		// 增加登录尝试次数
-		attempts, err := server.rdb.Incr(ctx, loginAttemptskey).Result()
-		if err != nil {
-			logs.Logs.Error("redis err: ", err)
-			ctx.JSON(http.StatusInternalServerError, errors.ServerErr.Error())
-			return
-		}
-
-		if attempts >= maxLoginAttempts {
-			// 锁定用户1小时
-			err = server.rdb.Set(ctx, lockedAccountKey, true, time.Hour).Err()
-			if err != nil {
-				logs.Logs.Error("redis err: ", err)
-				ctx.JSON(http.StatusInternalServerError, errors.ServerErr.Error())
-				return
-			}
-			ctx.JSON(http.StatusUnauthorized, errors.AccountLockedErr.Error())
-			return
-		}
-
 		ctx.SecureJSON(http.StatusUnauthorized, errors.PasswordErr.Error())
 		return
 	}
@@ -85,7 +72,7 @@ func (server *Server) login(ctx *gin.Context) {
 	}
 
 	// 重置登录尝试次数
-	if err := server.rdb.Del(ctx, loginAttemptskey).Err(); err != nil {
+	if err := server.rdb.Del(ctx, loginAttemptsKey).Err(); err != nil {
 		logs.Logs.Error("Del Redis err: ", err)
 		ctx.SecureJSON(http.StatusInternalServerError, errors.ServerErr.Error())
 		return
@@ -98,4 +85,25 @@ func (server *Server) login(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, loginResponse{Token: token})
+}
+
+func (server *Server) accountLocked(ctx context.Context, loginAttemptsKey, lockedAccountKey string) (int, error) {
+	// 增加登录尝试次数
+	attempts, err := server.rdb.Incr(ctx, loginAttemptsKey).Result()
+	if err != nil {
+		logs.Logs.Error("redis err: ", err)
+		return http.StatusInternalServerError, errors.ServerErr
+	}
+
+	if attempts >= maxLoginAttempts {
+		// 锁定用户1小时
+		err = server.rdb.Set(ctx, lockedAccountKey, true, time.Hour).Err()
+		if err != nil {
+			logs.Logs.Error("redis err: ", err)
+			return http.StatusInternalServerError, errors.ServerErr
+		}
+		return http.StatusUnauthorized, errors.AccountLockedErr
+	}
+
+	return http.StatusOK, nil
 }
