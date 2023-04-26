@@ -1,9 +1,10 @@
 package api
 
 import (
+	"Blog/core/errors"
+	"Blog/core/result"
 	db "Blog/db/sqlc"
 	"fmt"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +20,7 @@ type searchBlogRequest struct {
 func (server *Server) searchBlog(ctx *gin.Context) {
 	var req searchBlogRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.SecureJSON(http.StatusBadRequest, err.Error())
+		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
 
@@ -31,9 +32,9 @@ func (server *Server) searchBlog(ctx *gin.Context) {
 
 	blogs, err := server.store.SearchBlog(ctx, arg)
 	if err != nil {
-		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
-	ctx.JSON(http.StatusOK, blogs)
+	result.Obj(ctx, blogs)
 }

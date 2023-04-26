@@ -1,6 +1,8 @@
 package api
 
 import (
+	"Blog/core/errors"
+	"Blog/core/result"
 	db "Blog/db/sqlc"
 	"database/sql"
 	"net/http"
@@ -31,7 +33,7 @@ func newNullString(s *string) sql.NullString {
 func (server *Server) updateBlog(ctx *gin.Context) {
 	var req updateBlogRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.SecureJSON(http.StatusBadRequest, err.Error())
+		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
 
@@ -43,18 +45,18 @@ func (server *Server) updateBlog(ctx *gin.Context) {
 		Image:     newNullString(req.Image),
 	}
 
-	result, err := server.store.UpdateBlog(ctx, arg)
+	res, err := server.store.UpdateBlog(ctx, arg)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
 			case ErrUniqueViolation:
-				ctx.SecureJSON(http.StatusForbidden, err.Error())
+				result.Error(ctx, http.StatusForbidden, err.Error())
 				return
 			}
 		}
-		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
-	ctx.SecureJSON(http.StatusOK, result)
+	result.Obj(ctx, res)
 }

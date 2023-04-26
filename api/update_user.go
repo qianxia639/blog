@@ -1,6 +1,8 @@
 package api
 
 import (
+	"Blog/core/errors"
+	"Blog/core/result"
 	"Blog/core/token"
 	db "Blog/db/sqlc"
 	"Blog/utils"
@@ -22,18 +24,19 @@ type updateUserRequest struct {
 func (server *Server) updateUser(ctx *gin.Context) {
 	var req updateUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.SecureJSON(http.StatusBadRequest, err.Error())
+		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
 
+	// TODO: 这里的Key值后期需要更改
 	payload, ok := ctx.MustGet("Authorization_Payload").(*token.Payload)
 	if !ok {
-		ctx.SecureJSON(http.StatusInternalServerError, "internal server error")
+		result.ServerError(ctx, "internal server error")
 		return
 	}
 
 	if req.Username != payload.Username {
-		ctx.SecureJSON(http.StatusBadRequest, "用户名错误")
+		result.BadRequestError(ctx, errors.UsernameErr.Error())
 		return
 	}
 
@@ -47,7 +50,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	if req.Password != nil {
 		hashPassword, err := utils.Encrypt(*req.Password)
 		if err != nil {
-			ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+			result.ServerError(ctx, errors.ServerErr.Error())
 			return
 		}
 		arg.Password = sql.NullString{
@@ -61,13 +64,13 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
 			case ErrUniqueViolation:
-				ctx.SecureJSON(http.StatusForbidden, err.Error())
+				result.Error(ctx, http.StatusForbidden, err.Error())
 				return
 			}
 		}
-		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
-	ctx.SecureJSON(http.StatusOK, "Update User Successfully")
+	result.OK(ctx, "Update User Successfully")
 }

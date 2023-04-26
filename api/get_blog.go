@@ -1,29 +1,32 @@
 package api
 
 import (
+	"Blog/core/errors"
+	"Blog/core/logs"
+	"Blog/core/result"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-type getBlogRequest struct {
-	Id int64 `uri:"id" binding:"required,min=1"`
-}
-
 func (server *Server) getBlog(ctx *gin.Context) {
-	var req getBlogRequest
-	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.SecureJSON(http.StatusBadRequest, err.Error())
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+	if err != nil {
+		logs.Logs.Errorf("err: %s, param: %s", err.Error(), ctx.Param("id"))
+		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
 
-	blog, err := server.store.GetBlog(ctx, req.Id)
+	blog, err := server.store.GetBlog(ctx, id)
 	switch err {
 	case nil:
-		ctx.JSON(http.StatusOK, blog)
+		result.Obj(ctx, blog)
 	case ErrNoRows:
-		ctx.SecureJSON(http.StatusNotFound, err.Error())
+		logs.Logs.Error("User Not Found err: ", err)
+		result.Error(ctx, http.StatusNotFound, errors.NotExistsUserErr.Error())
 	default:
-		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+		logs.Logs.Error("Get Blog err: ", err)
+		result.ServerError(ctx, errors.ServerErr.Error())
 	}
 }

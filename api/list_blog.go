@@ -3,8 +3,8 @@ package api
 import (
 	"Blog/core/errors"
 	"Blog/core/logs"
+	"Blog/core/result"
 	db "Blog/db/sqlc"
-	"net/http"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -16,8 +16,10 @@ type listBlogsRequest struct {
 }
 
 type pageResponse struct {
-	Total int64       `json:"total"`
-	Data  interface{} `json:"data"`
+	PageNo   int32       `json:"page_no"`
+	PageSize int32       `json:"page_size"`
+	Total    int64       `json:"total"`
+	Data     interface{} `json:"data"`
 }
 
 func (server *Server) listBlogs(ctx *gin.Context) {
@@ -25,11 +27,14 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 	var req listBlogsRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		logs.Logs.Error(err)
-		ctx.JSON(http.StatusBadRequest, errors.ParamErr)
+		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
 
 	var resp pageResponse
+	resp.PageNo = req.PageNo
+	resp.PageSize = req.PageSize
+
 	offset := (req.PageNo - 1) * req.PageSize
 
 	var wg sync.WaitGroup
@@ -44,7 +49,7 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 		})
 		if err != nil {
 			logs.Logs.Error(err)
-			ctxCopy.JSON(http.StatusInternalServerError, errors.ServerErr)
+			result.ServerError(ctxCopy, errors.ServerErr.Error())
 			return
 		}
 		resp.Data = data
@@ -55,12 +60,12 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 		total, err := server.store.CountBlog(ctxCopy)
 		if err != nil {
 			logs.Logs.Error(err)
-			ctxCopy.JSON(http.StatusInternalServerError, errors.ServerErr)
+			result.ServerError(ctxCopy, errors.ServerErr.Error())
 			return
 		}
 		resp.Total = total
 	}()
 	wg.Wait()
 
-	ctx.JSON(http.StatusOK, resp)
+	result.Obj(ctx, resp)
 }

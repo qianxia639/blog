@@ -1,37 +1,41 @@
 package api
 
 import (
+	"Blog/core/errors"
+	"Blog/core/logs"
+	"Blog/core/result"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-type deleteBlogRequest struct {
-	Id int64 `uri:"id" binding:"required,min=1"`
-}
-
 func (server *Server) deleteBlog(ctx *gin.Context) {
-	var req deleteBlogRequest
-	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.SecureJSON(http.StatusBadRequest, err.Error())
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+	if err != nil {
+		logs.Logs.Errorf("err: %s, param: %s", err.Error(), ctx.Param("id"))
+		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
 
-	_, err := server.store.GetBlog(ctx, req.Id)
+	_, err = server.store.GetBlog(ctx, id)
 	if err != nil {
 		if err == ErrNoRows {
-			ctx.SecureJSON(http.StatusNotFound, err.Error())
+			logs.Logs.Error("Get Blog err: ", err)
+			result.Error(ctx, http.StatusNotFound, errors.NotExistsUserErr.Error())
 			return
 		}
-		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+		logs.Logs.Error("Get Blog err: ", err)
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
-	err = server.store.DeleteBlog(ctx, req.Id)
+	err = server.store.DeleteBlog(ctx, id)
 	if err != nil {
-		ctx.SecureJSON(http.StatusInternalServerError, err)
+		logs.Logs.Error("Delete Blog err: ", err)
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
-	ctx.SecureJSON(http.StatusOK, "Delete Blog Successfully")
+	result.OK(ctx, "Delete Blog Successfully")
 }

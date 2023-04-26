@@ -1,6 +1,9 @@
 package api
 
 import (
+	"Blog/core/errors"
+	"Blog/core/logs"
+	"Blog/core/result"
 	db "Blog/db/sqlc"
 	"net/http"
 	"time"
@@ -19,7 +22,8 @@ type insertBlogRequest struct {
 func (server *Server) insertBlog(ctx *gin.Context) {
 	var req insertBlogRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.SecureJSON(http.StatusBadRequest, err.Error())
+		logs.Logs.Error(err)
+		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
 
@@ -36,13 +40,14 @@ func (server *Server) insertBlog(ctx *gin.Context) {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
 			case ErrUniqueViolation:
-				ctx.SecureJSON(http.StatusForbidden, err.Error())
+				logs.Logs.Error(err)
+				result.Error(ctx, http.StatusForbidden, err.Error())
 				return
 			}
 		}
-		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
-	ctx.SecureJSON(http.StatusOK, "Insert Blog Successful")
+	result.OK(ctx, "Insert Blog Successful")
 }

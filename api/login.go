@@ -3,6 +3,7 @@ package api
 import (
 	"Blog/core/errors"
 	"Blog/core/logs"
+	"Blog/core/result"
 	"Blog/utils"
 	"context"
 	"fmt"
@@ -18,11 +19,7 @@ const maxLoginAttempts = 5
 
 type loginRequest struct {
 	Username string `json:"username" binding:"required"`
-	Password string `json:"password"`
-}
-
-type loginResponse struct {
-	Token string `json:"token"`
+	Password string `json:"password" binding:"required"`
 }
 
 func (server *Server) login(ctx *gin.Context) {
@@ -30,61 +27,61 @@ func (server *Server) login(ctx *gin.Context) {
 	var req loginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logs.Logs.Error("Bind Param err: ", err)
-		ctx.SecureJSON(http.StatusBadRequest, errors.ParamErr.Error())
+		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
 
 	user, err := server.store.GetUser(ctx, req.Username)
 	if err != nil {
-		if err == ErrNoRows {
+		switch err {
+		case ErrNoRows:
 			logs.Logs.Error("Not User err: ", err)
-			ctx.SecureJSON(http.StatusNotFound, errors.NotExistsUserErr.Error())
-			return
+			result.Error(ctx, http.StatusNotFound, errors.NotExistsUserErr.Error())
+		default:
+			result.ServerError(ctx, errors.ServerErr.Error())
 		}
-		ctx.SecureJSON(http.StatusInternalServerError, errors.ServerErr.Error())
-		return
 	}
 
 	loginAttemptsKey := fmt.Sprintf("loginAttempts:%s", user.Username)
 	lockedAccountKey := fmt.Sprintf("lockedAccount:%s", user.Username)
 
 	if err := utils.Decrypt(req.Password, user.Password); err != nil {
-
 		if statusCode, err := server.accountLocked(ctx, loginAttemptsKey, lockedAccountKey); err != nil && statusCode != http.StatusOK {
-			ctx.SecureJSON(statusCode, err.Error())
+			result.Error(ctx, statusCode, err.Error())
 			return
 		}
 
 		logs.Logs.Error(err)
-		ctx.SecureJSON(http.StatusUnauthorized, errors.PasswordErr.Error())
+		result.UnauthorizedError(ctx, errors.PasswordErr.Error())
 		return
 	}
 
 	locked, err := server.rdb.Get(ctx, lockedAccountKey).Bool()
 	if err != nil && err != redis.Nil {
-		ctx.SecureJSON(http.StatusInternalServerError, errors.ServerErr.Error())
+		logs.Logs.Error("get locked account err: ", err)
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
 	if locked {
-		ctx.SecureJSON(http.StatusUnauthorized, errors.AccountLockedErr.Error())
+		result.UnauthorizedError(ctx, errors.AccountLockedErr.Error())
 		return
 	}
 
 	// 重置登录尝试次数
 	if err := server.rdb.Del(ctx, loginAttemptsKey).Err(); err != nil {
 		logs.Logs.Error("Del Redis err: ", err)
-		ctx.SecureJSON(http.StatusInternalServerError, errors.ServerErr.Error())
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
 	token, err := server.maker.CreateToken(user.Username, server.conf.Token.AccessTokenDuration)
 	if err != nil {
-		ctx.SecureJSON(http.StatusInternalServerError, errors.ServerErr.Error())
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
-	ctx.JSON(http.StatusOK, loginResponse{Token: token})
+	result.Obj(ctx, token)
 }
 
 func (server *Server) accountLocked(ctx context.Context, loginAttemptsKey, lockedAccountKey string) (int, error) {
