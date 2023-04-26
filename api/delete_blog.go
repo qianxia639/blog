@@ -18,6 +18,11 @@ func (server *Server) deleteBlog(ctx *gin.Context) {
 		return
 	}
 
+	if id < 1 {
+		result.BadRequestError(ctx, errors.ParamErr.Error())
+		return
+	}
+
 	_, err = server.store.GetBlog(ctx, id)
 	if err != nil {
 		if err == ErrNoRows {

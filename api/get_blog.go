@@ -18,6 +18,11 @@ func (server *Server) getBlog(ctx *gin.Context) {
 		return
 	}
 
+	if id < 1 {
+		result.BadRequestError(ctx, errors.ParamErr.Error())
+		return
+	}
+
 	blog, err := server.store.GetBlog(ctx, id)
 	switch err {
 	case nil:
