@@ -13,8 +13,10 @@ SET
 WHERE id = $1;
 
 -- name: GetBlog :one
-SELECT * FROM blogs
-WHERE id = $1 LIMIT 1;
+SELECT b.*, u.nickname, u.avatar FROM blogs b
+JOIN users u
+ON b.owner_id = u.id
+WHERE b.id = $1 LIMIT 1;
 
 -- name: ListBlogs :many
 SELECT b.*, u.nickname, u.avatar FROM blogs b

@@ -41,7 +41,7 @@ func (server *Server) insertBlog(ctx *gin.Context) {
 			switch pqErr.Code.Name() {
 			case ErrUniqueViolation:
 				logs.Logs.Error(err)
-				result.Error(ctx, http.StatusForbidden, err.Error())
+				result.Error(ctx, http.StatusForbidden, errors.TitleExistsErr.Error())
 				return
 			}
 		}

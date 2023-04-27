@@ -31,6 +31,18 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 		return
 	}
 
+	if req.PageNo < 1 {
+		req.PageNo = 1
+	}
+
+	if req.PageSize <= 0 {
+		req.PageSize = 10
+	}
+
+	if req.PageSize > 100 {
+		req.PageSize = 100
+	}
+
 	var resp pageResponse
 	resp.PageNo = req.PageNo
 	resp.PageSize = req.PageSize

@@ -95,10 +95,10 @@ func (mr *MockStoreMockRecorder) DeleteBlog(arg0, arg1 interface{}) *gomock.Call
 }
 
 // GetBlog mocks base method.
-func (m *MockStore) GetBlog(arg0 context.Context, arg1 int64) (db.Blog, error) {
+func (m *MockStore) GetBlog(arg0 context.Context, arg1 int64) (db.GetBlogRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetBlog", arg0, arg1)
-	ret0, _ := ret[0].(db.Blog)
+	ret0, _ := ret[0].(db.GetBlogRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

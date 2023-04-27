@@ -12,7 +12,7 @@ import (
 const wildcard = "%%%s%%"
 
 type searchBlogRequest struct {
-	Title    string `form:"title"`
+	Query    string `form:"query"`
 	PageNo   int32  `form:"page_no" binding:"required,min=1"`
 	PageSize int32  `form:"page_size" binding:"required,min=1"`
 }
@@ -24,8 +24,20 @@ func (server *Server) searchBlog(ctx *gin.Context) {
 		return
 	}
 
+	if req.PageNo < 1 {
+		req.PageNo = 0
+	}
+
+	if req.PageSize <= 0 {
+		req.PageSize = 10
+	}
+
+	if req.PageSize > 100 {
+		req.PageSize = 100
+	}
+
 	arg := db.SearchBlogParams{
-		Title:  fmt.Sprintf(wildcard, req.Title),
+		Title:  fmt.Sprintf(wildcard, req.Query),
 		Limit:  req.PageSize,
 		Offset: (req.PageNo - 1) * req.PageSize,
 	}

@@ -33,13 +33,28 @@ func (q *Queries) DeleteBlog(ctx context.Context, id int64) error {
 }
 
 const getBlog = `-- name: GetBlog :one
-SELECT id, owner_id, title, content, image, views, created_at, updated_at FROM blogs
-WHERE id = $1 LIMIT 1
+SELECT b.id, b.owner_id, b.title, b.content, b.image, b.views, b.created_at, b.updated_at, u.nickname, u.avatar FROM blogs b
+JOIN users u
+ON b.owner_id = u.id
+WHERE b.id = $1 LIMIT 1
 `
 
-func (q *Queries) GetBlog(ctx context.Context, id int64) (Blog, error) {
+type GetBlogRow struct {
+	ID        int64     `json:"id"`
+	OwnerID   int64     `json:"owner_id"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	Image     string    `json:"image"`
+	Views     int32     `json:"views"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Nickname  string    `json:"nickname"`
+	Avatar    string    `json:"avatar"`
+}
+
+func (q *Queries) GetBlog(ctx context.Context, id int64) (GetBlogRow, error) {
 	row := q.db.QueryRowContext(ctx, getBlog, id)
-	var i Blog
+	var i GetBlogRow
 	err := row.Scan(
 		&i.ID,
 		&i.OwnerID,
@@ -49,6 +64,8 @@ func (q *Queries) GetBlog(ctx context.Context, id int64) (Blog, error) {
 		&i.Views,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Nickname,
+		&i.Avatar,
 	)
 	return i, err
 }

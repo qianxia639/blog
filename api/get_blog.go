@@ -29,7 +29,7 @@ func (server *Server) getBlog(ctx *gin.Context) {
 		result.Obj(ctx, blog)
 	case ErrNoRows:
 		logs.Logs.Error("User Not Found err: ", err)
-		result.Error(ctx, http.StatusNotFound, errors.NotExistsUserErr.Error())
+		result.Error(ctx, http.StatusNotFound, errors.NotExistsBlogErr.Error())
 	default:
 		logs.Logs.Error("Get Blog err: ", err)
 		result.ServerError(ctx, errors.ServerErr.Error())

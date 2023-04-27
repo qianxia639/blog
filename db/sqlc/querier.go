@@ -13,7 +13,7 @@ type Querier interface {
 	CreateComment(ctx context.Context, arg CreateCommentParams) (Comment, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteBlog(ctx context.Context, id int64) error
-	GetBlog(ctx context.Context, id int64) (Blog, error)
+	GetBlog(ctx context.Context, id int64) (GetBlogRow, error)
 	GetChildComments(ctx context.Context, arg GetChildCommentsParams) ([]Comment, error)
 	GetComments(ctx context.Context, ownerID int64) ([]Comment, error)
 	GetUser(ctx context.Context, username string) (User, error)

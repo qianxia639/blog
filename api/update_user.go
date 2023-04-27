@@ -2,6 +2,7 @@ package api
 
 import (
 	"Blog/core/errors"
+	"Blog/core/logs"
 	"Blog/core/result"
 	"Blog/core/token"
 	db "Blog/db/sqlc"
@@ -24,6 +25,7 @@ type updateUserRequest struct {
 func (server *Server) updateUser(ctx *gin.Context) {
 	var req updateUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		logs.Logs.Error(err)
 		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
@@ -31,12 +33,12 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	// TODO: 这里的Key值后期需要更改
 	payload, ok := ctx.MustGet("Authorization_Payload").(*token.Payload)
 	if !ok {
-		result.ServerError(ctx, "internal server error")
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
 	if req.Username != payload.Username {
-		result.BadRequestError(ctx, errors.UsernameErr.Error())
+		result.UnauthorizedError(ctx, errors.UnauthorizedError.Error())
 		return
 	}
 
@@ -64,7 +66,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
 			case ErrUniqueViolation:
-				result.Error(ctx, http.StatusForbidden, err.Error())
+				result.Error(ctx, http.StatusForbidden, errors.NicknameExistsErr.Error())
 				return
 			}
 		}
