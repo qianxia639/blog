@@ -1,6 +1,9 @@
 package api
 
 import (
+	"Blog/core/errors"
+	"Blog/core/logs"
+	"Blog/core/result"
 	db "Blog/db/sqlc"
 	"Blog/utils"
 	"net/http"
@@ -19,13 +22,15 @@ type createUserRequest struct {
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.SecureJSON(http.StatusBadRequest, err.Error())
+		logs.Logs.Error(err)
+		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
 
 	hashPassword, err := utils.Encrypt(req.Password)
 	if err != nil {
-		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+		logs.Logs.Error(err)
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
@@ -39,16 +44,17 @@ func (server *Server) createUser(ctx *gin.Context) {
 
 	_, err = server.store.CreateUser(ctx, arg)
 	if err != nil {
+		logs.Logs.Error(err)
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
 			case ErrUniqueViolation:
-				ctx.SecureJSON(http.StatusForbidden, err.Error())
+				result.Error(ctx, http.StatusForbidden, err.Error())
 				return
 			}
 		}
-		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
-	ctx.SecureJSON(http.StatusOK, "Create User Successfully")
+	result.OK(ctx, "Create User Successfully")
 }
