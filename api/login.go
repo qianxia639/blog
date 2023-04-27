@@ -31,6 +31,21 @@ func (server *Server) login(ctx *gin.Context) {
 		return
 	}
 
+	loginAttemptsKey := fmt.Sprintf("loginAttempts:%s", req.Username)
+	lockedAccountKey := fmt.Sprintf("lockedAccount:%s", req.Username)
+
+	locked, err := server.rdb.Get(ctx, lockedAccountKey).Bool()
+	if err != nil && err != redis.Nil {
+		logs.Logs.Error("get locked account err: ", err)
+		result.ServerError(ctx, errors.ServerErr.Error())
+		return
+	}
+
+	if locked {
+		result.UnauthorizedError(ctx, errors.AccountLockedErr.Error())
+		return
+	}
+
 	user, err := server.store.GetUser(ctx, req.Username)
 	if err != nil {
 		switch err {
@@ -42,29 +57,19 @@ func (server *Server) login(ctx *gin.Context) {
 		}
 	}
 
-	loginAttemptsKey := fmt.Sprintf("loginAttempts:%s", user.Username)
-	lockedAccountKey := fmt.Sprintf("lockedAccount:%s", user.Username)
-
 	if err := utils.Decrypt(req.Password, user.Password); err != nil {
 		if statusCode, err := server.accountLocked(ctx, loginAttemptsKey, lockedAccountKey); err != nil && statusCode != http.StatusOK {
+			// 重置失败的登录次数
+			if err := server.resetLoginAttempts(ctx, loginAttemptsKey); err != nil {
+				logs.Logs.Error(err)
+				result.ServerError(ctx, errors.ServerErr.Error())
+			}
 			result.Error(ctx, statusCode, err.Error())
 			return
 		}
 
 		logs.Logs.Error(err)
 		result.UnauthorizedError(ctx, errors.PasswordErr.Error())
-		return
-	}
-
-	locked, err := server.rdb.Get(ctx, lockedAccountKey).Bool()
-	if err != nil && err != redis.Nil {
-		logs.Logs.Error("get locked account err: ", err)
-		result.ServerError(ctx, errors.ServerErr.Error())
-		return
-	}
-
-	if locked {
-		result.UnauthorizedError(ctx, errors.AccountLockedErr.Error())
 		return
 	}
 
@@ -94,12 +99,7 @@ func (server *Server) accountLocked(ctx context.Context, loginAttemptsKey, locke
 
 	if attempts > maxLoginAttempts {
 		// 锁定用户1小时
-		if err := server.rdb.Set(ctx, lockedAccountKey, true, time.Hour).Err(); err == nil {
-			// 重置失败的登录次数
-			if err := server.resetLoginAttempts(ctx, loginAttemptsKey); err != nil {
-				logs.Logs.Error(err)
-				return http.StatusInternalServerError, errors.ServerErr
-			}
+		if err := server.rdb.Set(ctx, lockedAccountKey, true, time.Hour).Err(); err != nil {
 			logs.Logs.Error(err)
 			return http.StatusInternalServerError, errors.ServerErr
 		}
