@@ -68,9 +68,9 @@ func (server *Server) login(ctx *gin.Context) {
 		return
 	}
 
-	// 重置登录尝试次数
-	if err := server.rdb.Del(ctx, loginAttemptsKey).Err(); err != nil {
-		logs.Logs.Error("Del Redis err: ", err)
+	// 重置登录失败次数
+	if err := server.resetLoginAttempts(ctx, loginAttemptsKey); err != nil {
+		logs.Logs.Error(err)
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
@@ -92,15 +92,23 @@ func (server *Server) accountLocked(ctx context.Context, loginAttemptsKey, locke
 		return http.StatusInternalServerError, errors.ServerErr
 	}
 
-	if attempts >= maxLoginAttempts {
+	if attempts > maxLoginAttempts {
 		// 锁定用户1小时
-		err = server.rdb.Set(ctx, lockedAccountKey, true, time.Hour).Err()
-		if err != nil {
-			logs.Logs.Error("redis err: ", err)
+		if err := server.rdb.Set(ctx, lockedAccountKey, true, time.Hour).Err(); err == nil {
+			// 重置失败的登录次数
+			if err := server.resetLoginAttempts(ctx, loginAttemptsKey); err != nil {
+				logs.Logs.Error(err)
+				return http.StatusInternalServerError, errors.ServerErr
+			}
+			logs.Logs.Error(err)
 			return http.StatusInternalServerError, errors.ServerErr
 		}
 		return http.StatusUnauthorized, errors.AccountLockedErr
 	}
 
 	return http.StatusOK, nil
+}
+
+func (server *Server) resetLoginAttempts(ctx context.Context, loginAttemptsKey string) error {
+	return server.rdb.Del(ctx, loginAttemptsKey).Err()
 }
