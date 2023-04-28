@@ -5,6 +5,7 @@ import "errors"
 var (
 	ParamErr          = errors.New("参数错误")
 	ServerErr         = errors.New("服务异常")
+	InvalidSyntaxErr  = errors.New("无效语法")
 	NotExistsUserErr  = errors.New("用户不存在")
 	NicknameExistsErr = errors.New("用户名重复")
 	PasswordErr       = errors.New("密码错误")

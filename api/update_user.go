@@ -42,7 +42,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		return
 	}
 
-	arg := db.UpdateUserParams{
+	arg := &db.UpdateUserParams{
 		Username: req.Username,
 		Email:    newNullString(req.Email),
 		Nickname: newNullString(req.Nickname),

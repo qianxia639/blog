@@ -27,7 +27,7 @@ func (server *Server) insertBlog(ctx *gin.Context) {
 		return
 	}
 
-	arg := db.InsertBlogParams{
+	arg := &db.InsertBlogParams{
 		OwnerID:   req.OwnerId,
 		Title:     req.Title,
 		Content:   req.Content,

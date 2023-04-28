@@ -73,7 +73,7 @@ func (server *Server) updateBlog(ctx *gin.Context) {
 		return
 	}
 
-	arg := db.UpdateBlogParams{
+	arg := &db.UpdateBlogParams{
 		ID:        req.Id,
 		UpdatedAt: time.Now(),
 		Title:     newNullString(req.Title),

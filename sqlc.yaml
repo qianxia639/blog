@@ -12,3 +12,4 @@ sql:
         emit_interface: true          # 是否生成接口
         emit_exact_table_names: false # 是否生成复数表名
         emit_empty_slices: true
+        emit_params_struct_pointers: true # 将结构体参数作为指针进行传递

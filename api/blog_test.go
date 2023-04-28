@@ -54,7 +54,7 @@ func TestInsertBlog(t *testing.T) {
 
 	user, password := randomUser(t)
 
-	arg := db.CreateUserParams{
+	arg := &db.CreateUserParams{
 		Username: user.Username,
 		Password: password,
 		Nickname: user.Nickname,

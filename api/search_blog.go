@@ -36,7 +36,7 @@ func (server *Server) searchBlog(ctx *gin.Context) {
 		req.PageSize = 100
 	}
 
-	arg := db.SearchBlogParams{
+	arg := &db.SearchBlogParams{
 		Title:  fmt.Sprintf(wildcard, req.Query),
 		Limit:  req.PageSize,
 		Offset: (req.PageNo - 1) * req.PageSize,

@@ -30,7 +30,7 @@ type InsertRequestLogParams struct {
 	UserAgent    string `json:"user_agent"`
 }
 
-func (q *Queries) InsertRequestLog(ctx context.Context, arg InsertRequestLogParams) (RequestLog, error) {
+func (q *Queries) InsertRequestLog(ctx context.Context, arg *InsertRequestLogParams) (RequestLog, error) {
 	row := q.db.QueryRowContext(ctx, insertRequestLog,
 		arg.Method,
 		arg.Path,

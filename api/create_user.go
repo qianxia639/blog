@@ -34,7 +34,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	arg := db.CreateUserParams{
+	arg := &db.CreateUserParams{
 		Username:     req.Username,
 		Email:        req.Email,
 		Nickname:     req.Email,

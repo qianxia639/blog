@@ -51,7 +51,7 @@ func (mr *MockStoreMockRecorder) CountBlog(arg0 interface{}) *gomock.Call {
 }
 
 // CreateComment mocks base method.
-func (m *MockStore) CreateComment(arg0 context.Context, arg1 db.CreateCommentParams) (db.Comment, error) {
+func (m *MockStore) CreateComment(arg0 context.Context, arg1 *db.CreateCommentParams) (db.Comment, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateComment", arg0, arg1)
 	ret0, _ := ret[0].(db.Comment)
@@ -66,7 +66,7 @@ func (mr *MockStoreMockRecorder) CreateComment(arg0, arg1 interface{}) *gomock.C
 }
 
 // CreateUser mocks base method.
-func (m *MockStore) CreateUser(arg0 context.Context, arg1 db.CreateUserParams) (db.User, error) {
+func (m *MockStore) CreateUser(arg0 context.Context, arg1 *db.CreateUserParams) (db.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", arg0, arg1)
 	ret0, _ := ret[0].(db.User)
@@ -110,7 +110,7 @@ func (mr *MockStoreMockRecorder) GetBlog(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // GetChildComments mocks base method.
-func (m *MockStore) GetChildComments(arg0 context.Context, arg1 db.GetChildCommentsParams) ([]db.Comment, error) {
+func (m *MockStore) GetChildComments(arg0 context.Context, arg1 *db.GetChildCommentsParams) ([]db.Comment, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetChildComments", arg0, arg1)
 	ret0, _ := ret[0].([]db.Comment)
@@ -169,7 +169,7 @@ func (mr *MockStoreMockRecorder) IncrViews(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // InsertBlog mocks base method.
-func (m *MockStore) InsertBlog(arg0 context.Context, arg1 db.InsertBlogParams) (db.Blog, error) {
+func (m *MockStore) InsertBlog(arg0 context.Context, arg1 *db.InsertBlogParams) (db.Blog, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertBlog", arg0, arg1)
 	ret0, _ := ret[0].(db.Blog)
@@ -184,7 +184,7 @@ func (mr *MockStoreMockRecorder) InsertBlog(arg0, arg1 interface{}) *gomock.Call
 }
 
 // InsertRequestLog mocks base method.
-func (m *MockStore) InsertRequestLog(arg0 context.Context, arg1 db.InsertRequestLogParams) (db.RequestLog, error) {
+func (m *MockStore) InsertRequestLog(arg0 context.Context, arg1 *db.InsertRequestLogParams) (db.RequestLog, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertRequestLog", arg0, arg1)
 	ret0, _ := ret[0].(db.RequestLog)
@@ -199,7 +199,7 @@ func (mr *MockStoreMockRecorder) InsertRequestLog(arg0, arg1 interface{}) *gomoc
 }
 
 // ListBlogs mocks base method.
-func (m *MockStore) ListBlogs(arg0 context.Context, arg1 db.ListBlogsParams) ([]db.ListBlogsRow, error) {
+func (m *MockStore) ListBlogs(arg0 context.Context, arg1 *db.ListBlogsParams) ([]db.ListBlogsRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListBlogs", arg0, arg1)
 	ret0, _ := ret[0].([]db.ListBlogsRow)
@@ -214,7 +214,7 @@ func (mr *MockStoreMockRecorder) ListBlogs(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // SearchBlog mocks base method.
-func (m *MockStore) SearchBlog(arg0 context.Context, arg1 db.SearchBlogParams) ([]db.SearchBlogRow, error) {
+func (m *MockStore) SearchBlog(arg0 context.Context, arg1 *db.SearchBlogParams) ([]db.SearchBlogRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SearchBlog", arg0, arg1)
 	ret0, _ := ret[0].([]db.SearchBlogRow)
@@ -229,7 +229,7 @@ func (mr *MockStoreMockRecorder) SearchBlog(arg0, arg1 interface{}) *gomock.Call
 }
 
 // UpdateBlog mocks base method.
-func (m *MockStore) UpdateBlog(arg0 context.Context, arg1 db.UpdateBlogParams) (db.Blog, error) {
+func (m *MockStore) UpdateBlog(arg0 context.Context, arg1 *db.UpdateBlogParams) (db.Blog, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateBlog", arg0, arg1)
 	ret0, _ := ret[0].(db.Blog)
@@ -244,7 +244,7 @@ func (mr *MockStoreMockRecorder) UpdateBlog(arg0, arg1 interface{}) *gomock.Call
 }
 
 // UpdateUser mocks base method.
-func (m *MockStore) UpdateUser(arg0 context.Context, arg1 db.UpdateUserParams) (db.User, error) {
+func (m *MockStore) UpdateUser(arg0 context.Context, arg1 *db.UpdateUserParams) (db.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", arg0, arg1)
 	ret0, _ := ret[0].(db.User)

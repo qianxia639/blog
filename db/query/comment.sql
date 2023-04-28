@@ -8,8 +8,8 @@ RETURNING *;
 
 -- name: GetComments :many
 SELECT * FROM comments
-WHERE owner_id = $1 AND parent_id = 0;
+WHERE owner_id = $1;
 
 -- name: GetChildComments :many
 SELECT * FROM comments
-WHERE owner_id = $1 AND parent_id = $2;
+WHERE id = $1 AND parent_id = $2;

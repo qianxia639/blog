@@ -22,7 +22,7 @@ func createRandomUser(t *testing.T) User {
 
 	email := fmt.Sprintf("%s@email.com", username)
 
-	arg := CreateUserParams{
+	arg := &CreateUserParams{
 		Username:     username,
 		Email:        email,
 		Nickname:     email,
@@ -117,7 +117,7 @@ func TestUpdateUserOnlyNickname(t *testing.T) {
 
 	newNickname := utils.RandomString(6)
 
-	newUser, err := testQueries.UpdateUser(ctx, UpdateUserParams{
+	newUser, err := testQueries.UpdateUser(ctx, &UpdateUserParams{
 		Username: oldUser.Username,
 		Nickname: sql.NullString{
 			String: newNickname,
@@ -135,7 +135,7 @@ func TestUpdateUserOnlyEmail(t *testing.T) {
 
 	email := fmt.Sprintf("%s@email.com", utils.RandomString(6))
 
-	newUser, err := testQueries.UpdateUser(ctx, UpdateUserParams{
+	newUser, err := testQueries.UpdateUser(ctx, &UpdateUserParams{
 		Username: oldUser.Username,
 		Email: sql.NullString{
 			String: email,
@@ -154,7 +154,7 @@ func TestUpdateUserOnlyPassword(t *testing.T) {
 	hashPwd, err := utils.Encrypt(utils.RandomString(6))
 	require.NoError(t, err)
 
-	newUser, err := testQueries.UpdateUser(ctx, UpdateUserParams{
+	newUser, err := testQueries.UpdateUser(ctx, &UpdateUserParams{
 		Username: oldUser.Username,
 		Password: sql.NullString{
 			String: hashPwd,
@@ -172,7 +172,7 @@ func TestUpdateUserOnlyAvatar(t *testing.T) {
 
 	avatar := fmt.Sprintf("%s.jpg", utils.RandomString(6))
 
-	newUser, err := testQueries.UpdateUser(ctx, UpdateUserParams{
+	newUser, err := testQueries.UpdateUser(ctx, &UpdateUserParams{
 		Username: oldUser.Username,
 		Avatar: sql.NullString{
 			String: avatar,
@@ -196,7 +196,7 @@ func TestUpdateUserAll(t *testing.T) {
 
 	avatar := fmt.Sprintf("%s.jpg", utils.RandomString(6))
 
-	newUser, err := testQueries.UpdateUser(ctx, UpdateUserParams{
+	newUser, err := testQueries.UpdateUser(ctx, &UpdateUserParams{
 		Username: oldUser.Username,
 		Nickname: sql.NullString{
 			String: nickname,

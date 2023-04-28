@@ -55,7 +55,7 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		data, err := server.store.ListBlogs(ctxCopy, db.ListBlogsParams{
+		data, err := server.store.ListBlogs(ctxCopy, &db.ListBlogsParams{
 			Limit:  req.PageSize,
 			Offset: offset,
 		})

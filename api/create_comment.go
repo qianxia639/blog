@@ -1,28 +1,31 @@
 package api
 
 import (
+	"Blog/core/errors"
+	"Blog/core/logs"
+	"Blog/core/result"
 	db "Blog/db/sqlc"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type createCommentRequest struct {
-	OwnerId  int64  `json:"owner_id"`
-	ParentId int64  `json:"parent_id"`
-	Nickname string `json:"nickname"`
-	Avatar   string `json:"avatar"`
-	Content  string `json:"content"`
+	OwnerId  int64  `json:"owner_id" binding:"required"`
+	ParentId int64  `json:"parent_id" binding:"required"`
+	Nickname string `json:"nickname" binding:"required"`
+	Avatar   string `json:"avatar" binding:"required"`
+	Content  string `json:"content" binding:"required"`
 }
 
 func (server *Server) createComment(ctx *gin.Context) {
 	var req createCommentRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.SecureJSON(http.StatusBadRequest, err.Error)
+		logs.Logs.Error(err)
+		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
 
-	arg := db.CreateCommentParams{
+	arg := &db.CreateCommentParams{
 		OwnerID:  req.OwnerId,
 		ParentID: req.ParentId,
 		Nickname: req.Nickname,
@@ -32,8 +35,9 @@ func (server *Server) createComment(ctx *gin.Context) {
 
 	comment, err := server.store.CreateComment(ctx, arg)
 	if err != nil {
-		ctx.SecureJSON(http.StatusInternalServerError, err.Error())
+		logs.Logs.Error(err)
+		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
-	ctx.SecureJSON(http.StatusOK, comment)
+	result.Obj(ctx, comment)
 }

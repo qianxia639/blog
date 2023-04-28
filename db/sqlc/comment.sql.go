@@ -26,7 +26,7 @@ type CreateCommentParams struct {
 	Content  string `json:"content"`
 }
 
-func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (Comment, error) {
+func (q *Queries) CreateComment(ctx context.Context, arg *CreateCommentParams) (Comment, error) {
 	row := q.db.QueryRowContext(ctx, createComment,
 		arg.OwnerID,
 		arg.ParentID,
@@ -49,16 +49,16 @@ func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (C
 
 const getChildComments = `-- name: GetChildComments :many
 SELECT id, owner_id, parent_id, nickname, avatar, content, created_at FROM comments
-WHERE owner_id = $1 AND parent_id = $2
+WHERE id = $1 AND parent_id = $2
 `
 
 type GetChildCommentsParams struct {
-	OwnerID  int64 `json:"owner_id"`
+	ID       int64 `json:"id"`
 	ParentID int64 `json:"parent_id"`
 }
 
-func (q *Queries) GetChildComments(ctx context.Context, arg GetChildCommentsParams) ([]Comment, error) {
-	rows, err := q.db.QueryContext(ctx, getChildComments, arg.OwnerID, arg.ParentID)
+func (q *Queries) GetChildComments(ctx context.Context, arg *GetChildCommentsParams) ([]Comment, error) {
+	rows, err := q.db.QueryContext(ctx, getChildComments, arg.ID, arg.ParentID)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (q *Queries) GetChildComments(ctx context.Context, arg GetChildCommentsPara
 
 const getComments = `-- name: GetComments :many
 SELECT id, owner_id, parent_id, nickname, avatar, content, created_at FROM comments
-WHERE owner_id = $1 AND parent_id = 0
+WHERE owner_id = $1
 `
 
 func (q *Queries) GetComments(ctx context.Context, ownerID int64) ([]Comment, error) {

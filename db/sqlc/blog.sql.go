@@ -99,7 +99,7 @@ type InsertBlogParams struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func (q *Queries) InsertBlog(ctx context.Context, arg InsertBlogParams) (Blog, error) {
+func (q *Queries) InsertBlog(ctx context.Context, arg *InsertBlogParams) (Blog, error) {
 	row := q.db.QueryRowContext(ctx, insertBlog,
 		arg.OwnerID,
 		arg.Title,
@@ -148,7 +148,7 @@ type ListBlogsRow struct {
 	Avatar    string    `json:"avatar"`
 }
 
-func (q *Queries) ListBlogs(ctx context.Context, arg ListBlogsParams) ([]ListBlogsRow, error) {
+func (q *Queries) ListBlogs(ctx context.Context, arg *ListBlogsParams) ([]ListBlogsRow, error) {
 	rows, err := q.db.QueryContext(ctx, listBlogs, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
@@ -209,7 +209,7 @@ type SearchBlogRow struct {
 	Avatar    string    `json:"avatar"`
 }
 
-func (q *Queries) SearchBlog(ctx context.Context, arg SearchBlogParams) ([]SearchBlogRow, error) {
+func (q *Queries) SearchBlog(ctx context.Context, arg *SearchBlogParams) ([]SearchBlogRow, error) {
 	rows, err := q.db.QueryContext(ctx, searchBlog, arg.Title, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
@@ -263,7 +263,7 @@ type UpdateBlogParams struct {
 	ID        int64          `json:"id"`
 }
 
-func (q *Queries) UpdateBlog(ctx context.Context, arg UpdateBlogParams) (Blog, error) {
+func (q *Queries) UpdateBlog(ctx context.Context, arg *UpdateBlogParams) (Blog, error) {
 	row := q.db.QueryRowContext(ctx, updateBlog,
 		arg.Title,
 		arg.Content,
