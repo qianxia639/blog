@@ -110,7 +110,7 @@ func (mr *MockStoreMockRecorder) GetBlog(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // GetChildComments mocks base method.
-func (m *MockStore) GetChildComments(arg0 context.Context, arg1 *db.GetChildCommentsParams) ([]db.Comment, error) {
+func (m *MockStore) GetChildComments(arg0 context.Context, arg1 int64) ([]db.Comment, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetChildComments", arg0, arg1)
 	ret0, _ := ret[0].([]db.Comment)

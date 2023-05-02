@@ -5,15 +5,14 @@ import (
 	"Blog/core/logs"
 	"Blog/core/result"
 	db "Blog/db/sqlc"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 type commentTree struct {
-	Comment db.Comment     `json:"comment"`
-	Replies []*commentTree `json:"replies"`
+	Comment   db.Comment    `json:"comment"`
+	Childrens []*db.Comment `json:"childrens,omitempty"`
 }
 
 func (server *Server) getComments(ctx *gin.Context) {
@@ -31,40 +30,44 @@ func (server *Server) getComments(ctx *gin.Context) {
 		return
 	}
 
-	commentMap := make(map[int64][]*db.Comment)
-	for _, comment := range comments {
-		if comment.ParentID >= 0 {
-			commentMap[comment.ParentID] = append(commentMap[comment.ParentID], &comment)
-		}
-	}
+	// commentMap := make(map[int64][]*db.Comment)
+	// for _, comment := range comments {
+	// 	if comment.ParentID >= 0 {
+	// 		commentMap[comment.ParentID] = append(commentMap[comment.ParentID], &comment)
+	// 	}
+	// }
 
 	commentTreeMap := make(map[int64]*commentTree)
 	for _, comment := range comments {
 		if comment.ParentID >= 0 {
 			commentTreeMap[comment.ID] = &commentTree{
-				Comment: comment,
-				Replies: make([]*commentTree, 0),
+				Comment:   comment,
+				Childrens: make([]*db.Comment, 0),
 			}
 		}
-		// server.store.GetChildComments(ctx, &db.GetChildCommentsParams{})
 	}
 
 	for _, comment := range comments {
-		if comment.ParentID >= 0 {
-			parentID := comment.ParentID
-			if parentTree, ok := commentTreeMap[parentID]; ok {
-				parentTree.Replies = append(parentTree.Replies, &commentTree{
-					Comment: comment,
-					Replies: make([]*commentTree, 0),
-				})
+		// if comment.ParentID >= 0 {
+		// 	parentID := comment.ParentID
+		// 	if parentTree, ok := commentTreeMap[parentID]; ok {
+		// 		parentTree.Replies = append(parentTree.Replies, &comment)
+		// 	}
+		// }
+		if cs, err := server.store.GetChildComments(ctx, comment.ID); err == nil {
+			for _, c := range cs {
+				parentId := c.ParentID
+				if parentTree, ok := commentTreeMap[parentId]; ok {
+					parentTree.Childrens = append(parentTree.Childrens, &c)
+				}
 			}
 		}
 	}
 
-	commentTrees := make([]*commentTree, 0)
-	for _, tree := range commentTreeMap {
-		commentTrees = append(commentTrees, tree)
-	}
+	// commentTrees := make([]*commentTree, 0)
+	// for _, tree := range commentTreeMap {
+	// 	commentTrees = append(commentTrees, tree)
+	// }
 
-	ctx.JSON(http.StatusOK, commentTrees)
+	result.Obj(ctx, commentTreeMap)
 }

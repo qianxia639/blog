@@ -51,10 +51,11 @@ func (server *Server) login(ctx *gin.Context) {
 		switch err {
 		case ErrNoRows:
 			logs.Logs.Error("Not User err: ", err)
-			result.Error(ctx, http.StatusNotFound, errors.NotExistsUserErr.Error())
+			result.UnauthorizedError(ctx, errors.NotExistsUserErr.Error())
 		default:
 			result.ServerError(ctx, errors.ServerErr.Error())
 		}
+		return
 	}
 
 	if err := utils.Decrypt(req.Password, user.Password); err != nil {
