@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (server *Server) getBlog(ctx *gin.Context) {
+func (server *Server) getArticle(ctx *gin.Context) {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
 		logs.Logs.Errorf("err: %s, param: %s", err.Error(), ctx.Param("id"))
@@ -23,7 +23,7 @@ func (server *Server) getBlog(ctx *gin.Context) {
 		return
 	}
 
-	blog, err := server.store.GetBlog(ctx, id)
+	blog, err := server.store.GetArticle(ctx, id)
 	switch err {
 	case nil:
 		result.Obj(ctx, blog)

@@ -21,6 +21,10 @@ type Blog struct {
 	Image string `json:"image"`
 	// 浏览次数
 	Views int32 `json:"views"`
+	// 是否开启打赏(t: 是,f: 否)
+	IsReward bool `json:"is_reward"`
+	// 是否开启评论(t: 是,f: 否)
+	IsCritique bool `json:"is_critique"`
 	// 创建时间
 	CreatedAt time.Time `json:"created_at"`
 	// 修改时间
@@ -42,31 +46,6 @@ type Comment struct {
 	Content string `json:"content"`
 	// 创建时间
 	CreatedAt time.Time `json:"created_at"`
-}
-
-type RequestLog struct {
-	// 主键
-	ID int64 `json:"id"`
-	// 请求方式
-	Method string `json:"method"`
-	// 路由
-	Path string `json:"path"`
-	// 状态码
-	StatusCode int32 `json:"status_code"`
-	// 访问ip
-	Ip string `json:"ip"`
-	// 主机名
-	Hostname string `json:"hostname"`
-	// 请求体
-	RequestBody string `json:"request_body"`
-	// 响应时间/ms
-	ResponseTime int64 `json:"response_time"`
-	// 请求时间
-	RequestTime time.Time `json:"request_time"`
-	// 请求数据类型
-	ContentType string `json:"content_type"`
-	// user_agent
-	UserAgent string `json:"user_agent"`
 }
 
 type User struct {

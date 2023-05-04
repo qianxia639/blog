@@ -17,7 +17,7 @@ type searchBlogRequest struct {
 	PageSize int32  `form:"page_size" binding:"required,min=1"`
 }
 
-func (server *Server) searchBlog(ctx *gin.Context) {
+func (server *Server) searchArticle(ctx *gin.Context) {
 	var req searchBlogRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		result.BadRequestError(ctx, errors.ParamErr.Error())
@@ -36,13 +36,13 @@ func (server *Server) searchBlog(ctx *gin.Context) {
 		req.PageSize = 100
 	}
 
-	arg := &db.SearchBlogParams{
+	arg := &db.SearchArticleParams{
 		Title:  fmt.Sprintf(wildcard, req.Query),
 		Limit:  req.PageSize,
 		Offset: (req.PageNo - 1) * req.PageSize,
 	}
 
-	blogs, err := server.store.SearchBlog(ctx, arg)
+	blogs, err := server.store.SearchArticle(ctx, arg)
 	if err != nil {
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return

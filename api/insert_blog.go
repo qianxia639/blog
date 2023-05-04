@@ -12,30 +12,34 @@ import (
 	"github.com/lib/pq"
 )
 
-type insertBlogRequest struct {
-	OwnerId int64  `json:"owner_id" binding:"required"`
-	Title   string `json:"title" binding:"required"`
-	Content string `json:"content" binding:"required"`
-	Image   string `json:"image" binding:"required"`
+type insertArticleRequest struct {
+	OwnerId    int64  `json:"owner_id" binding:"required"`
+	Title      string `json:"title" binding:"required"`
+	Content    string `json:"content" binding:"required"`
+	Image      string `json:"image" binding:"required"`
+	IsReward   bool   `json:"is_reward" binding:"required"`
+	IsCritique bool   `json:"is_critique" binding:"required"`
 }
 
-func (server *Server) insertBlog(ctx *gin.Context) {
-	var req insertBlogRequest
+func (server *Server) insertArticle(ctx *gin.Context) {
+	var req insertArticleRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logs.Logs.Error(err)
 		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
 
-	arg := &db.InsertBlogParams{
-		OwnerID:   req.OwnerId,
-		Title:     req.Title,
-		Content:   req.Content,
-		Image:     req.Image,
-		CreatedAt: time.Now(),
+	arg := &db.InsertArticleParams{
+		OwnerID:    req.OwnerId,
+		Title:      req.Title,
+		Content:    req.Content,
+		Image:      req.Image,
+		IsReward:   req.IsReward,
+		IsCritique: req.IsCritique,
+		CreatedAt:  time.Now(),
 	}
 
-	_, err := server.store.InsertBlog(ctx, arg)
+	_, err := server.store.InsertArticle(ctx, arg)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {

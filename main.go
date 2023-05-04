@@ -30,7 +30,7 @@ func main() {
 		log.Fatal("can't connect to db: ", err)
 	}
 
-	runDBMigrate(conf.Postgres.MigrateUrl, conf.Postgres.Source)
+	// runDBMigrate(conf.Postgres.MigrateUrl, conf.Postgres.Source)
 
 	store := db.NewStore(conn)
 
@@ -40,11 +40,11 @@ func main() {
 func runDBMigrate(migrateUrl, dbSource string) {
 	migration, err := migrate.New(migrateUrl, dbSource)
 	if err != nil {
-		log.Fatal("can't create new migrate instance: ", err)
+		logs.Logs.Error("can't create new migrate instance: ", err)
 	}
 
 	if err := migration.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatal("failed to run migrate up: ", err)
+		logs.Logs.Error("failed to run migrate up: ", err)
 	}
 
 	logs.Logs.Info("db migrated successfully")

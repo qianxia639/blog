@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type listBlogsRequest struct {
+type listArticlesRequest struct {
 	PageNo   int32 `form:"page_no" binding:"required,min=1"`
 	PageSize int32 `form:"page_size" binding:"required,min=1"`
 }
@@ -24,7 +24,7 @@ type pageResponse struct {
 
 func (server *Server) listBlogs(ctx *gin.Context) {
 
-	var req listBlogsRequest
+	var req listArticlesRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		logs.Logs.Error(err)
 		result.BadRequestError(ctx, errors.ParamErr.Error())
@@ -35,7 +35,7 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 		req.PageNo = 1
 	}
 
-	if req.PageSize <= 0 {
+	if req.PageSize < 1 {
 		req.PageSize = 10
 	}
 
@@ -55,7 +55,7 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		data, err := server.store.ListBlogs(ctxCopy, &db.ListBlogsParams{
+		data, err := server.store.ListArticles(ctxCopy, &db.ListArticlesParams{
 			Limit:  req.PageSize,
 			Offset: offset,
 		})
@@ -69,7 +69,7 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 
 	go func() {
 		defer wg.Done()
-		total, err := server.store.CountBlog(ctxCopy)
+		total, err := server.store.CountArticle(ctxCopy)
 		if err != nil {
 			logs.Logs.Error(err)
 			result.ServerError(ctxCopy, errors.ServerErr.Error())

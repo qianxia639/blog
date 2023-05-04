@@ -18,7 +18,7 @@ func createRandomBlog(t *testing.T) Blog {
 	content := fmt.Sprintf("%s-content", title)
 	image := fmt.Sprintf("%s.jpg", title)
 
-	arg := &InsertBlogParams{
+	arg := &InsertArticleParams{
 		OwnerID:   user.ID,
 		Title:     title,
 		Content:   content,
@@ -26,7 +26,7 @@ func createRandomBlog(t *testing.T) Blog {
 		CreatedAt: time.Now(),
 	}
 
-	blog, err := testQueries.InsertBlog(context.Background(), arg)
+	blog, err := testQueries.InsertArticle(context.Background(), arg)
 	require.NoError(t, err)
 
 	require.Equal(t, user.ID, blog.OwnerID)
@@ -52,7 +52,7 @@ func TestGetBlog(t *testing.T) {
 
 	blog1 := createRandomBlog(t)
 
-	blog2, err := testQueries.GetBlog(context.Background(), blog1.ID)
+	blog2, err := testQueries.GetArticle(context.Background(), blog1.ID)
 	require.NoError(t, err)
 
 	require.Equal(t, blog1.ID, blog2.ID)
@@ -71,7 +71,7 @@ func TestListBlogs(t *testing.T) {
 		createRandomBlog(t)
 	}
 
-	blogs, err := testQueries.ListBlogs(context.Background(), &ListBlogsParams{
+	blogs, err := testQueries.ListArticles(context.Background(), &ListArticlesParams{
 		Limit:  5,
 		Offset: 5,
 	})
@@ -87,7 +87,7 @@ func TestDeleteBlog(t *testing.T) {
 
 	blog := createRandomBlog(t)
 
-	err := testQueries.DeleteBlog(ctx, blog.ID)
+	err := testQueries.DeleteArticle(ctx, blog.ID)
 	require.NoError(t, err)
 }
 
@@ -97,7 +97,7 @@ func TestUpdateBlogOnlyTitle(t *testing.T) {
 
 	title := utils.RandomString(6)
 
-	newBlog, err := testQueries.UpdateBlog(ctx, &UpdateBlogParams{
+	newBlog, err := testQueries.UpdateArticle(ctx, &UpdateArticleParams{
 		ID: blog.ID,
 		Title: sql.NullString{
 			String: title,
@@ -117,7 +117,7 @@ func TestUpdateBlogOnlyContent(t *testing.T) {
 
 	content := utils.RandomString(50)
 
-	newBlog, err := testQueries.UpdateBlog(ctx, &UpdateBlogParams{
+	newBlog, err := testQueries.UpdateArticle(ctx, &UpdateArticleParams{
 		ID: blog.ID,
 		Content: sql.NullString{
 			String: content,
@@ -137,7 +137,7 @@ func TestUpdateBlogOnlyImage(t *testing.T) {
 
 	image := fmt.Sprintf("%s.jpg", utils.RandomString(32))
 
-	newBlog, err := testQueries.UpdateBlog(ctx, &UpdateBlogParams{
+	newBlog, err := testQueries.UpdateArticle(ctx, &UpdateArticleParams{
 		ID: blog.ID,
 		Image: sql.NullString{
 			String: image,
@@ -158,7 +158,7 @@ func TestUpdateBlogAll(t *testing.T) {
 	image := fmt.Sprintf("%s.jpg", utils.RandomString(32))
 	content := utils.RandomString(50)
 
-	newBlog, err := testQueries.UpdateBlog(ctx, &UpdateBlogParams{
+	newBlog, err := testQueries.UpdateArticle(ctx, &UpdateArticleParams{
 		ID: oldBlog.ID,
 		Title: sql.NullString{
 			String: title,
@@ -187,12 +187,12 @@ func TestSearchBlog(t *testing.T) {
 
 	var limit int32 = 5
 
-	arg := &SearchBlogParams{
+	arg := &SearchArticleParams{
 		Title:  str,
 		Limit:  limit,
 		Offset: (limit - 1) * limit,
 	}
 
-	_, err := testQueries.SearchBlog(ctx, arg)
+	_, err := testQueries.SearchArticle(ctx, arg)
 	require.NoError(t, err)
 }

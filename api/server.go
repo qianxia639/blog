@@ -65,10 +65,10 @@ func (server *Server) setupRouter() {
 	router.POST("/user", server.createUser)
 	router.POST("/login", server.login)
 
-	router.PUT("/blog/incr/:id", server.incrViews)
-	router.GET("/blog", server.listBlogs)
-	router.GET("/blog/:id", server.getBlog)
-	router.GET("/blog/search", server.searchBlog)
+	router.PUT("/article/incr/:id", server.incrViews)
+	router.GET("/article", server.listBlogs)
+	router.GET("/article/:id", server.getArticle)
+	router.GET("/article/search", server.searchArticle)
 
 	router.POST("/comment", server.createComment)
 	router.GET("/comment", server.getComments)
@@ -77,9 +77,9 @@ func (server *Server) setupRouter() {
 	{
 		authRouter.PUT("/user", server.updateUser)
 
-		authRouter.POST("/blog", server.insertBlog)
-		authRouter.DELETE("/blog/:id", server.deleteBlog)
-		authRouter.PUT("/blog", server.updateBlog)
+		authRouter.POST("/article", server.insertArticle)
+		authRouter.DELETE("/article", server.deleteArticle)
+		authRouter.PUT("/article", server.updateArticle)
 	}
 
 	server.router = router

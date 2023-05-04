@@ -5,6 +5,8 @@ CREATE TABLE "blogs" (
   "content" text NOT NULL,
   "image" varchar(255) NOT NULL,
   "views" int4 DEFAULT 0 NOT NULL,
+  "is_reward" bool NOT NULL DEFAULT false,
+  "is_critique" bool NOT NULL DEFAULT false,
   "created_at" timestamptz NOT NULL DEFAULT '1970-01-01 00:00:00',
   "updated_at" timestamptz NOT NULL DEFAULT '1970-01-01 00:00:00'
 );
@@ -20,6 +22,10 @@ COMMENT ON COLUMN "blogs"."content" IS '内容';
 COMMENT ON COLUMN "blogs"."image" IS '图片链接';
 
 COMMENT ON COLUMN "blogs"."views" IS '浏览次数';
+
+COMMENT ON COLUMN "blogs"."is_reward" IS '是否开启打赏(t: 是,f: 否)';
+
+COMMENT ON COLUMN "blogs"."is_critique" IS '是否开启评论(t: 是,f: 否)';
 
 COMMENT ON COLUMN "blogs"."created_at" IS '创建时间';
 

@@ -13,12 +13,14 @@ import (
 	"github.com/lib/pq"
 )
 
-type updateBlogRequest struct {
-	Id       int64   `json:"id" binding:"required"`
-	Username string  `json:"username" binding:"required"`
-	Title    *string `json:"title"`
-	Content  *string `json:"content"`
-	Image    *string `json:"image"`
+type updateArticleRequest struct {
+	Id         int64   `json:"id" binding:"required"`
+	Username   string  `json:"username" binding:"required"`
+	Title      *string `json:"title"`
+	Content    *string `json:"content"`
+	Image      *string `json:"image"`
+	IsReward   *bool   `json:"is_reward"`
+	IsCritique *bool   `json:"is_critique"`
 }
 
 func newNullString(s *string) sql.NullString {
@@ -32,8 +34,8 @@ func newNullString(s *string) sql.NullString {
 	}
 }
 
-func (server *Server) updateBlog(ctx *gin.Context) {
-	var req updateBlogRequest
+func (server *Server) updateArticle(ctx *gin.Context) {
+	var req updateArticleRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logs.Logs.Error(err)
 		result.BadRequestError(ctx, errors.ParamErr.Error())
@@ -55,7 +57,7 @@ func (server *Server) updateBlog(ctx *gin.Context) {
 		return
 	}
 
-	blog, err := server.store.GetBlog(ctx, req.Id)
+	blog, err := server.store.GetArticle(ctx, req.Id)
 	if err != nil {
 		if err == ErrNoRows {
 			logs.Logs.Error("Get Blog err: ", err)
@@ -73,7 +75,7 @@ func (server *Server) updateBlog(ctx *gin.Context) {
 		return
 	}
 
-	arg := &db.UpdateBlogParams{
+	arg := &db.UpdateArticleParams{
 		ID:        req.Id,
 		UpdatedAt: time.Now(),
 		Title:     newNullString(req.Title),
@@ -81,7 +83,7 @@ func (server *Server) updateBlog(ctx *gin.Context) {
 		Image:     newNullString(req.Image),
 	}
 
-	res, err := server.store.UpdateBlog(ctx, arg)
+	res, err := server.store.UpdateArticle(ctx, arg)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
