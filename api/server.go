@@ -56,22 +56,21 @@ func NewServer(opts ...ServerOptions) *Server {
 }
 
 func (server *Server) setupRouter() {
-	// router := gin.Default()
-	router := gin.New()
+	router := gin.Default()
+	// router := gin.New()
 	router.Use(gin.Recovery())
 
-	router.Use(middleware.CORS()).Use(middleware.LogFuncExecTime())
+	router.Use(middleware.CORS())
 
 	router.POST("/user", server.createUser)
 	router.POST("/login", server.login)
 
 	router.PUT("/article/incr/:id", server.incrViews)
-	router.GET("/article", server.listBlogs)
+	router.GET("/article", server.listArticles)
 	router.GET("/article/:id", server.getArticle)
-	router.GET("/article/search", server.searchArticle)
 
-	router.POST("/comment", server.createComment)
-	router.GET("/comment", server.getComments)
+	router.POST("/critique", server.createCritique)
+	router.GET("/critique", server.getCritiques)
 
 	authRouter := router.Group("/").Use(middleware.Authorization(server.maker, server.rdb))
 	{

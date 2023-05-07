@@ -22,8 +22,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var ctx = context.Background()
-
 type eqInsertBlogParamsMatcher struct {
 	arg        db.InsertArticleParams
 	created_at time.Time
@@ -126,7 +124,7 @@ func TestInsertBlog(t *testing.T) {
 				store.EXPECT().
 					InsertArticle(gomock.Any(), EqInsertBlogParams(arg, createdAt)).
 					Times(1).
-					Return(db.Blog{}, sql.ErrConnDone)
+					Return(db.Article{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recoder.Code)
@@ -147,7 +145,7 @@ func TestInsertBlog(t *testing.T) {
 				store.EXPECT().
 					InsertArticle(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(db.Blog{}, &pq.Error{Code: "23505"})
+					Return(db.Article{}, &pq.Error{Code: "23505"})
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusForbidden, recoder.Code)
@@ -229,7 +227,7 @@ func TestIncrViews(t *testing.T) {
 				store.EXPECT().
 					GetArticle(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(db.Blog{}, sql.ErrNoRows)
+					Return(db.Article{}, sql.ErrNoRows)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recoder.Code)
@@ -242,7 +240,7 @@ func TestIncrViews(t *testing.T) {
 				store.EXPECT().
 					GetArticle(gomock.Any(), gomock.Eq(id)).
 					Times(1).
-					Return(db.Blog{}, sql.ErrConnDone)
+					Return(db.Article{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recoder.Code)
@@ -255,7 +253,7 @@ func TestIncrViews(t *testing.T) {
 				store.EXPECT().
 					GetArticle(gomock.Any(), gomock.Eq(id)).
 					Times(1).
-					Return(db.Blog{}, nil)
+					Return(db.Article{}, nil)
 				store.EXPECT().
 					IncrViews(gomock.Any(), gomock.Eq(id)).
 					Times(1).
@@ -340,7 +338,7 @@ func TestDeleteBlog(t *testing.T) {
 				store.EXPECT().
 					GetArticle(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(db.Blog{}, sql.ErrNoRows)
+					Return(db.Article{}, sql.ErrNoRows)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recoder.Code)
@@ -356,7 +354,7 @@ func TestDeleteBlog(t *testing.T) {
 				store.EXPECT().
 					GetArticle(gomock.Any(), gomock.Eq(id)).
 					Times(1).
-					Return(db.Blog{}, sql.ErrConnDone)
+					Return(db.Article{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recoder.Code)
@@ -372,7 +370,7 @@ func TestDeleteBlog(t *testing.T) {
 				store.EXPECT().
 					GetArticle(gomock.Any(), gomock.Eq(id)).
 					Times(1).
-					Return(db.Blog{}, nil)
+					Return(db.Article{}, nil)
 				store.EXPECT().
 					DeleteArticle(gomock.Any(), gomock.Eq(id)).
 					Times(1).
@@ -559,7 +557,7 @@ func TestGetArticle(t *testing.T) {
 				store.EXPECT().
 					GetArticle(gomock.Any(), gomock.Eq(id)).
 					Times(1).
-					Return(db.Blog{}, sql.ErrConnDone)
+					Return(db.Article{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recoder.Code)
@@ -572,7 +570,7 @@ func TestGetArticle(t *testing.T) {
 				store.EXPECT().
 					GetArticle(gomock.Any(), gomock.Eq(id)).
 					Times(1).
-					Return(db.Blog{}, sql.ErrNoRows)
+					Return(db.Article{}, sql.ErrNoRows)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recoder.Code)
@@ -692,7 +690,7 @@ func EqUpdateBlogParams(arg db.UpdateArticleParams, updated_at time.Time) gomock
 // 				store.EXPECT().
 // 					UpdateBlog(gomock.Any(), gomock.Any()).
 // 					Times(1).
-// 					Return(db.Blog{}, sql.ErrConnDone)
+// 					Return(db.Article{}, sql.ErrConnDone)
 // 			},
 // 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 // 				require.Equal(t, http.StatusInternalServerError, recoder.Code)
@@ -735,7 +733,7 @@ func EqUpdateBlogParams(arg db.UpdateArticleParams, updated_at time.Time) gomock
 // 				store.EXPECT().
 // 					UpdateBlog(gomock.Any(), gomock.Any()).
 // 					Times(1).
-// 					Return(db.Blog{}, &pq.Error{Code: "23505"})
+// 					Return(db.Article{}, &pq.Error{Code: "23505"})
 // 			},
 // 			checkResponse: func(recoder *httptest.ResponseRecorder) {
 // 				require.Equal(t, http.StatusForbidden, recoder.Code)
@@ -903,126 +901,3 @@ func EqUpdateBlogParams(arg db.UpdateArticleParams, updated_at time.Time) gomock
 // 		})
 // 	}
 // }
-
-type Search struct {
-	Title    string
-	PageNo   int32
-	PageSize int32
-}
-
-type eqSearchBloggParamsMatcher struct {
-	arg   db.SearchArticleParams
-	title string
-}
-
-func (e eqSearchBloggParamsMatcher) Matches(x interface{}) bool {
-	arg, ok := x.(db.SearchArticleParams)
-	if !ok {
-		return false
-	}
-
-	e.arg.Title = arg.Title
-
-	return reflect.DeepEqual(e.arg, arg)
-}
-
-func (e eqSearchBloggParamsMatcher) String() string {
-	return fmt.Sprintf("matches arg %v and titlee %v\n", e.arg, e.title)
-}
-
-func EqSearchBlogParams(arg db.SearchArticleParams, title string) gomock.Matcher {
-	return eqSearchBloggParamsMatcher{arg, title}
-}
-
-func TestSearchBlog(t *testing.T) {
-
-	search := Search{
-		Title:    "s",
-		PageNo:   1,
-		PageSize: 5,
-	}
-
-	testCases := []struct {
-		name          string
-		search        Search
-		buildStubs    func(store *mockdb.MockStore)
-		checkResponse func(recoder *httptest.ResponseRecorder)
-	}{
-		{
-			name:   "OK",
-			search: search,
-			buildStubs: func(store *mockdb.MockStore) {
-				title := "s"
-				arg := db.SearchArticleParams{
-					Title:  title,
-					Limit:  search.PageSize,
-					Offset: (search.PageNo - 1) * search.PageSize,
-				}
-
-				store.EXPECT().
-					SearchArticle(gomock.Any(), EqSearchBlogParams(arg, title)).
-					Times(1)
-			},
-			checkResponse: func(recoder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, recoder.Code)
-			},
-		},
-		{
-			name:   "Internal Error",
-			search: search,
-			buildStubs: func(store *mockdb.MockStore) {
-				title := "s"
-				arg := db.SearchArticleParams{
-					Title:  title,
-					Limit:  search.PageSize,
-					Offset: (search.PageNo - 1) * search.PageSize,
-				}
-				store.EXPECT().
-					SearchArticle(gomock.Any(), EqSearchBlogParams(arg, title)).
-					Times(1).
-					Return([]db.SearchArticleRow{}, sql.ErrConnDone)
-			},
-			checkResponse: func(recoder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusInternalServerError, recoder.Code)
-			},
-		},
-		{
-			name: "Invalid Parameter",
-			search: Search{
-				Title:    "s",
-				PageNo:   0,
-				PageSize: 0,
-			},
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					SearchArticle(gomock.Any(), gomock.Any()).
-					Times(0)
-			},
-			checkResponse: func(recoder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recoder.Code)
-			},
-		},
-	}
-
-	for i := range testCases {
-		tc := testCases[i]
-
-		t.Run(tc.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-
-			store := mockdb.NewMockStore(ctrl)
-			tc.buildStubs(store)
-
-			server := newTestServer(t, store)
-			recodre := httptest.NewRecorder()
-
-			url := fmt.Sprintf("/blog/search?title=%s&page_no=%d&page_size=%d", tc.search.Title, tc.search.PageNo, tc.search.PageSize)
-			request, err := http.NewRequest(http.MethodGet, url, nil)
-			require.NoError(t, err)
-
-			server.router.ServeHTTP(recodre, request)
-			tc.checkResponse(recodre)
-		})
-	}
-}

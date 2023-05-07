@@ -49,7 +49,7 @@ func (server *Server) login(ctx *gin.Context) {
 	user, err := server.store.GetUser(ctx, req.Username)
 	if err != nil {
 		switch err {
-		case ErrNoRows:
+		case errors.NoRowsErr:
 			logs.Logs.Error("Not User err: ", err)
 			result.UnauthorizedError(ctx, errors.NotExistsUserErr.Error())
 		default:

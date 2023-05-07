@@ -5,14 +5,18 @@ import (
 	"Blog/core/logs"
 	"Blog/core/result"
 	db "Blog/db/sqlc"
+	"fmt"
 	"sync"
 
 	"github.com/gin-gonic/gin"
 )
 
+const wildcard = "%%%s%%"
+
 type listArticlesRequest struct {
-	PageNo   int32 `form:"page_no" binding:"required,min=1"`
-	PageSize int32 `form:"page_size" binding:"required,min=1"`
+	Query    string `form:"query"`
+	PageNo   int32  `form:"page_no" binding:"required,min=1"`
+	PageSize int32  `form:"page_size" binding:"required,min=1"`
 }
 
 type pageResponse struct {
@@ -22,7 +26,7 @@ type pageResponse struct {
 	Data     interface{} `json:"data"`
 }
 
-func (server *Server) listBlogs(ctx *gin.Context) {
+func (server *Server) listArticles(ctx *gin.Context) {
 
 	var req listArticlesRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -56,6 +60,7 @@ func (server *Server) listBlogs(ctx *gin.Context) {
 	go func() {
 		defer wg.Done()
 		data, err := server.store.ListArticles(ctxCopy, &db.ListArticlesParams{
+			Title:  fmt.Sprintf(wildcard, req.Query),
 			Limit:  req.PageSize,
 			Offset: offset,
 		})

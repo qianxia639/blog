@@ -25,12 +25,12 @@ func (server *Server) incrViews(ctx *gin.Context) {
 
 	_, err = server.store.GetArticle(ctx, id)
 	if err != nil {
-		if err == ErrNoRows {
+		if err == errors.NoRowsErr {
 			logs.Logs.Error("User Not Found err: ", err)
-			result.Error(ctx, http.StatusNotFound, errors.NotExistsBlogErr.Error())
+			result.Error(ctx, http.StatusNotFound, errors.NotExistsAtricleErr.Error())
 			return
 		}
-		logs.Logs.Error("Get Blog err: ", err)
+		logs.Logs.Error("Get Article err: ", err)
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}

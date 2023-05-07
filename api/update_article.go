@@ -57,20 +57,20 @@ func (server *Server) updateArticle(ctx *gin.Context) {
 		return
 	}
 
-	blog, err := server.store.GetArticle(ctx, req.Id)
+	article, err := server.store.GetArticle(ctx, req.Id)
 	if err != nil {
-		if err == ErrNoRows {
-			logs.Logs.Error("Get Blog err: ", err)
+		if err == errors.NoRowsErr {
+			logs.Logs.Error("Get Article err: ", err)
 			result.Error(ctx, http.StatusNotFound, errors.NotExistsUserErr.Error())
 			return
 		}
-		logs.Logs.Error("Get Blog err: ", err)
+		logs.Logs.Error("Get Article err: ", err)
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
-	if blog.OwnerID != user.ID {
-		logs.Logs.Errorf("blog.OwnerID: %d, user.ID: %d", blog.OwnerID, user.ID)
+	if article.OwnerID != user.ID {
+		logs.Logs.Errorf("article.OwnerID: %d, user.ID: %d", article.OwnerID, user.ID)
 		result.UnauthorizedError(ctx, errors.UnauthorizedError.Error())
 		return
 	}
@@ -87,7 +87,7 @@ func (server *Server) updateArticle(ctx *gin.Context) {
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
-			case ErrUniqueViolation:
+			case errors.UniqueViolationErr:
 				result.Error(ctx, http.StatusForbidden, errors.TitleExistsErr.Error())
 				return
 			}

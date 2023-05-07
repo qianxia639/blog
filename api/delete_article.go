@@ -25,22 +25,22 @@ func (server *Server) deleteArticle(ctx *gin.Context) {
 
 	_, err = server.store.GetArticle(ctx, id)
 	if err != nil {
-		if err == ErrNoRows {
-			logs.Logs.Error("Get Blog err: ", err)
+		if err == errors.NoRowsErr {
+			logs.Logs.Error("Get Article err: ", err)
 			result.Error(ctx, http.StatusNotFound, errors.NotExistsUserErr.Error())
 			return
 		}
-		logs.Logs.Error("Get Blog err: ", err)
+		logs.Logs.Error("Get Article err: ", err)
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
 	err = server.store.DeleteArticle(ctx, id)
 	if err != nil {
-		logs.Logs.Error("Delete Blog err: ", err)
+		logs.Logs.Error("Delete Article err: ", err)
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
-	result.OK(ctx, "Delete Blog Successfully")
+	result.OK(ctx, "Delete Article Successfully")
 }

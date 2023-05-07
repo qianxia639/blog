@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type Blog struct {
+type Article struct {
 	// 主键
 	ID int64 `json:"id"`
 	// 创建者Id
@@ -31,7 +31,7 @@ type Blog struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type Comment struct {
+type Critique struct {
 	// 主键
 	ID int64 `json:"id"`
 	// 博客Id

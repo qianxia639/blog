@@ -47,8 +47,8 @@ func (server *Server) createUser(ctx *gin.Context) {
 		logs.Logs.Error(err)
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
-			case ErrUniqueViolation:
-				result.Error(ctx, http.StatusForbidden, err.Error())
+			case errors.UniqueViolationErr:
+				result.Error(ctx, http.StatusForbidden, errors.UsernameOrEmailEexistsErr.Error())
 				return
 			}
 		}

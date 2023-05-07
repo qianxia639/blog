@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type createCommentRequest struct {
+type createCritiqueRequest struct {
 	OwnerId  int64  `json:"owner_id" binding:"required"`
 	ParentId int64  `json:"parent_id" binding:"required"`
 	Nickname string `json:"nickname" binding:"required"`
@@ -17,15 +17,15 @@ type createCommentRequest struct {
 	Content  string `json:"content" binding:"required"`
 }
 
-func (server *Server) createComment(ctx *gin.Context) {
-	var req createCommentRequest
+func (server *Server) createCritique(ctx *gin.Context) {
+	var req createCritiqueRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logs.Logs.Error(err)
 		result.BadRequestError(ctx, errors.ParamErr.Error())
 		return
 	}
 
-	arg := &db.CreateCommentParams{
+	arg := &db.CreateCritiqueParams{
 		OwnerID:  req.OwnerId,
 		ParentID: req.ParentId,
 		Nickname: req.Nickname,
@@ -33,11 +33,11 @@ func (server *Server) createComment(ctx *gin.Context) {
 		Content:  req.Content,
 	}
 
-	comment, err := server.store.CreateComment(ctx, arg)
+	critique, err := server.store.CreateCritique(ctx, arg)
 	if err != nil {
 		logs.Logs.Error(err)
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
-	result.Obj(ctx, comment)
+	result.Obj(ctx, critique)
 }

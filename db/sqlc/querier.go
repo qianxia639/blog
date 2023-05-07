@@ -10,18 +10,17 @@ import (
 
 type Querier interface {
 	CountArticle(ctx context.Context) (int64, error)
-	CreateComment(ctx context.Context, arg *CreateCommentParams) (Comment, error)
+	CreateCritique(ctx context.Context, arg *CreateCritiqueParams) (Critique, error)
 	CreateUser(ctx context.Context, arg *CreateUserParams) (User, error)
 	DeleteArticle(ctx context.Context, id int64) error
 	GetArticle(ctx context.Context, id int64) (GetArticleRow, error)
-	GetChildComments(ctx context.Context, parentID int64) ([]Comment, error)
-	GetComments(ctx context.Context, ownerID int64) ([]Comment, error)
+	GetChildCritiques(ctx context.Context, parentID int64) ([]Critique, error)
+	GetCritiques(ctx context.Context, ownerID int64) ([]Critique, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	IncrViews(ctx context.Context, id int64) error
-	InsertArticle(ctx context.Context, arg *InsertArticleParams) (Blog, error)
+	InsertArticle(ctx context.Context, arg *InsertArticleParams) (Article, error)
 	ListArticles(ctx context.Context, arg *ListArticlesParams) ([]ListArticlesRow, error)
-	SearchArticle(ctx context.Context, arg *SearchArticleParams) ([]SearchArticleRow, error)
-	UpdateArticle(ctx context.Context, arg *UpdateArticleParams) (Blog, error)
+	UpdateArticle(ctx context.Context, arg *UpdateArticleParams) (Article, error)
 	UpdateUser(ctx context.Context, arg *UpdateUserParams) (User, error)
 }
 

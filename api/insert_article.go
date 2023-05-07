@@ -43,7 +43,7 @@ func (server *Server) insertArticle(ctx *gin.Context) {
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
-			case ErrUniqueViolation:
+			case errors.UniqueViolationErr:
 				logs.Logs.Error(err)
 				result.Error(ctx, http.StatusForbidden, errors.TitleExistsErr.Error())
 				return
@@ -53,5 +53,5 @@ func (server *Server) insertArticle(ctx *gin.Context) {
 		return
 	}
 
-	result.OK(ctx, "Insert Blog Successful")
+	result.OK(ctx, "Insert Article Successful")
 }

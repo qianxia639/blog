@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createRandomBlog(t *testing.T) Blog {
+func createRandomArticle(t *testing.T) Article {
 	user := createRandomUser(t)
 
 	title := utils.RandomString(6)
@@ -37,12 +37,12 @@ func createRandomBlog(t *testing.T) Blog {
 	return blog
 }
 
-func TestInseertBlog(t *testing.T) {
-	createRandomBlog(t)
+func TestInseertArticle(t *testing.T) {
+	createRandomArticle(t)
 }
 
 func TestIncrViews(t *testing.T) {
-	blog := createRandomBlog(t)
+	blog := createRandomArticle(t)
 
 	err := testQueries.IncrViews(context.Background(), blog.ID)
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestIncrViews(t *testing.T) {
 
 func TestGetBlog(t *testing.T) {
 
-	blog1 := createRandomBlog(t)
+	blog1 := createRandomArticle(t)
 
 	blog2, err := testQueries.GetArticle(context.Background(), blog1.ID)
 	require.NoError(t, err)
@@ -68,7 +68,7 @@ func TestGetBlog(t *testing.T) {
 func TestListBlogs(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
-		createRandomBlog(t)
+		createRandomArticle(t)
 	}
 
 	blogs, err := testQueries.ListArticles(context.Background(), &ListArticlesParams{
@@ -85,7 +85,7 @@ func TestListBlogs(t *testing.T) {
 
 func TestDeleteBlog(t *testing.T) {
 
-	blog := createRandomBlog(t)
+	blog := createRandomArticle(t)
 
 	err := testQueries.DeleteArticle(ctx, blog.ID)
 	require.NoError(t, err)
@@ -93,7 +93,7 @@ func TestDeleteBlog(t *testing.T) {
 
 func TestUpdateBlogOnlyTitle(t *testing.T) {
 
-	blog := createRandomBlog(t)
+	blog := createRandomArticle(t)
 
 	title := utils.RandomString(6)
 
@@ -113,7 +113,7 @@ func TestUpdateBlogOnlyTitle(t *testing.T) {
 
 func TestUpdateBlogOnlyContent(t *testing.T) {
 
-	blog := createRandomBlog(t)
+	blog := createRandomArticle(t)
 
 	content := utils.RandomString(50)
 
@@ -133,7 +133,7 @@ func TestUpdateBlogOnlyContent(t *testing.T) {
 
 func TestUpdateBlogOnlyImage(t *testing.T) {
 
-	blog := createRandomBlog(t)
+	blog := createRandomArticle(t)
 
 	image := fmt.Sprintf("%s.jpg", utils.RandomString(32))
 
@@ -152,7 +152,7 @@ func TestUpdateBlogOnlyImage(t *testing.T) {
 }
 
 func TestUpdateBlogAll(t *testing.T) {
-	oldBlog := createRandomBlog(t)
+	oldBlog := createRandomArticle(t)
 
 	title := utils.RandomString(6)
 	image := fmt.Sprintf("%s.jpg", utils.RandomString(32))
@@ -179,20 +179,4 @@ func TestUpdateBlogAll(t *testing.T) {
 	require.Equal(t, title, newBlog.Title)
 	require.Equal(t, content, newBlog.Content)
 	require.Equal(t, image, newBlog.Image)
-}
-
-func TestSearchBlog(t *testing.T) {
-
-	str := fmt.Sprintf("%%%s%%", "s")
-
-	var limit int32 = 5
-
-	arg := &SearchArticleParams{
-		Title:  str,
-		Limit:  limit,
-		Offset: (limit - 1) * limit,
-	}
-
-	_, err := testQueries.SearchArticle(ctx, arg)
-	require.NoError(t, err)
 }

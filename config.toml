@@ -21,11 +21,11 @@ time_format = 2006-01-02 15:04:05Z
 level = "debug"
 caller = true
 stack_trace = true
-encode = "console"
-writer = "both" # 日志输出位置 file | console | both
+encode = "console"  # 日志格式 json | console
+writer = "console" # 日志输出位置 file | console | both
 
-[log_file]
-max_size = 20
-backups = 5
-compress = true
-output = "./log/output.log"
+    [zap.log_file]
+    max_size = 20
+    backups = 5
+    compress = true
+    output = "./log/output.log"

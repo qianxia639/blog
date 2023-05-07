@@ -50,19 +50,19 @@ func (mr *MockStoreMockRecorder) CountArticle(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountArticle", reflect.TypeOf((*MockStore)(nil).CountArticle), arg0)
 }
 
-// CreateComment mocks base method.
-func (m *MockStore) CreateComment(arg0 context.Context, arg1 *db.CreateCommentParams) (db.Comment, error) {
+// CreateCritique mocks base method.
+func (m *MockStore) CreateCritique(arg0 context.Context, arg1 *db.CreateCritiqueParams) (db.Critique, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateComment", arg0, arg1)
-	ret0, _ := ret[0].(db.Comment)
+	ret := m.ctrl.Call(m, "CreateCritique", arg0, arg1)
+	ret0, _ := ret[0].(db.Critique)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateComment indicates an expected call of CreateComment.
-func (mr *MockStoreMockRecorder) CreateComment(arg0, arg1 interface{}) *gomock.Call {
+// CreateCritique indicates an expected call of CreateCritique.
+func (mr *MockStoreMockRecorder) CreateCritique(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateComment", reflect.TypeOf((*MockStore)(nil).CreateComment), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCritique", reflect.TypeOf((*MockStore)(nil).CreateCritique), arg0, arg1)
 }
 
 // CreateUser mocks base method.
@@ -109,34 +109,34 @@ func (mr *MockStoreMockRecorder) GetArticle(arg0, arg1 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetArticle", reflect.TypeOf((*MockStore)(nil).GetArticle), arg0, arg1)
 }
 
-// GetChildComments mocks base method.
-func (m *MockStore) GetChildComments(arg0 context.Context, arg1 int64) ([]db.Comment, error) {
+// GetChildCritiques mocks base method.
+func (m *MockStore) GetChildCritiques(arg0 context.Context, arg1 int64) ([]db.Critique, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetChildComments", arg0, arg1)
-	ret0, _ := ret[0].([]db.Comment)
+	ret := m.ctrl.Call(m, "GetChildCritiques", arg0, arg1)
+	ret0, _ := ret[0].([]db.Critique)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetChildComments indicates an expected call of GetChildComments.
-func (mr *MockStoreMockRecorder) GetChildComments(arg0, arg1 interface{}) *gomock.Call {
+// GetChildCritiques indicates an expected call of GetChildCritiques.
+func (mr *MockStoreMockRecorder) GetChildCritiques(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChildComments", reflect.TypeOf((*MockStore)(nil).GetChildComments), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChildCritiques", reflect.TypeOf((*MockStore)(nil).GetChildCritiques), arg0, arg1)
 }
 
-// GetComments mocks base method.
-func (m *MockStore) GetComments(arg0 context.Context, arg1 int64) ([]db.Comment, error) {
+// GetCritiques mocks base method.
+func (m *MockStore) GetCritiques(arg0 context.Context, arg1 int64) ([]db.Critique, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetComments", arg0, arg1)
-	ret0, _ := ret[0].([]db.Comment)
+	ret := m.ctrl.Call(m, "GetCritiques", arg0, arg1)
+	ret0, _ := ret[0].([]db.Critique)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetComments indicates an expected call of GetComments.
-func (mr *MockStoreMockRecorder) GetComments(arg0, arg1 interface{}) *gomock.Call {
+// GetCritiques indicates an expected call of GetCritiques.
+func (mr *MockStoreMockRecorder) GetCritiques(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetComments", reflect.TypeOf((*MockStore)(nil).GetComments), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCritiques", reflect.TypeOf((*MockStore)(nil).GetCritiques), arg0, arg1)
 }
 
 // GetUser mocks base method.
@@ -169,10 +169,10 @@ func (mr *MockStoreMockRecorder) IncrViews(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // InsertArticle mocks base method.
-func (m *MockStore) InsertArticle(arg0 context.Context, arg1 *db.InsertArticleParams) (db.Blog, error) {
+func (m *MockStore) InsertArticle(arg0 context.Context, arg1 *db.InsertArticleParams) (db.Article, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertArticle", arg0, arg1)
-	ret0, _ := ret[0].(db.Blog)
+	ret0, _ := ret[0].(db.Article)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -198,26 +198,11 @@ func (mr *MockStoreMockRecorder) ListArticles(arg0, arg1 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListArticles", reflect.TypeOf((*MockStore)(nil).ListArticles), arg0, arg1)
 }
 
-// SearchArticle mocks base method.
-func (m *MockStore) SearchArticle(arg0 context.Context, arg1 *db.SearchArticleParams) ([]db.SearchArticleRow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchArticle", arg0, arg1)
-	ret0, _ := ret[0].([]db.SearchArticleRow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SearchArticle indicates an expected call of SearchArticle.
-func (mr *MockStoreMockRecorder) SearchArticle(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchArticle", reflect.TypeOf((*MockStore)(nil).SearchArticle), arg0, arg1)
-}
-
 // UpdateArticle mocks base method.
-func (m *MockStore) UpdateArticle(arg0 context.Context, arg1 *db.UpdateArticleParams) (db.Blog, error) {
+func (m *MockStore) UpdateArticle(arg0 context.Context, arg1 *db.UpdateArticleParams) (db.Article, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateArticle", arg0, arg1)
-	ret0, _ := ret[0].(db.Blog)
+	ret0, _ := ret[0].(db.Article)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

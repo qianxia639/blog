@@ -23,15 +23,15 @@ func (server *Server) getArticle(ctx *gin.Context) {
 		return
 	}
 
-	blog, err := server.store.GetArticle(ctx, id)
+	article, err := server.store.GetArticle(ctx, id)
 	switch err {
 	case nil:
-		result.Obj(ctx, blog)
-	case ErrNoRows:
-		logs.Logs.Error("User Not Found err: ", err)
-		result.Error(ctx, http.StatusNotFound, errors.NotExistsBlogErr.Error())
+		result.Obj(ctx, article)
+	case errors.NoRowsErr:
+		logs.Logs.Error("Article Not Found err: ", err)
+		result.Error(ctx, http.StatusNotFound, errors.NotExistsAtricleErr.Error())
 	default:
-		logs.Logs.Error("Get Blog err: ", err)
+		logs.Logs.Error("Get Article err: ", err)
 		result.ServerError(ctx, errors.ServerErr.Error())
 	}
 }

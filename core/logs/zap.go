@@ -21,6 +21,7 @@ func zapEncoder(config *config.Config) zapcore.Encoder {
 		CallerKey:     "Caller",
 		MessageKey:    "Message",
 		StacktraceKey: "StackTrace",
+		EncodeCaller:  zapcore.ShortCallerEncoder,
 		LineEnding:    zapcore.DefaultLineEnding,
 		FunctionKey:   zapcore.OmitKey,
 	}
@@ -58,11 +59,11 @@ func zapWriteSyncer(cfg *config.Config) zapcore.WriteSyncer {
 	if cfg.Zap.Writer == "both" || cfg.Zap.Writer == "file" {
 		// 添加日志输出器
 		logger := &lumberjack.Logger{
-			Filename:   cfg.LogFile.Output,   //文件路径
-			MaxSize:    cfg.LogFile.MaxSize,  //分割文件的大小
-			MaxBackups: cfg.LogFile.Backups,  //备份次数
-			Compress:   cfg.LogFile.Compress, // 是否压缩
-			LocalTime:  true,                 //使用本地时间
+			Filename:   cfg.Zap.LogFile.Output,   //文件路径
+			MaxSize:    cfg.Zap.LogFile.MaxSize,  //分割文件的大小
+			MaxBackups: cfg.Zap.LogFile.Backups,  //备份次数
+			Compress:   cfg.Zap.LogFile.Compress, // 是否压缩
+			LocalTime:  true,                     //使用本地时间
 		}
 		syncers = append(syncers, zapcore.Lock(zapcore.AddSync(logger)))
 	}

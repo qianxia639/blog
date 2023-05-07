@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS article;
+
+ALTER TABLE IF EXISTS "article" DROP CONSTRAINT IF EXISTS "article_owner_id_fkey";
