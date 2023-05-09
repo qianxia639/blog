@@ -27,7 +27,7 @@ func (server *Server) login(ctx *gin.Context) {
 	var req loginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logs.Logs.Error("Bind Param err: ", err)
-		result.BadRequestError(ctx, errors.ParamErr.Error())
+		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
 
@@ -83,6 +83,14 @@ func (server *Server) login(ctx *gin.Context) {
 
 	token, err := server.maker.CreateToken(user.Username, server.conf.Token.AccessTokenDuration)
 	if err != nil {
+		result.ServerError(ctx, errors.ServerErr.Error())
+		return
+	}
+
+	key := fmt.Sprintf("t_%s", user.Username)
+	err = server.rdb.Set(ctx, key, &user, 24*time.Hour).Err()
+	if err != nil {
+		logs.Logs.Error("redis err: ", err.Error())
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}

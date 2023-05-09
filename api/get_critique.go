@@ -19,7 +19,7 @@ func (server *Server) getCritiques(ctx *gin.Context) {
 	id, err := strconv.ParseInt(ctx.Query("id"), 10, 64)
 	if err != nil {
 		logs.Logs.Error(err)
-		result.BadRequestError(ctx, errors.InvalidSyntaxErr.Error())
+		result.ParamError(ctx, errors.InvalidSyntaxErr.Error())
 		return
 	}
 

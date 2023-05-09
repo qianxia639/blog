@@ -38,7 +38,7 @@ func (server *Server) updateArticle(ctx *gin.Context) {
 	var req updateArticleRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logs.Logs.Error(err)
-		result.BadRequestError(ctx, errors.ParamErr.Error())
+		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
 

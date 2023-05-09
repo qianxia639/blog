@@ -31,7 +31,7 @@ func (server *Server) listArticles(ctx *gin.Context) {
 	var req listArticlesRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		logs.Logs.Error(err)
-		result.BadRequestError(ctx, errors.ParamErr.Error())
+		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
 

@@ -88,9 +88,9 @@ func (q *Queries) IncrViews(ctx context.Context, id int64) error {
 
 const insertArticle = `-- name: InsertArticle :one
 INSERT INTO articles (
-    owner_id, title, content, image, is_reward, is_critique, created_at
+    owner_id, title, content, image, is_reward, is_critique, created_at, updated_at
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
+    $1, $2, $3, $4, $5, $6, $7, $8
 )
 RETURNING id, owner_id, title, content, image, views, is_reward, is_critique, created_at, updated_at
 `
@@ -103,6 +103,7 @@ type InsertArticleParams struct {
 	IsReward   bool      `json:"is_reward"`
 	IsCritique bool      `json:"is_critique"`
 	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 func (q *Queries) InsertArticle(ctx context.Context, arg *InsertArticleParams) (Article, error) {
@@ -114,6 +115,7 @@ func (q *Queries) InsertArticle(ctx context.Context, arg *InsertArticleParams) (
 		arg.IsReward,
 		arg.IsCritique,
 		arg.CreatedAt,
+		arg.UpdatedAt,
 	)
 	var i Article
 	err := row.Scan(

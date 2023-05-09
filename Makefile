@@ -12,6 +12,9 @@ postgres:
 createdb:
 	sudo docker exec -it postgres createdb --username=root --owner=root blog
 
+redis:
+	sudo docker run -d -p 6379:6379 --restart=always --name redis redis:6-alpine
+
 migrateup:
 	migrate -path db/migration -database "${DB_URL}" -verbose up
 
@@ -30,4 +33,4 @@ sqlc:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go Blog/db/sqlc Store
 
-.PHONY: server test postgres createdb migrateup migrateup1 migratedown migratedown1 sqlc mock
+.PHONY: server test postgres createdb redis migrateup migrateup1 migratedown migratedown1 sqlc mock

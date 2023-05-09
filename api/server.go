@@ -64,6 +64,7 @@ func (server *Server) setupRouter() {
 
 	router.POST("/user", server.createUser)
 	router.POST("/login", server.login)
+	router.POST("/refresh", server.refreshToken)
 
 	router.PUT("/article/incr/:id", server.incrViews)
 	router.GET("/article", server.listArticles)
@@ -74,12 +75,16 @@ func (server *Server) setupRouter() {
 
 	authRouter := router.Group("/").Use(middleware.Authorization(server.maker, server.rdb))
 	{
+		authRouter.GET("/user", server.getUser)
 		authRouter.PUT("/user", server.updateUser)
+		authRouter.POST("/logut", server.logout)
 
 		authRouter.POST("/article", server.insertArticle)
 		authRouter.DELETE("/article", server.deleteArticle)
 		authRouter.PUT("/article", server.updateArticle)
 	}
+
+	// ginpprof.Wrap(router)
 
 	server.router = router
 }

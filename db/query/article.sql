@@ -1,8 +1,8 @@
 -- name: InsertArticle :one
 INSERT INTO articles (
-    owner_id, title, content, image, is_reward, is_critique, created_at
+    owner_id, title, content, image, is_reward, is_critique, created_at, updated_at
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
+    $1, $2, $3, $4, $5, $6, $7, $8
 )
 RETURNING *;
 

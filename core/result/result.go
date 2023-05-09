@@ -77,7 +77,7 @@ func UnauthorizedError(ctx *gin.Context, err string) {
 	ctx.SecureJSON(http.StatusUnauthorized, res)
 }
 
-func BadRequestError(ctx *gin.Context, err string) {
+func ParamError(ctx *gin.Context, err string) {
 	res := Result{
 		OK: false,
 		Err: &ErrorInfo{

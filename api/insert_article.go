@@ -17,15 +17,15 @@ type insertArticleRequest struct {
 	Title      string `json:"title" binding:"required"`
 	Content    string `json:"content" binding:"required"`
 	Image      string `json:"image" binding:"required"`
-	IsReward   bool   `json:"is_reward" binding:"required"`
-	IsCritique bool   `json:"is_critique" binding:"required"`
+	IsReward   bool   `json:"is_reward"`
+	IsCritique bool   `json:"is_critique"`
 }
 
 func (server *Server) insertArticle(ctx *gin.Context) {
 	var req insertArticleRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logs.Logs.Error(err)
-		result.BadRequestError(ctx, errors.ParamErr.Error())
+		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
 
@@ -37,6 +37,7 @@ func (server *Server) insertArticle(ctx *gin.Context) {
 		IsReward:   req.IsReward,
 		IsCritique: req.IsCritique,
 		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
 	}
 
 	_, err := server.store.InsertArticle(ctx, arg)

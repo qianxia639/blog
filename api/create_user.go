@@ -23,7 +23,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		logs.Logs.Error(err)
-		result.BadRequestError(ctx, errors.ParamErr.Error())
+		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
 
