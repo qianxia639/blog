@@ -7,6 +7,7 @@ import (
 	"Blog/middleware"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis_rate/v10"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -57,10 +58,10 @@ func NewServer(opts ...ServerOptions) *Server {
 
 func (server *Server) setupRouter() {
 	router := gin.Default()
-	// router := gin.New()
-	router.Use(gin.Recovery())
 
-	router.Use(middleware.CORS())
+	limiter := redis_rate.NewLimiter(server.rdb)
+
+	router.Use(middleware.CORS()).Use(middleware.Limit(limiter))
 
 	router.POST("/user", server.createUser)
 	router.POST("/login", server.login)
@@ -77,7 +78,7 @@ func (server *Server) setupRouter() {
 	{
 		authRouter.GET("/user", server.getUser)
 		authRouter.PUT("/user", server.updateUser)
-		authRouter.POST("/logut", server.logout)
+		authRouter.POST("/logout", server.logout)
 
 		authRouter.POST("/article", server.insertArticle)
 		authRouter.DELETE("/article", server.deleteArticle)

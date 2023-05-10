@@ -42,5 +42,5 @@ func (server *Server) incrViews(ctx *gin.Context) {
 		return
 	}
 
-	result.OK(ctx, "Increment Views Successfully")
+	result.OK(ctx, "Increment Successfully")
 }

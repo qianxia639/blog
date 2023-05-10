@@ -56,5 +56,5 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	result.OK(ctx, "Create User Successfully")
+	result.OK(ctx, "Create Successfully")
 }

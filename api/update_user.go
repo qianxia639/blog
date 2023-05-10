@@ -82,5 +82,5 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		return
 	}
 
-	result.OK(ctx, "Update User Successfully")
+	result.OK(ctx, "Update Successfully")
 }

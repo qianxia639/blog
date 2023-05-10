@@ -16,5 +16,5 @@ func (server *Server) logout(ctx *gin.Context) {
 
 	_ = server.rdb.Del(ctx, fmt.Sprintf("t_%s", payload.Username)).Err()
 
-	result.OK(ctx, "delete successfull")
+	result.OK(ctx, "Delete Successfully")
 }

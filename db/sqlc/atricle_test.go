@@ -24,17 +24,18 @@ func createRandomArticle(t *testing.T) Article {
 		Content:   content,
 		Image:     image,
 		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
-	blog, err := testQueries.InsertArticle(context.Background(), arg)
+	article, err := testQueries.InsertArticle(context.Background(), arg)
 	require.NoError(t, err)
 
-	require.Equal(t, user.ID, blog.OwnerID)
-	require.Equal(t, title, blog.Title)
-	require.Equal(t, content, blog.Content)
-	require.Equal(t, image, blog.Image)
+	require.Equal(t, user.ID, article.OwnerID)
+	require.Equal(t, title, article.Title)
+	require.Equal(t, content, article.Content)
+	require.Equal(t, image, article.Image)
 
-	return blog
+	return article
 }
 
 func TestInseertArticle(t *testing.T) {
@@ -42,63 +43,63 @@ func TestInseertArticle(t *testing.T) {
 }
 
 func TestIncrViews(t *testing.T) {
-	blog := createRandomArticle(t)
+	article := createRandomArticle(t)
 
-	err := testQueries.IncrViews(context.Background(), blog.ID)
+	err := testQueries.IncrViews(context.Background(), article.ID)
 	require.NoError(t, err)
 }
 
-func TestGetBlog(t *testing.T) {
+func TestGetArticle(t *testing.T) {
 
-	blog1 := createRandomArticle(t)
+	article1 := createRandomArticle(t)
 
-	blog2, err := testQueries.GetArticle(context.Background(), blog1.ID)
+	article2, err := testQueries.GetArticle(context.Background(), article1.ID)
 	require.NoError(t, err)
 
-	require.Equal(t, blog1.ID, blog2.ID)
-	require.Equal(t, blog1.OwnerID, blog2.OwnerID)
-	require.Equal(t, blog1.Title, blog2.Title)
-	require.Equal(t, blog1.Content, blog2.Content)
-	require.Equal(t, blog1.Image, blog2.Image)
-	require.Equal(t, blog1.Views, blog2.Views)
-	require.WithinDuration(t, blog1.CreatedAt, blog2.CreatedAt, time.Second)
-	require.WithinDuration(t, blog1.UpdatedAt, blog2.UpdatedAt, time.Second)
+	require.Equal(t, article1.ID, article2.ID)
+	require.Equal(t, article1.OwnerID, article2.OwnerID)
+	require.Equal(t, article1.Title, article2.Title)
+	require.Equal(t, article1.Content, article2.Content)
+	require.Equal(t, article1.Image, article2.Image)
+	require.Equal(t, article1.Views, article2.Views)
+	require.WithinDuration(t, article1.CreatedAt, article2.CreatedAt, time.Second)
+	require.WithinDuration(t, article1.UpdatedAt, article2.UpdatedAt, time.Second)
 }
 
-func TestListBlogs(t *testing.T) {
+func TestListArticles(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		createRandomArticle(t)
 	}
 
-	blogs, err := testQueries.ListArticles(context.Background(), &ListArticlesParams{
+	articles, err := testQueries.ListArticles(context.Background(), &ListArticlesParams{
+		Title:  "",
 		Limit:  5,
-		Offset: 5,
+		Offset: 0,
 	})
 	require.NoError(t, err)
-	require.Len(t, blogs, 5)
 
-	for _, blog := range blogs {
-		require.NotEmpty(t, blog)
+	for _, article := range articles {
+		require.NotEmpty(t, article)
 	}
 }
 
-func TestDeleteBlog(t *testing.T) {
+func TestDeleteArticle(t *testing.T) {
 
-	blog := createRandomArticle(t)
+	article := createRandomArticle(t)
 
-	err := testQueries.DeleteArticle(ctx, blog.ID)
+	err := testQueries.DeleteArticle(ctx, article.ID)
 	require.NoError(t, err)
 }
 
-func TestUpdateBlogOnlyTitle(t *testing.T) {
+func TestUpdateArticleOnlyTitle(t *testing.T) {
 
-	blog := createRandomArticle(t)
+	article := createRandomArticle(t)
 
 	title := utils.RandomString(6)
 
-	newBlog, err := testQueries.UpdateArticle(ctx, &UpdateArticleParams{
-		ID: blog.ID,
+	newArticle, err := testQueries.UpdateArticle(ctx, &UpdateArticleParams{
+		ID: article.ID,
 		Title: sql.NullString{
 			String: title,
 			Valid:  true,
@@ -107,18 +108,18 @@ func TestUpdateBlogOnlyTitle(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	require.NotEqual(t, blog.Title, newBlog.Title)
-	require.Equal(t, title, newBlog.Title)
+	require.NotEqual(t, article.Title, newArticle.Title)
+	require.Equal(t, title, newArticle.Title)
 }
 
-func TestUpdateBlogOnlyContent(t *testing.T) {
+func TestUpdateArticleOnlyContent(t *testing.T) {
 
-	blog := createRandomArticle(t)
+	article := createRandomArticle(t)
 
 	content := utils.RandomString(50)
 
-	newBlog, err := testQueries.UpdateArticle(ctx, &UpdateArticleParams{
-		ID: blog.ID,
+	newArticle, err := testQueries.UpdateArticle(ctx, &UpdateArticleParams{
+		ID: article.ID,
 		Content: sql.NullString{
 			String: content,
 			Valid:  true,
@@ -127,18 +128,18 @@ func TestUpdateBlogOnlyContent(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	require.NotEqual(t, blog.Content, newBlog.Content)
-	require.Equal(t, content, newBlog.Content)
+	require.NotEqual(t, article.Content, newArticle.Content)
+	require.Equal(t, content, newArticle.Content)
 }
 
-func TestUpdateBlogOnlyImage(t *testing.T) {
+func TestUpdateArticleOnlyImage(t *testing.T) {
 
-	blog := createRandomArticle(t)
+	article := createRandomArticle(t)
 
 	image := fmt.Sprintf("%s.jpg", utils.RandomString(32))
 
-	newBlog, err := testQueries.UpdateArticle(ctx, &UpdateArticleParams{
-		ID: blog.ID,
+	newArticle, err := testQueries.UpdateArticle(ctx, &UpdateArticleParams{
+		ID: article.ID,
 		Image: sql.NullString{
 			String: image,
 			Valid:  true,
@@ -147,19 +148,19 @@ func TestUpdateBlogOnlyImage(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	require.NotEqual(t, blog.Image, newBlog.Image)
-	require.Equal(t, image, newBlog.Image)
+	require.NotEqual(t, article.Image, newArticle.Image)
+	require.Equal(t, image, newArticle.Image)
 }
 
-func TestUpdateBlogAll(t *testing.T) {
-	oldBlog := createRandomArticle(t)
+func TestUpdateArticleAll(t *testing.T) {
+	oldArticle := createRandomArticle(t)
 
 	title := utils.RandomString(6)
 	image := fmt.Sprintf("%s.jpg", utils.RandomString(32))
 	content := utils.RandomString(50)
 
-	newBlog, err := testQueries.UpdateArticle(ctx, &UpdateArticleParams{
-		ID: oldBlog.ID,
+	newArticle, err := testQueries.UpdateArticle(ctx, &UpdateArticleParams{
+		ID: oldArticle.ID,
 		Title: sql.NullString{
 			String: title,
 			Valid:  true,
@@ -176,7 +177,7 @@ func TestUpdateBlogAll(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	require.Equal(t, title, newBlog.Title)
-	require.Equal(t, content, newBlog.Content)
-	require.Equal(t, image, newBlog.Image)
+	require.Equal(t, title, newArticle.Title)
+	require.Equal(t, content, newArticle.Content)
+	require.Equal(t, image, newArticle.Image)
 }

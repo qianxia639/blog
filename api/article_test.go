@@ -183,7 +183,7 @@ func TestInsertBlog(t *testing.T) {
 			server := newTestServer(t, store)
 			recodre := httptest.NewRecorder()
 
-			url := "/blog"
+			url := "/article"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(data))
 			require.NoError(t, err)
 
@@ -289,7 +289,7 @@ func TestIncrViews(t *testing.T) {
 			server := newTestServer(t, store)
 			recodre := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/blog/incr/%d", tc.blogId)
+			url := fmt.Sprintf("/article/incr/%d", tc.blogId)
 			request, err := http.NewRequest(http.MethodPut, url, nil)
 			require.NoError(t, err)
 
@@ -409,7 +409,7 @@ func TestDeleteBlog(t *testing.T) {
 			server := newTestServer(t, store)
 			recodre := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/blog/%d", tc.blogId)
+			url := fmt.Sprintf("/article/%d", tc.blogId)
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
@@ -518,7 +518,7 @@ type Page struct {
 // 			server := newTestServer(t, store)
 // 			recodre := httptest.NewRecorder()
 
-// 			url := fmt.Sprintf("/blog?page_no=%d&page_size=%d", tc.page.PageNo, tc.page.PageSize)
+// 			url := fmt.Sprintf("/article?page_no=%d&page_size=%d", tc.page.PageNo, tc.page.PageSize)
 // 			request, err := http.NewRequest(http.MethodGet, url, nil)
 // 			require.NoError(t, err)
 
@@ -602,7 +602,7 @@ func TestGetArticle(t *testing.T) {
 			server := newTestServer(t, store)
 			recodre := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/blog/%d", tc.blogId)
+			url := fmt.Sprintf("/article/%d", tc.blogId)
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -890,7 +890,7 @@ func EqUpdateBlogParams(arg db.UpdateArticleParams, updated_at time.Time) gomock
 // 			server := newTestServer(t, store)
 // 			recodre := httptest.NewRecorder()
 
-// 			url := "/blog"
+// 			url := "/article"
 // 			request, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(data))
 // 			require.NoError(t, err)
 

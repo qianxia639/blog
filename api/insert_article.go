@@ -54,5 +54,5 @@ func (server *Server) insertArticle(ctx *gin.Context) {
 		return
 	}
 
-	result.OK(ctx, "Insert Article Successful")
+	result.OK(ctx, "Insert Successfully")
 }

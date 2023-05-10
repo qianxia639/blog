@@ -42,5 +42,5 @@ func (server *Server) deleteArticle(ctx *gin.Context) {
 		return
 	}
 
-	result.OK(ctx, "Delete Article Successfully")
+	result.OK(ctx, "Delete Successfully")
 }
