@@ -3,11 +3,12 @@ package config
 import "time"
 
 type Config struct {
-	Postgres Postgres
-	Token    Token
-	Server   Server
-	Redis    Redis
-	Zap      Zap
+	Postgres Postgres `mapstructure:"postgres"`
+	Token    Token    `mapstructure:"token"`
+	Server   Server   `mapstructure:"server"`
+	Redis    Redis    `mapstructure:"redis"`
+	OssQiniu OssQiniu `mapstructure:"oss_qiniu"`
+	Zap      Zap      `mapstructure:"zap"`
 }
 
 type Postgres struct {
@@ -29,6 +30,13 @@ type Redis struct {
 	Address  string `mapstructure:"address"`
 	Password string `mapstructure:"password"`
 	DB       int    `mapstructure:"db"`
+}
+
+type OssQiniu struct {
+	AccessKey string `mapstructure:"access_key"`
+	SecretKey string `mapstructure:"secret_key"`
+	ServerUrl string `mapstructure:"server_url"`
+	Bucket    string `mapstructure:"bucket"`
 }
 
 type Zap struct {

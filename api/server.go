@@ -6,6 +6,7 @@ import (
 	db "Blog/db/sqlc"
 	"Blog/middleware"
 
+	"github.com/DeanThompson/ginpprof"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis_rate/v10"
 	"github.com/redis/go-redis/v9"
@@ -85,7 +86,7 @@ func (server *Server) setupRouter() {
 		authRouter.PUT("/article", server.updateArticle)
 	}
 
-	// ginpprof.Wrap(router)
+	ginpprof.Wrap(router)
 
 	server.router = router
 }

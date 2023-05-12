@@ -61,6 +61,17 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		}
 	}
 
+	// TODO 此处需要优化
+	if req.Avatar != nil {
+		fileUrl, err := server.uploadFile(*req.Avatar)
+		if err != nil {
+			logs.Logs.Error("upload file err: ", err)
+			result.ServerError(ctx, errors.ServerErr.Error())
+			return
+		}
+		arg.Avatar = newNullString(&fileUrl)
+	}
+
 	user, err := server.store.UpdateUser(ctx, arg)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {

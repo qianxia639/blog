@@ -23,14 +23,14 @@ func Authorization(maker token.Maker, rdb *redis.Client) gin.HandlerFunc {
 			return
 		}
 
-		payload, err := maker.VerifyToken(authorization)
+		_, err := maker.VerifyToken(authorization)
 		if err != nil {
 			ctx.Abort()
 			result.UnauthorizedError(ctx, err.Error())
 			return
 		}
 
-		ctx.Set(authorizationPayloadKey, payload)
+		// ctx.Set(authorizationPayloadKey, payload)
 		ctx.Next()
 	}
 }
