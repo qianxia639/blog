@@ -34,15 +34,22 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	arg := &db.CreateUserParams{
-		Username:     req.Username,
-		Email:        req.Email,
-		Nickname:     req.Email,
-		Password:     hashPassword,
-		RegisterTime: time.Now(),
+	// TODO 还未完成实现
+	arg := &db.CreateUserTxParams{
+		CreateUserParams: db.CreateUserParams{
+			Username:     req.Username,
+			Email:        req.Email,
+			Nickname:     req.Email,
+			Password:     hashPassword,
+			RegisterTime: time.Now(),
+		},
+		AfterCreate: func(user db.User) error {
+			logs.Logs.Infof("after create func user: %+v", user)
+			return nil
+		},
 	}
 
-	_, err = server.store.CreateUser(ctx, arg)
+	_, err = server.store.CreateUserTx(ctx, arg)
 	if err != nil {
 		logs.Logs.Error(err)
 		if pqErr, ok := err.(*pq.Error); ok {

@@ -3,6 +3,7 @@ package api
 import (
 	"Blog/core/errors"
 	"Blog/core/logs"
+	"Blog/core/oss"
 	"Blog/core/result"
 	db "Blog/db/sqlc"
 	"Blog/utils"
@@ -61,9 +62,8 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		}
 	}
 
-	// TODO 此处需要优化
 	if req.Avatar != nil {
-		fileUrl, err := server.uploadFile(*req.Avatar)
+		fileUrl, err := server.upload(*req.Avatar)
 		if err != nil {
 			logs.Logs.Error("upload file err: ", err)
 			result.ServerError(ctx, errors.ServerErr.Error())
@@ -94,4 +94,17 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	}
 
 	result.OK(ctx, "Update Successfully")
+}
+
+func (server *Server) upload(avatar string) (string, error) {
+	up := oss.Upload{
+		Strategy: &oss.OssQiniu{
+			AccessKey: server.conf.OssQiniu.AccessKey,
+			SecretKey: server.conf.OssQiniu.SecretKey,
+			ServerUrl: server.conf.OssQiniu.ServerUrl,
+			Bucket:    server.conf.OssQiniu.Bucket,
+		},
+		LocalFile: avatar,
+	}
+	return up.UploadFile()
 }

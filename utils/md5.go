@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-func Md5(data string) string {
-	return fmt.Sprintf("%x", md5.Sum([]byte(data)))
+func Md5(data []byte) string {
+	return fmt.Sprintf("%x", md5.Sum(data))
 }
 
 func ShardMd5(localfile string) (string, error) {

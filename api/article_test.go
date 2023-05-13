@@ -22,31 +22,33 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type eqInsertBlogParamsMatcher struct {
+type eqInsertArticleParamsMatcher struct {
 	arg        db.InsertArticleParams
 	created_at time.Time
+	updated_at time.Time
 }
 
-func (e eqInsertBlogParamsMatcher) Matches(x interface{}) bool {
+func (e eqInsertArticleParamsMatcher) Matches(x interface{}) bool {
 	arg, ok := x.(db.InsertArticleParams)
 	if !ok {
 		return false
 	}
 
 	e.arg.CreatedAt = arg.CreatedAt
+	e.arg.UpdatedAt = arg.UpdatedAt
 
 	return reflect.DeepEqual(e.arg, arg)
 }
 
-func (e eqInsertBlogParamsMatcher) String() string {
-	return fmt.Sprintf("matches arg %v and created_at %v\n", e.arg, e.created_at)
+func (e eqInsertArticleParamsMatcher) String() string {
+	return fmt.Sprintf("matches arg %v and created_at %v and updated_at %v\n", e.arg, e.created_at, e.updated_at)
 }
 
-func EqInsertBlogParams(arg db.InsertArticleParams, created_at time.Time) gomock.Matcher {
-	return eqInsertBlogParamsMatcher{arg, created_at}
+func EqInsertArticleParams(arg db.InsertArticleParams, created_at, updated_at time.Time) gomock.Matcher {
+	return eqInsertArticleParamsMatcher{arg, created_at, updated_at}
 }
 
-func TestInsertBlog(t *testing.T) {
+func TestInsertArticle(t *testing.T) {
 
 	store := newTestDB(t)
 
@@ -86,15 +88,17 @@ func TestInsertBlog(t *testing.T) {
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				createdAt := time.Now()
+				updatedAt := time.Now()
 				arg := db.InsertArticleParams{
 					OwnerID:   user.ID,
 					Title:     title,
 					Content:   content,
 					Image:     image,
 					CreatedAt: createdAt,
+					UpdatedAt: updatedAt,
 				}
 				store.EXPECT().
-					InsertArticle(gomock.Any(), EqInsertBlogParams(arg, createdAt)).
+					InsertArticle(gomock.Any(), EqInsertArticleParams(arg, createdAt, updatedAt)).
 					Times(1)
 			},
 			checkResponse: func(recoder *httptest.ResponseRecorder) {
@@ -120,9 +124,10 @@ func TestInsertBlog(t *testing.T) {
 					Content:   content,
 					Image:     image,
 					CreatedAt: createdAt,
+					UpdatedAt: createdAt,
 				}
 				store.EXPECT().
-					InsertArticle(gomock.Any(), EqInsertBlogParams(arg, createdAt)).
+					InsertArticle(gomock.Any(), EqInsertArticleParams(arg, createdAt, createdAt)).
 					Times(1).
 					Return(db.Article{}, sql.ErrConnDone)
 			},
