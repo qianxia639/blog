@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var Logs *zap.SugaredLogger
+var Logs *zap.Logger
 
 func zapEncoder(config *config.Config) zapcore.Encoder {
 	// 新建一个配置
@@ -88,7 +88,7 @@ func zapLevelEnabler(cfg *config.Config) zapcore.LevelEnabler {
 	return zap.DebugLevel
 }
 
-func InitZap(config *config.Config) *zap.SugaredLogger {
+func InitZap(config *config.Config) *zap.Logger {
 	// 构建编码器
 	encoder := zapEncoder(config)
 	// 构建日志级别
@@ -96,7 +96,7 @@ func InitZap(config *config.Config) *zap.SugaredLogger {
 	// 最后获得Core和Options
 	subCore, options := tee(config, encoder, levelEnabler)
 	// 创建Logger
-	return zap.New(subCore, options...).Sugar()
+	return zap.New(subCore, options...)
 }
 
 // 将所有合并

@@ -14,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
+	"go.uber.org/zap"
 )
 
 type updateUserRequest struct {
@@ -27,7 +28,7 @@ type updateUserRequest struct {
 func (server *Server) updateUser(ctx *gin.Context) {
 	var req updateUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		logs.Logs.Error(err)
+		logs.Logs.Error("bind pramar err", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
@@ -65,7 +66,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	if req.Avatar != nil {
 		fileUrl, err := server.upload(*req.Avatar)
 		if err != nil {
-			logs.Logs.Error("upload file err: ", err)
+			logs.Logs.Error("upload file err: ", zap.Error(err))
 			result.ServerError(ctx, errors.ServerErr.Error())
 			return
 		}
@@ -88,7 +89,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	key := fmt.Sprintf("t_%s", user.Username)
 	err = server.rdb.Set(ctx, key, &user, 24*time.Hour).Err()
 	if err != nil {
-		logs.Logs.Error("redis err: ", err.Error())
+		logs.Logs.Error("redis err: ", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}

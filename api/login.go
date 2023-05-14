@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
 // max login attempts count
@@ -26,7 +27,7 @@ func (server *Server) login(ctx *gin.Context) {
 
 	var req loginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		logs.Logs.Error("Bind Param err: ", err)
+		logs.Logs.Error("Bind Param err: ", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
@@ -36,7 +37,7 @@ func (server *Server) login(ctx *gin.Context) {
 
 	locked, err := server.rdb.Get(ctx, lockedAccountKey).Bool()
 	if err != nil && err != redis.Nil {
-		logs.Logs.Error("get locked account err: ", err)
+		logs.Logs.Error("get locked account err: ", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
@@ -50,7 +51,7 @@ func (server *Server) login(ctx *gin.Context) {
 	if err != nil {
 		switch err {
 		case errors.NoRowsErr:
-			logs.Logs.Error("Not User err: ", err)
+			logs.Logs.Error("Not User err: ", zap.Error(err))
 			result.UnauthorizedError(ctx, errors.NotExistsUserErr.Error())
 		default:
 			result.ServerError(ctx, errors.ServerErr.Error())
@@ -62,21 +63,21 @@ func (server *Server) login(ctx *gin.Context) {
 		if statusCode, err := server.accountLocked(ctx, loginAttemptsKey, lockedAccountKey); err != nil && statusCode != http.StatusOK {
 			// 重置失败的登录次数
 			if err := server.resetLoginAttempts(ctx, loginAttemptsKey); err != nil {
-				logs.Logs.Error(err)
+				logs.Logs.Error("reset login attempts", zap.Error(err))
 				result.ServerError(ctx, errors.ServerErr.Error())
 			}
 			result.Error(ctx, statusCode, err.Error())
 			return
 		}
 
-		logs.Logs.Error(err)
+		logs.Logs.Error("Decrypt Password", zap.Error(err))
 		result.UnauthorizedError(ctx, errors.PasswordErr.Error())
 		return
 	}
 
 	// 重置登录失败次数
 	if err := server.resetLoginAttempts(ctx, loginAttemptsKey); err != nil {
-		logs.Logs.Error(err)
+		logs.Logs.Error("reset login attempts", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
@@ -90,7 +91,7 @@ func (server *Server) login(ctx *gin.Context) {
 	key := fmt.Sprintf("t_%s", user.Username)
 	err = server.rdb.Set(ctx, key, &user, 24*time.Hour).Err()
 	if err != nil {
-		logs.Logs.Error("redis err: ", err.Error())
+		logs.Logs.Error("redis err: ", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
@@ -102,14 +103,14 @@ func (server *Server) accountLocked(ctx context.Context, loginAttemptsKey, locke
 	// 增加登录尝试次数
 	attempts, err := server.rdb.Incr(ctx, loginAttemptsKey).Result()
 	if err != nil {
-		logs.Logs.Error("redis err: ", err)
+		logs.Logs.Error("redis err: ", zap.Error(err))
 		return http.StatusInternalServerError, errors.ServerErr
 	}
 
 	if attempts > maxLoginAttempts {
 		// 锁定用户1小时
 		if err := server.rdb.Set(ctx, lockedAccountKey, true, time.Hour).Err(); err != nil {
-			logs.Logs.Error(err)
+			logs.Logs.Error("set locked account", zap.Error(err))
 			return http.StatusInternalServerError, errors.ServerErr
 		}
 		return http.StatusUnauthorized, errors.AccountLockedErr

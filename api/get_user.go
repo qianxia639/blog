@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type getUserResponse struct {
@@ -30,7 +31,7 @@ func (server *Server) getUser(ctx *gin.Context) {
 
 	var user db.User
 	if err := server.rdb.Get(ctx, fmt.Sprintf("t_%s", payload.Username)).Scan(&user); err != nil {
-		logs.Logs.Error("redis err: ", err.Error())
+		logs.Logs.Error("redis err: ", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}

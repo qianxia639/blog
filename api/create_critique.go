@@ -7,6 +7,7 @@ import (
 	db "Blog/db/sqlc"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type createCritiqueRequest struct {
@@ -20,7 +21,7 @@ type createCritiqueRequest struct {
 func (server *Server) createCritique(ctx *gin.Context) {
 	var req createCritiqueRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		logs.Logs.Error(err)
+		logs.Logs.Error("bind params", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
@@ -35,7 +36,7 @@ func (server *Server) createCritique(ctx *gin.Context) {
 
 	critique, err := server.store.CreateCritique(ctx, arg)
 	if err != nil {
-		logs.Logs.Error(err)
+		logs.Logs.Error("create critique", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}

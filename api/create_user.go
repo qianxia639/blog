@@ -4,13 +4,16 @@ import (
 	"Blog/core/errors"
 	"Blog/core/logs"
 	"Blog/core/result"
+	"Blog/core/task"
 	db "Blog/db/sqlc"
 	"Blog/utils"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hibiken/asynq"
 	"github.com/lib/pq"
+	"go.uber.org/zap"
 )
 
 type createUserRequest struct {
@@ -22,14 +25,14 @@ type createUserRequest struct {
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		logs.Logs.Error(err)
+		logs.Logs.Error("bind params", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
 
 	hashPassword, err := utils.Encrypt(req.Password)
 	if err != nil {
-		logs.Logs.Error(err)
+		logs.Logs.Error("encrypt password", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
@@ -44,14 +47,22 @@ func (server *Server) createUser(ctx *gin.Context) {
 			RegisterTime: time.Now(),
 		},
 		AfterCreate: func(user db.User) error {
-			logs.Logs.Infof("after create func user: %+v", user)
-			return nil
+			taskPayload := &task.SendVerifyEmailPayload{
+				Email: user.Email,
+			}
+
+			opts := []asynq.Option{
+				asynq.MaxRetry(10),
+				asynq.ProcessIn(time.Duration(utils.RandomInt(5, 10)) * time.Second),
+				asynq.Queue(task.QueueCritical),
+			}
+
+			return server.taskDistributor.DistributeTaskSendVerifyEmail(ctx, taskPayload, opts...)
 		},
 	}
 
 	_, err = server.store.CreateUserTx(ctx, arg)
 	if err != nil {
-		logs.Logs.Error(err)
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
 			case errors.UniqueViolationErr:

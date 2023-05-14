@@ -5,6 +5,7 @@ import (
 	"Blog/core/cache"
 	"Blog/core/config"
 	"Blog/core/logs"
+	"Blog/core/task"
 	"Blog/core/token"
 	db "Blog/db/sqlc"
 	"database/sql"
@@ -13,7 +14,9 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/hibiken/asynq"
 	_ "github.com/lib/pq"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -34,20 +37,35 @@ func main() {
 
 	store := db.NewStore(conn)
 
+	// redisOpt := asynq.RedisClientOpt{
+	// 	Addr: conf.Redis.Address,
+	// }
+
+	// taskDistributor := task.NewRedisTaskDistributor(redisOpt)
+	// go runTaskProcessor(redisOpt)
 	runGinServer(conf, store)
 }
 
 func runDBMigrate(migrateUrl, dbSource string) {
 	migration, err := migrate.New(migrateUrl, dbSource)
 	if err != nil {
-		logs.Logs.Error("can't create new migrate instance: ", err)
+		logs.Logs.Error("can't create new migrate instance: ", zap.Error(err))
 	}
 
 	if err := migration.Up(); err != nil && err != migrate.ErrNoChange {
-		logs.Logs.Error("failed to run migrate up: ", err)
+		logs.Logs.Error("failed to run migrate up: ", zap.Error(err))
 	}
 
 	logs.Logs.Info("db migrated successfully")
+}
+
+func runTaskProcessor(redisOpt asynq.RedisClientOpt) {
+	taskProcessor := task.NewRedisTaskProcessor(redisOpt)
+	logs.Logs.Info("start task processor")
+	err := taskProcessor.Start()
+	if err != nil {
+		logs.Logs.Fatal("failed to start task processor", zap.Error(err))
+	}
 }
 
 func runGinServer(conf config.Config, store db.Store) {
@@ -59,11 +77,19 @@ func runGinServer(conf config.Config, store db.Store) {
 		log.Fatal(err)
 	}
 
+	redisOpt := asynq.RedisClientOpt{
+		Addr: conf.Redis.Address,
+	}
+
+	taskDistributor := task.NewRedisTaskDistributor(redisOpt)
+	go runTaskProcessor(redisOpt)
+
 	opts := []api.ServerOptions{
 		api.WithStor(store),
 		api.WithConfig(conf),
 		api.WithMaker(maker),
 		api.WithCache(rdb),
+		api.WithTaskDistributor(taskDistributor),
 	}
 
 	server := api.NewServer(opts...)

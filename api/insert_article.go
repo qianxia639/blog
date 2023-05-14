@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
+	"go.uber.org/zap"
 )
 
 type insertArticleRequest struct {
@@ -24,7 +25,7 @@ type insertArticleRequest struct {
 func (server *Server) insertArticle(ctx *gin.Context) {
 	var req insertArticleRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		logs.Logs.Error(err)
+		logs.Logs.Error("bind pramar", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
@@ -45,7 +46,7 @@ func (server *Server) insertArticle(ctx *gin.Context) {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
 			case errors.UniqueViolationErr:
-				logs.Logs.Error(err)
+				logs.Logs.Error("insert article", zap.Error(err))
 				result.Error(ctx, http.StatusForbidden, errors.TitleExistsErr.Error())
 				return
 			}

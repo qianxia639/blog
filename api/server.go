@@ -2,6 +2,7 @@ package api
 
 import (
 	"Blog/core/config"
+	"Blog/core/task"
 	"Blog/core/token"
 	db "Blog/db/sqlc"
 	"Blog/middleware"
@@ -13,11 +14,12 @@ import (
 )
 
 type Server struct {
-	store  db.Store
-	conf   config.Config
-	router *gin.Engine
-	maker  token.Maker
-	rdb    *redis.Client
+	store           db.Store
+	conf            config.Config
+	router          *gin.Engine
+	maker           token.Maker
+	rdb             *redis.Client
+	taskDistributor task.TaskDistributor
 }
 
 type ServerOptions func(*Server)
@@ -43,6 +45,12 @@ func WithMaker(maker token.Maker) ServerOptions {
 func WithCache(rdb *redis.Client) ServerOptions {
 	return func(s *Server) {
 		s.rdb = rdb
+	}
+}
+
+func WithTaskDistributor(taskDistributor task.TaskDistributor) ServerOptions {
+	return func(s *Server) {
+		s.taskDistributor = taskDistributor
 	}
 }
 

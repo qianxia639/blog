@@ -6,6 +6,7 @@ import (
 	"Blog/core/result"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type refreshTokenRquest struct {
@@ -15,7 +16,7 @@ type refreshTokenRquest struct {
 func (server *Server) refreshToken(ctx *gin.Context) {
 	var req refreshTokenRquest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		logs.Logs.Errorf("Should Bing Body: %s", err.Error())
+		logs.Logs.Error("Should Bing Body", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
@@ -28,7 +29,7 @@ func (server *Server) refreshToken(ctx *gin.Context) {
 
 	payload, err := server.maker.VerifyToken(req.Token)
 	if err != nil {
-		logs.Logs.Errorf("failed decode token: %s", err.Error())
+		logs.Logs.Error("failed decode token", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}

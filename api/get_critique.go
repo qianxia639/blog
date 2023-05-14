@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type critiqueTree struct {
@@ -18,14 +19,14 @@ type critiqueTree struct {
 func (server *Server) getCritiques(ctx *gin.Context) {
 	id, err := strconv.ParseInt(ctx.Query("id"), 10, 64)
 	if err != nil {
-		logs.Logs.Error(err)
+		logs.Logs.Error("string to int", zap.Error(err), zap.String("id", ctx.Param("id")))
 		result.ParamError(ctx, errors.InvalidSyntaxErr.Error())
 		return
 	}
 
 	critiques, err := server.store.GetCritiques(ctx, id)
 	if err != nil {
-		logs.Logs.Error(err)
+		logs.Logs.Error("get critiques", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
