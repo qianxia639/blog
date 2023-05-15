@@ -61,11 +61,13 @@ func runDBMigrate(migrateUrl, dbSource string) {
 
 func runTaskProcessor(redisOpt asynq.RedisClientOpt) {
 	taskProcessor := task.NewRedisTaskProcessor(redisOpt)
-	logs.Logs.Info("start task processor")
+
 	err := taskProcessor.Start()
 	if err != nil {
 		logs.Logs.Fatal("failed to start task processor", zap.Error(err))
 	}
+
+	logs.Logs.Info("start task processor")
 }
 
 func runGinServer(conf config.Config, store db.Store) {

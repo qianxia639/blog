@@ -16,10 +16,7 @@ password = ""
 db = 0
 
 [oss_qiniu]
-access_key = ""
-secret_key = ""
-server_url = ""
-bucket = ""
+
 
 [zap]
 prefix = "BlogLog"

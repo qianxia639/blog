@@ -100,10 +100,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 func (server *Server) upload(avatar string) (string, error) {
 	up := oss.Upload{
 		Strategy: &oss.OssQiniu{
-			AccessKey: server.conf.OssQiniu.AccessKey,
-			SecretKey: server.conf.OssQiniu.SecretKey,
-			ServerUrl: server.conf.OssQiniu.ServerUrl,
-			Bucket:    server.conf.OssQiniu.Bucket,
+			Conf: server.conf.OssQiniu,
 		},
 		LocalFile: avatar,
 	}

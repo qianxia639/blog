@@ -1,27 +1,27 @@
 package oss
 
 import (
+	"Blog/core/config"
+	"Blog/core/logs"
 	"Blog/utils"
 	"context"
 	"os"
 
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
+	"go.uber.org/zap"
 )
 
 type OssQiniu struct {
-	AccessKey string
-	SecretKey string
-	Bucket    string
-	ServerUrl string
+	Conf config.OssQiniu
 }
 
 func (o *OssQiniu) UploadImage(localfile string) (string, error) {
 	putPolicy := storage.PutPolicy{
-		Scope: o.Bucket,
+		Scope: o.Conf.Bucket,
 	}
 
-	mac := qbox.NewMac(o.AccessKey, o.SecretKey)
+	mac := qbox.NewMac(o.Conf.AccessKey, o.Conf.SecretKey)
 	upToken := putPolicy.UploadToken(mac)
 	cfg := storage.Config{
 		Region:        &storage.ZoneHuanan, // 空间对应的域名
@@ -41,8 +41,11 @@ func (o *OssQiniu) UploadImage(localfile string) (string, error) {
 
 	err = formUploader.PutFile(context.Background(), &ret, upToken, md5Hash, localfile, nil)
 	if err != nil {
+		logs.Logs.Error("failed put file", zap.Error(err))
 		return "", err
 	}
 
-	return o.ServerUrl + "/" + ret.Key, nil
+	logs.Logs.Info("upload success", zap.String("file", localfile), zap.String("key", md5Hash))
+
+	return o.Conf.ServerUrl + "/" + ret.Key, nil
 }

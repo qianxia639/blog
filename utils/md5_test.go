@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var path = "/opt/blog/bg.jpeg"
+var path = "/opt/blog/sqlc.yaml"
 
 func TestShardMd5(t *testing.T) {
 

@@ -30,7 +30,4 @@ migratedown1:
 sqlc:
 	sqlc generate
 
-mock:
-	mockgen -package mockdb -destination db/mock/store.go Blog/db/sqlc Store
-
-.PHONY: server test postgres createdb redis migrateup migrateup1 migratedown migratedown1 sqlc mock
+.PHONY: server test postgres createdb redis migrateup migrateup1 migratedown migratedown1 sqlc

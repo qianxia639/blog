@@ -7,7 +7,6 @@ require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-redis/redis_rate/v10 v10.0.1
 	github.com/golang-migrate/migrate/v4 v4.15.2
-	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/hibiken/asynq v0.24.1
 	github.com/lib/pq v1.10.7

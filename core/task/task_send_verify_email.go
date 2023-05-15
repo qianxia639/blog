@@ -18,23 +18,6 @@ type SendVerifyEmailPayload struct {
 	Email string
 }
 
-func (distributor *RedisTaskDistributor) DistributeTaskSendVerifyEmail(ctx context.Context, payload *SendVerifyEmailPayload, opts ...asynq.Option) error {
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		return err
-	}
-
-	tak := asynq.NewTask(TaskSendVerifyEmail, jsonPayload, opts...)
-	taskInfo, err := distributor.client.EnqueueContext(ctx, tak)
-	if err != nil {
-		return fmt.Errorf("failed to enqueue task: %w", err)
-	}
-
-	logs.Logs.Info("enqueued task", zap.String("type", tak.Type()), zap.ByteString("payload", taskInfo.Payload), zap.String("queue", taskInfo.Queue), zap.Int("max_retry", taskInfo.MaxRetry))
-
-	return nil
-}
-
 func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Context, tak *asynq.Task) error {
 	var payload SendVerifyEmailPayload
 	err := json.Unmarshal(tak.Payload(), &payload)
