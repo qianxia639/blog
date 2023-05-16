@@ -26,7 +26,9 @@ func main() {
 		log.Fatal("load config err: ", err)
 	}
 
-	logs.Logs = logs.InitZap(&conf)
+	// logs.Logs = logs.InitZap(conf.Zap)
+	logs.Logs = logs.GetInstance(conf.Zap)
+	defer logs.Logs.Sync()
 
 	conn, err := sql.Open(conf.Postgres.Driver, conf.Postgres.Source)
 	if err != nil {

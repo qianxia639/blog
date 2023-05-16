@@ -2,7 +2,9 @@ package logs
 
 import (
 	"Blog/core/config"
+	"io"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/natefinch/lumberjack"
@@ -12,107 +14,71 @@ import (
 
 var Logs *zap.Logger
 
-func zapEncoder(config *config.Config) zapcore.Encoder {
-	// 新建一个配置
-	encoderConfig := zapcore.EncoderConfig{
-		TimeKey:       "Time",
-		LevelKey:      "Level",
-		NameKey:       "Logger",
-		CallerKey:     "Caller",
-		MessageKey:    "Message",
-		StacktraceKey: "StackTrace",
-		EncodeCaller:  zapcore.ShortCallerEncoder,
+func zapEncoderConfig() zapcore.EncoderConfig {
+	return zapcore.EncoderConfig{
+		TimeKey:       "Time",                           // 日志时间对应的key
+		LevelKey:      "Level",                          // 日志级别对应的key
+		NameKey:       "Logger",                         //
+		CallerKey:     "Caller",                         // 日志所在文件对应的key
+		MessageKey:    "Message",                        // 结构化(json)输出：msg的key
+		StacktraceKey: "StackTrace",                     //
+		EncodeLevel:   zapcore.CapitalColorLevelEncoder, // 日志级别大写
+		EncodeCaller:  zapcore.ShortCallerEncoder,       // 相对路径编码输出
 		LineEnding:    zapcore.DefaultLineEnding,
 		FunctionKey:   zapcore.OmitKey,
+		EncodeTime: func(t time.Time, pae zapcore.PrimitiveArrayEncoder) { // 自定义时间格式
+			pae.AppendString(t.Format("2006-01-02 15:04:05"))
+		},
+		EncodeDuration: zapcore.SecondsDurationEncoder, // 秒级时间间隔
 	}
-	// 自定义时间格式
-	encoderConfig.EncodeTime = func(t time.Time, pae zapcore.PrimitiveArrayEncoder) {
-		pae.AppendString(t.Format("2006-01-02 15:04:05"))
-	}
-	// 日志级别大写
-	encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	// 秒级时间间隔
-	encoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
-	// 简短的调用者输出
-	encoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
-	// 完整的序列化logger名称
-	encoderConfig.EncodeName = zapcore.FullNameEncoder
-	// 最终的日志编码 json或者console
-	switch config.Zap.Encode {
-	case "json":
-		return zapcore.NewJSONEncoder(encoderConfig)
-	case "console":
-		return zapcore.NewConsoleEncoder(encoderConfig)
-	}
-	// 默认console
-	return zapcore.NewConsoleEncoder(encoderConfig)
 }
 
-func zapWriteSyncer(cfg *config.Config) zapcore.WriteSyncer {
-	syncers := make([]zapcore.WriteSyncer, 0, 2)
-	// 如果开启了日志控制台输出，就加入控制台书写器
-	if cfg.Zap.Writer == "both" || cfg.Zap.Writer == "console" {
-		syncers = append(syncers, zapcore.AddSync(os.Stdout))
-	}
+func initZap(conf config.Zap) *zap.Logger {
+	// 新建一个配置
+	encoderConfig := zapEncoderConfig()
 
-	// 如果开启了日志文件存储，就根据文件路径切片加入书写器
-	if cfg.Zap.Writer == "both" || cfg.Zap.Writer == "file" {
-		// 添加日志输出器
-		logger := &lumberjack.Logger{
-			Filename:   cfg.Zap.LogFile.Output,   //文件路径
-			MaxSize:    cfg.Zap.LogFile.MaxSize,  //分割文件的大小
-			MaxBackups: cfg.Zap.LogFile.Backups,  //备份次数
-			Compress:   cfg.Zap.LogFile.Compress, // 是否压缩
-			LocalTime:  true,                     //使用本地时间
-		}
-		syncers = append(syncers, zapcore.Lock(zapcore.AddSync(logger)))
-	}
-	return zap.CombineWriteSyncers(syncers...)
+	highPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl >= zapcore.ErrorLevel
+	})
+	lowPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl < zapcore.ErrorLevel
+	})
+
+	topicDebugging := zapcore.AddSync(logSegmentation(conf))
+	topicErrors := zapcore.AddSync(logSegmentation(conf))
+
+	consoleDebugging := zapcore.Lock(os.Stdout)
+	consoleErrors := zapcore.Lock(os.Stderr)
+
+	jsonEncoder := zapcore.NewJSONEncoder(encoderConfig)
+	consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
+
+	core := zapcore.NewTee(
+		zapcore.NewCore(jsonEncoder, topicErrors, highPriority),
+		zapcore.NewCore(consoleEncoder, consoleErrors, highPriority),
+		zapcore.NewCore(jsonEncoder, topicDebugging, lowPriority),
+		zapcore.NewCore(consoleEncoder, consoleDebugging, lowPriority),
+	)
+
+	return zap.New(core)
 }
 
-// 日志级别
-func zapLevelEnabler(cfg *config.Config) zapcore.LevelEnabler {
-	switch cfg.Zap.Level {
-	case "debug":
-		return zap.DebugLevel
-	case "info":
-		return zap.InfoLevel
-	case "error":
-		return zap.ErrorLevel
-	case "panic":
-		return zap.PanicLevel
-	case "fatal":
-		return zap.FatalLevel
+func logSegmentation(conf config.Zap) io.Writer {
+	return &lumberjack.Logger{
+		Filename:   conf.LogFile.Output,   //文件路径
+		MaxSize:    conf.LogFile.MaxSize,  //分割文件的大小
+		MaxAge:     conf.LogFile.MaxAge,   // 保存天数
+		MaxBackups: conf.LogFile.Backups,  //最大保留数
+		Compress:   conf.LogFile.Compress, // 是否压缩
+		LocalTime:  true,                  //使用本地时间
 	}
-	// 默认Debug级别
-	return zap.DebugLevel
 }
 
-func InitZap(config *config.Config) *zap.Logger {
-	// 构建编码器
-	encoder := zapEncoder(config)
-	// 构建日志级别
-	levelEnabler := zapLevelEnabler(config)
-	// 最后获得Core和Options
-	subCore, options := tee(config, encoder, levelEnabler)
-	// 创建Logger
-	return zap.New(subCore, options...)
-}
+var once sync.Once
 
-// 将所有合并
-func tee(cfg *config.Config, encoder zapcore.Encoder, levelEnabler zapcore.LevelEnabler) (core zapcore.Core, options []zap.Option) {
-	sink := zapWriteSyncer(cfg)
-	return zapcore.NewCore(encoder, sink, levelEnabler), nil
-}
-
-// 构建Option
-func buildOptions(cfg *config.Config, levelEnabler zapcore.LevelEnabler) (options []zap.Option) {
-	if cfg.Zap.Caller {
-		options = append(options, zap.AddCaller())
-	}
-
-	if cfg.Zap.StackTrace {
-		options = append(options, zap.AddStacktrace(levelEnabler))
-	}
-	return
+func GetInstance(conf config.Zap) *zap.Logger {
+	once.Do(func() {
+		Logs = initZap(conf)
+	})
+	return Logs
 }

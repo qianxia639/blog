@@ -40,18 +40,17 @@ type OssQiniu struct {
 }
 
 type Zap struct {
-	Prefix     string    `mapstructure:"prefix"`
-	TimeFormat time.Time `mapstructure:"time_format"`
-	Level      string    `mapstructure:"level"`
 	Caller     bool      `mapstructure:"caller"`
 	StackTrace bool      `mapstructure:"stack_trace"`
-	Writer     string    `mapstructure:"writer"`
-	Encode     string    `mapstructure:"encode"`
+	WriterFile bool      `mapstructure:"writer_file"`
+	Level      string    `mapstructure:"level"`
+	TimeFormat time.Time `mapstructure:"time_format"`
 	LogFile    *LogFile  `mapstructure:"log_file"`
 }
 
 type LogFile struct {
 	MaxSize  int    `mapstructure:"max_size"`
+	MaxAge   int    `mapstructure:"max_age"`
 	Backups  int    `mapstructure:"backups"`
 	Compress bool   `mapstructure:"compress"`
 	Output   string `mapstructure:"output"`

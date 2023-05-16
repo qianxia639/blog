@@ -5,10 +5,10 @@ type UploadImageStrategy interface {
 }
 
 type Upload struct {
-	Strategy  UploadImageStrategy
-	LocalFile string
+	ImageStrategy UploadImageStrategy
+	LocalFile     string
 }
 
-func (u *Upload) UploadFile() (string, error) {
-	return u.Strategy.UploadImage(u.LocalFile)
+func (u *Upload) UploadImage() (string, error) {
+	return u.ImageStrategy.UploadImage(u.LocalFile)
 }

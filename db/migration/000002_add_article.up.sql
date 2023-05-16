@@ -8,7 +8,7 @@ CREATE TABLE "articles" (
   "is_reward" bool NOT NULL DEFAULT false,
   "is_critique" bool NOT NULL DEFAULT false,
   "created_at" timestamptz NOT NULL DEFAULT '1970-01-01 00:00:00',
-  "updated_at" timestamptz NOT NULL DEFAULT '1970-01-01 00:00:00'
+  "updated_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 COMMENT ON COLUMN "articles"."id" IS '主键';

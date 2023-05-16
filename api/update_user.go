@@ -99,10 +99,10 @@ func (server *Server) updateUser(ctx *gin.Context) {
 
 func (server *Server) upload(avatar string) (string, error) {
 	up := oss.Upload{
-		Strategy: &oss.OssQiniu{
+		ImageStrategy: &oss.OssQiniu{
 			Conf: server.conf.OssQiniu,
 		},
 		LocalFile: avatar,
 	}
-	return up.UploadFile()
+	return up.UploadImage()
 }
