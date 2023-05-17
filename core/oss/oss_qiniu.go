@@ -25,7 +25,7 @@ func (o *OssQiniu) UploadImage(localfile string) (string, error) {
 	}
 
 	contentType := http.DetectContentType(buf)
-	if _, ok := utils.ImageTypes[contentType]; !ok {
+	if _, ok := utils.GetInstance()[contentType]; !ok {
 		return "", fmt.Errorf("文件类型错误,当前文件类型为: %s", contentType)
 	}
 
