@@ -66,6 +66,7 @@ func NewServer(opts ...ServerOptions) *Server {
 }
 
 func (server *Server) setupRouter() {
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
 	limiter := redis_rate.NewLimiter(server.rdb)
