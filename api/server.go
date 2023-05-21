@@ -15,7 +15,7 @@ import (
 
 type Server struct {
 	store           db.Store
-	conf            config.Config
+	conf            *config.Config
 	router          *gin.Engine
 	maker           token.Maker
 	rdb             *redis.Client
@@ -30,7 +30,7 @@ func WithStor(store db.Store) ServerOptions {
 	}
 }
 
-func WithConfig(conf config.Config) ServerOptions {
+func WithConfig(conf *config.Config) ServerOptions {
 	return func(s *Server) {
 		s.conf = conf
 	}

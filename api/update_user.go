@@ -42,7 +42,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	}
 
 	if req.Username != payload.Username {
-		result.UnauthorizedError(ctx, errors.UnauthorizedError.Error())
+		result.UnauthorizedError(ctx, errors.UnauthorizedErr.Error())
 		return
 	}
 
@@ -112,6 +112,10 @@ func (server *Server) upload(localFile string) (string, error) {
 	buf, err := os.ReadFile(localFile)
 	if err != nil {
 		return "", err
+	}
+
+	if len(buf) > utils.ImageMaxSize {
+		return "", errors.ExceedingLenggthErr
 	}
 
 	contentType := http.DetectContentType(buf)

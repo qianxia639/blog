@@ -54,7 +54,7 @@ func (server *Server) updateArticle(ctx *gin.Context) {
 
 	if payload.Username != user.Username {
 		logs.Logs.Error("payload.Username not equals user.Username: %s", zap.String("payloadUsername", payload.Username), zap.String("userUsername", user.Username))
-		result.UnauthorizedError(ctx, errors.UnauthorizedError.Error())
+		result.UnauthorizedError(ctx, errors.UnauthorizedErr.Error())
 		return
 	}
 
@@ -72,7 +72,7 @@ func (server *Server) updateArticle(ctx *gin.Context) {
 
 	if article.OwnerID != user.ID {
 		logs.Logs.Error("article.OwnerID not equals user.ID: ", zap.Int64("articleOwnerID", article.OwnerID), zap.Int64("userID", user.ID))
-		result.UnauthorizedError(ctx, errors.UnauthorizedError.Error())
+		result.UnauthorizedError(ctx, errors.UnauthorizedErr.Error())
 		return
 	}
 
