@@ -37,7 +37,6 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	// TODO 还未完成实现
 	arg := &db.CreateUserTxParams{
 		CreateUserParams: db.CreateUserParams{
 			Username:     req.Username,
