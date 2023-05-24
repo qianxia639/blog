@@ -2,7 +2,10 @@ package config
 
 import "github.com/spf13/viper"
 
-func LoadConfig(path string) (conf Config, err error) {
+func LoadConfig(path string) (*Config, error) {
+
+	var conf Config
+
 	viper.AddConfigPath(path)
 
 	viper.SetConfigName("config")
@@ -10,11 +13,11 @@ func LoadConfig(path string) (conf Config, err error) {
 
 	viper.AutomaticEnv()
 
-	err = viper.ReadInConfig()
+	err := viper.ReadInConfig()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	err = viper.Unmarshal(&conf)
-	return
+	return &conf, err
 }

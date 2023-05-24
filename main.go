@@ -39,12 +39,6 @@ func main() {
 
 	store := db.NewStore(conn)
 
-	// redisOpt := asynq.RedisClientOpt{
-	// 	Addr: conf.Redis.Address,
-	// }
-
-	// taskDistributor := task.NewRedisTaskDistributor(redisOpt)
-	// go runTaskProcessor(redisOpt)
 	runGinServer(conf, store)
 }
 
@@ -72,7 +66,7 @@ func runTaskProcessor(redisOpt asynq.RedisClientOpt) {
 	logs.Logs.Info("start task processor")
 }
 
-func runGinServer(conf config.Config, store db.Store) {
+func runGinServer(conf *config.Config, store db.Store) {
 
 	rdb := cache.InitRedis(conf)
 

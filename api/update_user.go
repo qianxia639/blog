@@ -9,7 +9,9 @@ import (
 	"Blog/utils"
 	"database/sql"
 	"fmt"
+	"mime"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -40,7 +42,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	}
 
 	if req.Username != payload.Username {
-		result.UnauthorizedError(ctx, errors.UnauthorizedError.Error())
+		result.UnauthorizedError(ctx, errors.UnauthorizedErr.Error())
 		return
 	}
 
@@ -66,7 +68,14 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	if req.Avatar != nil {
 		fileUrl, err := server.upload(*req.Avatar)
 		if err != nil {
-			logs.Logs.Error("upload file err: ", zap.Error(err))
+			logs.Logs.Error("upload file err", zap.Error(err))
+			if wr, ok := err.(*errors.WrapError); ok {
+				switch err {
+				case wr:
+					result.ServerError(ctx, wr.Error())
+					return
+				}
+			}
 			result.ServerError(ctx, errors.ServerErr.Error())
 			return
 		}
@@ -97,12 +106,32 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	result.OK(ctx, "Update Successfully")
 }
 
-func (server *Server) upload(avatar string) (string, error) {
+func (server *Server) upload(localFile string) (string, error) {
+	logs.Logs.Info("upload filename", zap.String("filename", localFile))
+
+	buf, err := os.ReadFile(localFile)
+	if err != nil {
+		return "", err
+	}
+
+	if len(buf) > utils.ImageMaxSize {
+		return "", errors.ExceedingLenggthErr
+	}
+
+	contentType := http.DetectContentType(buf)
+	mediaType, _, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		return "", err
+	}
+	if _, ok := utils.GetInstance()[contentType]; !ok {
+		return "", errors.NewWrapError("只支持上传图片(.gif也不行)，当前文件类型为: " + mediaType)
+	}
+
 	up := oss.Upload{
 		ImageStrategy: &oss.OssQiniu{
 			Conf: server.conf.OssQiniu,
 		},
-		LocalFile: avatar,
+		LocalFile: localFile,
 	}
 	return up.UploadImage()
 }

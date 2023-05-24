@@ -10,10 +10,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	TaskSendVerifyEmail = "task:send_verify_email"
-)
-
 type SendVerifyEmailPayload struct {
 	Email string
 }
