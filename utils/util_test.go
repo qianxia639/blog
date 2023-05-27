@@ -28,7 +28,7 @@ func TestMime(t *testing.T) {
 		// wg.Add(1)
 		go func(i int) {
 			// defer wg.Done()
-			ext, ok := GetInstance()[exts[i]]
+			ext, ok := ImageTypes[exts[i]]
 			t.Logf("ext: %s,ok: %t", ext, ok)
 		}(i)
 		time.Sleep(1 * time.Second)
