@@ -28,5 +28,6 @@ func InValidUrl(u string) bool {
 }
 
 const (
-	ImageMaxSize = 5120 * 1024 // 单位: byte
+	// image max 3M
+	ImageMaxSize = 3072 * 1024 // 单位: byte
 )

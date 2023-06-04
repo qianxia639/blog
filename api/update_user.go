@@ -123,8 +123,8 @@ func (server *Server) upload(localFile string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if _, ok := utils.GetInstance()[contentType]; !ok {
-		return "", errors.NewWrapError("只支持上传图片(.gif也不行)，当前文件类型为: " + mediaType)
+	if _, ok := utils.ImageTypes[contentType]; !ok {
+		return "", errors.NewWrapError("非图片类型或为不支持的图片类型，当前文件类型为: " + mediaType)
 	}
 
 	up := oss.Upload{
