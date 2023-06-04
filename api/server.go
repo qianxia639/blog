@@ -8,7 +8,6 @@ import (
 	"Blog/middleware"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis_rate/v10"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -19,11 +18,6 @@ type Server struct {
 	maker           token.Maker
 	rdb             *redis.Client
 	taskDistributor task.TaskDistributor
-}
-
-func (server *Server) Build() *Server {
-	server.setupRouter()
-	return server
 }
 
 func NewServer() *Server {
@@ -38,9 +32,7 @@ func (server *Server) setupRouter() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	limiter := redis_rate.NewLimiter(server.rdb)
-
-	router.Use(middleware.CORS()).Use(middleware.Limit(limiter))
+	router.Use(middleware.CORS())
 
 	router.POST("/user", server.createUser)
 	router.POST("/login", server.login)
