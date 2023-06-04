@@ -3,7 +3,6 @@ module Blog
 go 1.19
 
 require (
-	github.com/DeanThompson/ginpprof v0.0.0-20201112072838-007b1e56b2e1
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-redis/redis_rate/v10 v10.0.1
 	github.com/golang-migrate/migrate/v4 v4.15.2

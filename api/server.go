@@ -7,7 +7,6 @@ import (
 	db "Blog/db/sqlc"
 	"Blog/middleware"
 
-	"github.com/DeanThompson/ginpprof"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis_rate/v10"
 	"github.com/redis/go-redis/v9"
@@ -22,43 +21,13 @@ type Server struct {
 	taskDistributor task.TaskDistributor
 }
 
-type ServerOptions func(*Server)
-
-func WithStor(store db.Store) ServerOptions {
-	return func(s *Server) {
-		s.store = store
-	}
+func (server *Server) Build() *Server {
+	server.setupRouter()
+	return server
 }
 
-func WithConfig(conf *config.Config) ServerOptions {
-	return func(s *Server) {
-		s.conf = conf
-	}
-}
-
-func WithMaker(maker token.Maker) ServerOptions {
-	return func(s *Server) {
-		s.maker = maker
-	}
-}
-
-func WithCache(rdb *redis.Client) ServerOptions {
-	return func(s *Server) {
-		s.rdb = rdb
-	}
-}
-
-func WithTaskDistributor(taskDistributor task.TaskDistributor) ServerOptions {
-	return func(s *Server) {
-		s.taskDistributor = taskDistributor
-	}
-}
-
-func NewServer(opts ...ServerOptions) *Server {
+func NewServer() *Server {
 	server := &Server{}
-	for _, opt := range opts {
-		opt(server)
-	}
 
 	server.setupRouter()
 
@@ -95,8 +64,6 @@ func (server *Server) setupRouter() {
 		authRouter.PUT("/article", server.updateArticle)
 	}
 
-	ginpprof.Wrap(router)
-
 	server.router = router
 }
 
@@ -104,10 +71,27 @@ func (server *Server) Start(addr string) error {
 	return server.router.Run(addr)
 }
 
-func (server Server) GetRoutr() *gin.Engine {
-	return server.router
+func (server *Server) WithStore(store db.Store) *Server {
+	server.store = store
+	return server
 }
 
-func (server Server) GetMaker() token.Maker {
-	return server.maker
+func (server *Server) WithConfig(conf *config.Config) *Server {
+	server.conf = conf
+	return server
+}
+
+func (server *Server) WithMaker(maker token.Maker) *Server {
+	server.maker = maker
+	return server
+}
+
+func (server *Server) WithCache(rdb *redis.Client) *Server {
+	server.rdb = rdb
+	return server
+}
+
+func (server *Server) WithTaskDistributor(taskDistributor task.TaskDistributor) *Server {
+	server.taskDistributor = taskDistributor
+	return server
 }

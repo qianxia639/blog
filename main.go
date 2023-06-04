@@ -82,15 +82,12 @@ func runGinServer(conf *config.Config, store db.Store) {
 	taskDistributor := task.NewRedisTaskDistributor(redisOpt)
 	go runTaskProcessor(redisOpt)
 
-	opts := []api.ServerOptions{
-		api.WithStor(store),
-		api.WithConfig(conf),
-		api.WithMaker(maker),
-		api.WithCache(rdb),
-		api.WithTaskDistributor(taskDistributor),
-	}
-
-	server := api.NewServer(opts...)
+	server := api.NewServer().
+		WithConfig(conf).
+		WithStore(store).
+		WithMaker(maker).
+		WithCache(rdb).
+		WithTaskDistributor(taskDistributor)
 
 	log.Fatal(server.Start(conf.Server.Address))
 }
