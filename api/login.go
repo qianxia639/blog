@@ -35,7 +35,7 @@ func (server *Server) login(ctx *gin.Context) {
 	loginAttemptsKey := fmt.Sprintf("loginAttempts:%s", req.Username)
 	lockedAccountKey := fmt.Sprintf("lockedAccount:%s", req.Username)
 
-	locked, err := server.rdb.Get(ctx, lockedAccountKey).Bool()
+	locked, err := server.cache.Get(ctx, lockedAccountKey).Bool()
 	if err != nil && err != redis.Nil {
 		logs.Logs.Error("get locked account err: ", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
@@ -89,7 +89,7 @@ func (server *Server) login(ctx *gin.Context) {
 	}
 
 	key := fmt.Sprintf("t_%s", user.Username)
-	err = server.rdb.Set(ctx, key, &user, 24*time.Hour).Err()
+	err = server.cache.Set(ctx, key, &user, 24*time.Hour).Err()
 	if err != nil {
 		logs.Logs.Error("redis err: ", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
@@ -101,7 +101,7 @@ func (server *Server) login(ctx *gin.Context) {
 
 func (server *Server) accountLocked(ctx context.Context, loginAttemptsKey, lockedAccountKey string) (int, error) {
 	// 增加登录尝试次数
-	attempts, err := server.rdb.Incr(ctx, loginAttemptsKey).Result()
+	attempts, err := server.cache.Incr(ctx, loginAttemptsKey).Result()
 	if err != nil {
 		logs.Logs.Error("redis err: ", zap.Error(err))
 		return http.StatusInternalServerError, errors.ServerErr
@@ -109,7 +109,7 @@ func (server *Server) accountLocked(ctx context.Context, loginAttemptsKey, locke
 
 	if attempts > maxLoginAttempts {
 		// 锁定用户1小时
-		if err := server.rdb.Set(ctx, lockedAccountKey, true, time.Hour).Err(); err != nil {
+		if err := server.cache.Set(ctx, lockedAccountKey, true, time.Hour).Err(); err != nil {
 			logs.Logs.Error("set locked account", zap.Error(err))
 			return http.StatusInternalServerError, errors.ServerErr
 		}
@@ -120,5 +120,5 @@ func (server *Server) accountLocked(ctx context.Context, loginAttemptsKey, locke
 }
 
 func (server *Server) resetLoginAttempts(ctx context.Context, loginAttemptsKey string) error {
-	return server.rdb.Del(ctx, loginAttemptsKey).Err()
+	return server.cache.Del(ctx, loginAttemptsKey).Err()
 }

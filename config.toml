@@ -16,18 +16,3 @@ password = ""
 db = 0
 
 [oss_qiniu]
-
-
-[zap]
-time_format = 2006-01-02 15:04:05Z
-level = "debug"
-caller = true
-stack_trace = true
-writer_file = true
-
-    [zap.log_file]
-    max_size = 20
-    max_age = 7
-    backups = 5
-    compress = true
-    output = "./log/blog.log"

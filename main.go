@@ -26,10 +26,6 @@ func main() {
 		log.Fatal("load config err: ", err)
 	}
 
-	// logs.Logs = logs.InitZap(conf.Zap)
-	logs.Logs = logs.GetInstance(conf.Zap)
-	defer logs.Logs.Sync()
-
 	conn, err := sql.Open(conf.Postgres.Driver, conf.Postgres.Source)
 	if err != nil {
 		log.Fatal("can't connect to db: ", err)
@@ -82,12 +78,15 @@ func runGinServer(conf *config.Config, store db.Store) {
 	taskDistributor := task.NewRedisTaskDistributor(redisOpt)
 	go runTaskProcessor(redisOpt)
 
-	server := api.NewServer().
-		WithConfig(conf).
-		WithStore(store).
-		WithMaker(maker).
-		WithCache(rdb).
-		WithTaskDistributor(taskDistributor)
+	opts := []api.ServerOptions{
+		api.WithConf(conf),
+		api.WithStore(store),
+		api.WithCache(rdb),
+		api.WithMaker(maker),
+		api.WithTaskDistributor(taskDistributor),
+	}
+
+	server := api.NewServer(opts...)
 
 	log.Fatal(server.Start(conf.Server.Address))
 }

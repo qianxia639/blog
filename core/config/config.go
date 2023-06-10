@@ -8,7 +8,6 @@ type Config struct {
 	Server   Server   `mapstructure:"server"`
 	Redis    Redis    `mapstructure:"redis"`
 	OssQiniu OssQiniu `mapstructure:"oss_qiniu"`
-	Zap      Zap      `mapstructure:"zap"`
 }
 
 type Postgres struct {
@@ -37,21 +36,4 @@ type OssQiniu struct {
 	SecretKey string `mapstructure:"secret_key"`
 	ServerUrl string `mapstructure:"server_url"`
 	Bucket    string `mapstructure:"bucket"`
-}
-
-type Zap struct {
-	Caller     bool      `mapstructure:"caller"`
-	StackTrace bool      `mapstructure:"stack_trace"`
-	WriterFile bool      `mapstructure:"writer_file"`
-	Level      string    `mapstructure:"level"`
-	TimeFormat time.Time `mapstructure:"time_format"`
-	LogFile    *LogFile  `mapstructure:"log_file"`
-}
-
-type LogFile struct {
-	MaxSize  int    `mapstructure:"max_size"`
-	MaxAge   int    `mapstructure:"max_age"`
-	Backups  int    `mapstructure:"backups"`
-	Compress bool   `mapstructure:"compress"`
-	Output   string `mapstructure:"output"`
 }

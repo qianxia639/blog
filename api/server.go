@@ -8,6 +8,7 @@ import (
 	"Blog/middleware"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis_rate/v10"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -16,12 +17,48 @@ type Server struct {
 	conf            *config.Config
 	router          *gin.Engine
 	maker           token.Maker
-	rdb             *redis.Client
+	cache           *redis.Client
 	taskDistributor task.TaskDistributor
 }
 
-func NewServer() *Server {
+type ServerOptions func(*Server)
+
+func WithStore(store db.Store) ServerOptions {
+	return func(s *Server) {
+		s.store = store
+	}
+}
+
+func WithConf(conf *config.Config) ServerOptions {
+	return func(s *Server) {
+		s.conf = conf
+	}
+}
+
+func WithMaker(maker token.Maker) ServerOptions {
+	return func(s *Server) {
+		s.maker = maker
+	}
+}
+
+func WithCache(cache *redis.Client) ServerOptions {
+	return func(s *Server) {
+		s.cache = cache
+	}
+}
+
+func WithTaskDistributor(taskDistributor task.TaskDistributor) ServerOptions {
+	return func(s *Server) {
+		s.taskDistributor = taskDistributor
+	}
+}
+
+func NewServer(opts ...ServerOptions) *Server {
 	server := &Server{}
+
+	for _, opt := range opts {
+		opt(server)
+	}
 
 	server.setupRouter()
 
@@ -32,7 +69,9 @@ func (server *Server) setupRouter() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	router.Use(middleware.CORS())
+	limiter := redis_rate.NewLimiter(server.cache)
+
+	router.Use(middleware.CORS()).Use(middleware.Limit(limiter))
 
 	router.POST("/user", server.createUser)
 	router.POST("/login", server.login)
@@ -45,7 +84,7 @@ func (server *Server) setupRouter() {
 	router.POST("/critique", server.createCritique)
 	router.GET("/critique", server.getCritiques)
 
-	authRouter := router.Group("/").Use(middleware.Authorization(server.maker, server.rdb))
+	authRouter := router.Group("/").Use(middleware.Authorization(server.maker, server.cache))
 	{
 		authRouter.GET("/user", server.getUser)
 		authRouter.PUT("/user", server.updateUser)
@@ -61,29 +100,4 @@ func (server *Server) setupRouter() {
 
 func (server *Server) Start(addr string) error {
 	return server.router.Run(addr)
-}
-
-func (server *Server) WithStore(store db.Store) *Server {
-	server.store = store
-	return server
-}
-
-func (server *Server) WithConfig(conf *config.Config) *Server {
-	server.conf = conf
-	return server
-}
-
-func (server *Server) WithMaker(maker token.Maker) *Server {
-	server.maker = maker
-	return server
-}
-
-func (server *Server) WithCache(rdb *redis.Client) *Server {
-	server.rdb = rdb
-	return server
-}
-
-func (server *Server) WithTaskDistributor(taskDistributor task.TaskDistributor) *Server {
-	server.taskDistributor = taskDistributor
-	return server
 }

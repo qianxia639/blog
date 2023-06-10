@@ -96,7 +96,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	}
 
 	key := fmt.Sprintf("t_%s", user.Username)
-	err = server.rdb.Set(ctx, key, &user, 24*time.Hour).Err()
+	err = server.cache.Set(ctx, key, &user, 24*time.Hour).Err()
 	if err != nil {
 		logs.Logs.Error("redis err: ", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())

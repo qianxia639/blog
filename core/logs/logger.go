@@ -1,10 +1,9 @@
 package logs
 
 import (
-	"Blog/core/config"
+	"fmt"
 	"io"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/natefinch/lumberjack"
@@ -13,6 +12,11 @@ import (
 )
 
 var Logs *zap.Logger
+
+func init() {
+	Logs = initLogger()
+	defer Logs.Sync()
+}
 
 func zapEncoderConfig() zapcore.EncoderConfig {
 	return zapcore.EncoderConfig{
@@ -33,7 +37,7 @@ func zapEncoderConfig() zapcore.EncoderConfig {
 	}
 }
 
-func initZap(conf config.Zap) *zap.Logger {
+func initLogger() *zap.Logger {
 	// 新建一个配置
 	encoderConfig := zapEncoderConfig()
 
@@ -44,41 +48,32 @@ func initZap(conf config.Zap) *zap.Logger {
 		return lvl < zapcore.ErrorLevel
 	})
 
-	topicDebugging := zapcore.AddSync(logSegmentation(conf))
-	topicErrors := zapcore.AddSync(logSegmentation(conf))
+	topicDebugging := zapcore.AddSync(logSegmentation())
+	topicErrors := zapcore.AddSync(logSegmentation())
 
 	consoleDebugging := zapcore.Lock(os.Stdout)
 	consoleErrors := zapcore.Lock(os.Stderr)
 
-	jsonEncoder := zapcore.NewJSONEncoder(encoderConfig)
+	fileEncoder := zapcore.NewConsoleEncoder(encoderConfig)
 	consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
 
 	core := zapcore.NewTee(
-		zapcore.NewCore(jsonEncoder, topicErrors, highPriority),
+		zapcore.NewCore(fileEncoder, topicErrors, highPriority),
 		zapcore.NewCore(consoleEncoder, consoleErrors, highPriority),
-		zapcore.NewCore(jsonEncoder, topicDebugging, lowPriority),
+		zapcore.NewCore(fileEncoder, topicDebugging, lowPriority),
 		zapcore.NewCore(consoleEncoder, consoleDebugging, lowPriority),
 	)
 
-	return zap.New(core)
+	return zap.New(core, zap.AddCaller())
 }
 
-func logSegmentation(conf config.Zap) io.Writer {
+func logSegmentation() io.Writer {
 	return &lumberjack.Logger{
-		Filename:   conf.LogFile.Output,   //文件路径
-		MaxSize:    conf.LogFile.MaxSize,  //分割文件的大小
-		MaxAge:     conf.LogFile.MaxAge,   // 保存天数
-		MaxBackups: conf.LogFile.Backups,  //最大保留数
-		Compress:   conf.LogFile.Compress, // 是否压缩
-		LocalTime:  true,                  //使用本地时间
+		Filename:   fmt.Sprintf("./log/%s.log", time.Now().Format("2006-01-02")), //文件路径
+		MaxSize:    20,                                                           //分割文件的大小
+		MaxAge:     7,                                                            // 保存天数
+		MaxBackups: 5,                                                            //最大保留数
+		Compress:   true,                                                         // 是否压缩
+		LocalTime:  true,                                                         //使用本地时间
 	}
-}
-
-var once sync.Once
-
-func GetInstance(conf config.Zap) *zap.Logger {
-	once.Do(func() {
-		Logs = initZap(conf)
-	})
-	return Logs
 }
