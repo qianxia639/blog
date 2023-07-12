@@ -11,11 +11,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var Logs *zap.Logger
+var Logger *zap.Logger
 
 func init() {
-	Logs = initLogger()
-	defer Logs.Sync()
+	Logger = initLogger()
 }
 
 func zapEncoderConfig() zapcore.EncoderConfig {

@@ -22,7 +22,7 @@ func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Cont
 	}
 
 	// TODO: send email to user
-	logs.Logs.Info("processed task", zap.String("type", tak.Type()), zap.ByteString("payload", tak.Payload()), zap.String("email", payload.Email))
+	logs.Logger.Info("processed task", zap.String("type", tak.Type()), zap.ByteString("payload", tak.Payload()), zap.String("email", payload.Email))
 
 	return nil
 }

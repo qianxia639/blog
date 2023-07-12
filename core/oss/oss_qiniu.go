@@ -19,11 +19,11 @@ func (o *OssQiniu) UploadImage(localfile string) (string, error) {
 	ret := storage.PutRet{}
 	err := formUploader.PutFileWithoutKey(context.Background(), &ret, upToken, localfile, nil)
 	if err != nil {
-		logs.Logs.Error("failed put file", zap.Error(err))
+		logs.Logger.Error("failed put file", zap.Error(err))
 		return "", err
 	}
 
-	logs.Logs.Info("upload success", zap.String("file", localfile), zap.String("key", ret.Key))
+	logs.Logger.Info("upload success", zap.String("file", localfile), zap.String("key", ret.Key))
 
 	return o.Conf.ServerUrl + "/" + ret.Key, nil
 }

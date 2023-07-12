@@ -30,7 +30,7 @@ func NewRedisTaskProcessor(redisOpt asynq.RedisClientOpt) TaskProcessor {
 			QueueDefault:  5,
 		},
 		ErrorHandler: asynq.ErrorHandlerFunc(func(ctx context.Context, task *asynq.Task, err error) {
-			logs.Logs.Error("process task failed", zap.Error(err), zap.String("type", task.Type()), zap.ByteString("payload", task.Payload()))
+			logs.Logger.Error("process task failed", zap.Error(err), zap.String("type", task.Type()), zap.ByteString("payload", task.Payload()))
 		}),
 	})
 

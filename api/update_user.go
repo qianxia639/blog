@@ -30,7 +30,7 @@ type updateUserRequest struct {
 func (server *Server) updateUser(ctx *gin.Context) {
 	var req updateUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		logs.Logs.Error("bind pramar err", zap.Error(err))
+		logs.Logger.Error("bind pramar err", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
@@ -68,7 +68,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	if req.Avatar != nil {
 		fileUrl, err := server.upload(*req.Avatar)
 		if err != nil {
-			logs.Logs.Error("upload file err", zap.Error(err))
+			logs.Logger.Error("upload file err", zap.Error(err))
 			if wr, ok := err.(*errors.WrapError); ok {
 				switch err {
 				case wr:
@@ -98,7 +98,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	key := fmt.Sprintf("t_%s", user.Username)
 	err = server.cache.Set(ctx, key, &user, 24*time.Hour).Err()
 	if err != nil {
-		logs.Logs.Error("redis err: ", zap.Error(err))
+		logs.Logger.Error("redis err: ", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
@@ -107,7 +107,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 }
 
 func (server *Server) upload(localFile string) (string, error) {
-	logs.Logs.Info("upload filename", zap.String("filename", localFile))
+	logs.Logger.Info("upload filename", zap.String("filename", localFile))
 
 	buf, err := os.ReadFile(localFile)
 	if err != nil {

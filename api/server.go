@@ -23,31 +23,37 @@ type Server struct {
 
 type ServerOptions func(*Server)
 
-func WithStore(store db.Store) ServerOptions {
+func Store(store db.Store) ServerOptions {
 	return func(s *Server) {
 		s.store = store
 	}
 }
 
-func WithConf(conf *config.Config) ServerOptions {
+func Conf(conf *config.Config) ServerOptions {
 	return func(s *Server) {
 		s.conf = conf
 	}
 }
 
-func WithMaker(maker token.Maker) ServerOptions {
+func Maker(maker token.Maker) ServerOptions {
 	return func(s *Server) {
 		s.maker = maker
 	}
 }
 
-func WithCache(cache *redis.Client) ServerOptions {
+func Cache(cache *redis.Client) ServerOptions {
 	return func(s *Server) {
 		s.cache = cache
 	}
 }
 
-func WithTaskDistributor(taskDistributor task.TaskDistributor) ServerOptions {
+func Router() ServerOptions {
+	return func(s *Server) {
+		s.setupRouter()
+	}
+}
+
+func TaskDistributor(taskDistributor task.TaskDistributor) ServerOptions {
 	return func(s *Server) {
 		s.taskDistributor = taskDistributor
 	}
@@ -60,7 +66,7 @@ func NewServer(opts ...ServerOptions) *Server {
 		opt(server)
 	}
 
-	server.setupRouter()
+	// server.setupRouter()
 
 	return server
 }

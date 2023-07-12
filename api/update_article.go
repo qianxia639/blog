@@ -38,7 +38,7 @@ func newNullString(s *string) sql.NullString {
 func (server *Server) updateArticle(ctx *gin.Context) {
 	var req updateArticleRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		logs.Logs.Error("bind pramar err", zap.Error(err))
+		logs.Logger.Error("bind pramar err", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
@@ -53,7 +53,7 @@ func (server *Server) updateArticle(ctx *gin.Context) {
 	user, _ := server.store.GetUser(ctx, req.Username)
 
 	if payload.Username != user.Username {
-		logs.Logs.Error("payload.Username not equals user.Username: %s", zap.String("payloadUsername", payload.Username), zap.String("userUsername", user.Username))
+		logs.Logger.Error("payload.Username not equals user.Username: %s", zap.String("payloadUsername", payload.Username), zap.String("userUsername", user.Username))
 		result.UnauthorizedError(ctx, errors.UnauthorizedErr.Error())
 		return
 	}
@@ -61,17 +61,17 @@ func (server *Server) updateArticle(ctx *gin.Context) {
 	article, err := server.store.GetArticle(ctx, req.Id)
 	if err != nil {
 		if err == errors.NoRowsErr {
-			logs.Logs.Error("Get Article err: ", zap.Error(err))
+			logs.Logger.Error("Get Article err: ", zap.Error(err))
 			result.Error(ctx, http.StatusNotFound, errors.NotExistsUserErr.Error())
 			return
 		}
-		logs.Logs.Error("Get Article err: ", zap.Error(err))
+		logs.Logger.Error("Get Article err: ", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}
 
 	if article.OwnerID != user.ID {
-		logs.Logs.Error("article.OwnerID not equals user.ID: ", zap.Int64("articleOwnerID", article.OwnerID), zap.Int64("userID", user.ID))
+		logs.Logger.Error("article.OwnerID not equals user.ID: ", zap.Int64("articleOwnerID", article.OwnerID), zap.Int64("userID", user.ID))
 		result.UnauthorizedError(ctx, errors.UnauthorizedErr.Error())
 		return
 	}

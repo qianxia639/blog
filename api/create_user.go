@@ -25,14 +25,14 @@ type createUserRequest struct {
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		logs.Logs.Error("bind params", zap.Error(err))
+		logs.Logger.Error("bind params", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
 
 	hashPassword, err := utils.Encrypt(req.Password)
 	if err != nil {
-		logs.Logs.Error("encrypt password", zap.Error(err))
+		logs.Logger.Error("encrypt password", zap.Error(err))
 		result.ServerError(ctx, errors.ServerErr.Error())
 		return
 	}

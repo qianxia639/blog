@@ -9,7 +9,6 @@ import (
 	"Blog/core/token"
 	db "Blog/db/sqlc"
 	"database/sql"
-	"log"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -20,15 +19,15 @@ import (
 )
 
 func main() {
-
+	defer logs.Logger.Sync()
 	conf, err := config.LoadConfig(".")
 	if err != nil {
-		log.Fatal("load config err: ", err)
+		logs.Logger.Fatal("load config err: ", zap.Error(err))
 	}
 
 	conn, err := sql.Open(conf.Postgres.Driver, conf.Postgres.Source)
 	if err != nil {
-		log.Fatal("can't connect to db: ", err)
+		logs.Logger.Fatal("can't connect to db: ", zap.Error(err))
 	}
 
 	runDBMigrate(conf.Postgres.MigrateUrl, conf.Postgres.Source)
@@ -41,14 +40,14 @@ func main() {
 func runDBMigrate(migrateUrl, dbSource string) {
 	migration, err := migrate.New(migrateUrl, dbSource)
 	if err != nil {
-		logs.Logs.Error("can't create new migrate instance: ", zap.Error(err))
+		logs.Logger.Error("can't create new migrate instance: ", zap.Error(err))
 	}
 
 	if err := migration.Up(); err != nil && err != migrate.ErrNoChange {
-		logs.Logs.Error("failed to run migrate up: ", zap.Error(err))
+		logs.Logger.Error("failed to run migrate up: ", zap.Error(err))
 	}
 
-	logs.Logs.Info("db migrated successfully")
+	logs.Logger.Info("db migrated successfully")
 }
 
 func runTaskProcessor(redisOpt asynq.RedisClientOpt) {
@@ -56,10 +55,10 @@ func runTaskProcessor(redisOpt asynq.RedisClientOpt) {
 
 	err := taskProcessor.Start()
 	if err != nil {
-		logs.Logs.Fatal("failed to start task processor", zap.Error(err))
+		logs.Logger.Fatal("failed to start task processor", zap.Error(err))
 	}
 
-	logs.Logs.Info("start task processor")
+	logs.Logger.Info("start task processor")
 }
 
 func runGinServer(conf *config.Config, store db.Store) {
@@ -68,7 +67,7 @@ func runGinServer(conf *config.Config, store db.Store) {
 
 	maker, err := token.NewPasetoMaker(conf.Token.TokenSymmetricKey)
 	if err != nil {
-		log.Fatal(err)
+		logs.Logger.Fatal("failed to create paseto maker", zap.Error(err))
 	}
 
 	redisOpt := asynq.RedisClientOpt{
@@ -79,14 +78,16 @@ func runGinServer(conf *config.Config, store db.Store) {
 	go runTaskProcessor(redisOpt)
 
 	opts := []api.ServerOptions{
-		api.WithConf(conf),
-		api.WithStore(store),
-		api.WithCache(rdb),
-		api.WithMaker(maker),
-		api.WithTaskDistributor(taskDistributor),
+		api.Conf(conf),
+		api.Store(store),
+		api.Cache(rdb),
+		api.Maker(maker),
+		api.TaskDistributor(taskDistributor),
+		api.Router(),
 	}
 
 	server := api.NewServer(opts...)
 
-	log.Fatal(server.Start(conf.Server.Address))
+	// log.Fatal(server.Start(conf.Server.Address))
+	logs.Logger.Fatal("failed server start", zap.Error(server.Start(conf.Server.Address)))
 }

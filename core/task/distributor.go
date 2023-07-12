@@ -37,7 +37,7 @@ func (distributor *RedisTaskDistributor) DistributeTaskSendVerifyEmail(ctx conte
 		return fmt.Errorf("failed to enqueue task: %w", err)
 	}
 
-	logs.Logs.Info("enqueued task", zap.String("type", tak.Type()), zap.ByteString("payload", taskInfo.Payload), zap.String("queue", taskInfo.Queue), zap.Int("max_retry", taskInfo.MaxRetry))
+	logs.Logger.Info("enqueued task", zap.String("type", tak.Type()), zap.ByteString("payload", taskInfo.Payload), zap.String("queue", taskInfo.Queue), zap.Int("max_retry", taskInfo.MaxRetry))
 
 	return nil
 }

@@ -16,20 +16,20 @@ type refreshTokenRquest struct {
 func (server *Server) refreshToken(ctx *gin.Context) {
 	var req refreshTokenRquest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		logs.Logs.Error("Should Bing Body", zap.Error(err))
+		logs.Logger.Error("Should Bing Body", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
 	ua := ctx.Request.Header.Get("User-Agent")
 	if ua == "" {
-		logs.Logs.Error("Can't Find 'User-Agent' in header")
+		logs.Logger.Error("Can't Find 'User-Agent' in header")
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
 
 	payload, err := server.maker.VerifyToken(req.Token)
 	if err != nil {
-		logs.Logs.Error("failed decode token", zap.Error(err))
+		logs.Logger.Error("failed decode token", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}

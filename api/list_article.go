@@ -31,7 +31,7 @@ func (server *Server) listArticles(ctx *gin.Context) {
 
 	var req listArticlesRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		logs.Logs.Error("bind pramar", zap.Error(err))
+		logs.Logger.Error("bind pramar", zap.Error(err))
 		result.ParamError(ctx, errors.ParamErr.Error())
 		return
 	}
@@ -66,7 +66,7 @@ func (server *Server) listArticles(ctx *gin.Context) {
 			Offset: offset,
 		})
 		if err != nil {
-			logs.Logs.Error("list article", zap.Error(err))
+			logs.Logger.Error("list article", zap.Error(err))
 			result.ServerError(ctxCopy, errors.ServerErr.Error())
 			return
 		}
@@ -77,7 +77,7 @@ func (server *Server) listArticles(ctx *gin.Context) {
 		defer wg.Done()
 		total, err := server.store.CountArticle(ctxCopy)
 		if err != nil {
-			logs.Logs.Error("count article", zap.Error(err))
+			logs.Logger.Error("count article", zap.Error(err))
 			result.ServerError(ctxCopy, errors.ServerErr.Error())
 			return
 		}
